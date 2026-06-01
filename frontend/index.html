@@ -131,10 +131,18 @@ function rs(){S.dels=new Set();S.rpt=null;S.ac=[];S.ab=null;document.getElementB
 function done(){if(!S.sel)return;fetch('/api/patients/'+S.sel.id+'/status?status=已完成',{method:'PUT'}).catch(function(){});lq()}
 
 // ==================== 录音 ====================
-function toggleRec(){if(S.rec){stopRec();return}if(!S.sel){t('请先选择患者','e');return}startRec()}
-function startRec(){navigator.mediaDevices.getUserMedia({audio:{sampleRate:16000,channelCount:1,echoCancellation:true,noiseSuppression:true}}).then(function(stream){var m=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';S.mr=new MediaRecorder(stream,{mimeType:m,audioBitsPerSecond:32000});S.ac=[];S.mr.ondataavailable=function(e){if(e.data.size>0)S.ac.push(e.data)};S.mr.onstop=function(){stream.getTracks().forEach(function(t){t.stop()});S.ab=new Blob(S.ac,{type:m});stt();document.getElementById('tb').disabled=false;setSt('k','可转写')};S.mr.start(250);S.rec=true;S.paused=false;S.rs=Date.now();sit();document.getElementById('rb').classList.add('on');document.getElementById('pb').disabled=false;setSt('o','录音中')}).catch(function(e){t('麦克风错误: '+e.message,'e')})}
-function stopRec(){if(S.mr&&S.mr.state==='recording')S.mr.stop();S.rec=false;document.getElementById('rb').classList.remove('on');document.getElementById('pb').disabled=true}
-function togglePause(){if(!S.rec)return;if(S.paused){S.mr.resume();S.paused=false;S.rs=Date.now()-S.pe;sit();document.getElementById('pb').textContent='暂停';setSt('o','录音中')}else{S.mr.pause();S.paused=true;S.pe=Date.now()-S.rs;stt();document.getElementById('pb').textContent='继续';setSt('idle')}}
+function toggleRec(){if(!S.sel){t('请先选择患者','e');return}
+  if(S.rec){stopRec();return}
+  var R=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!R){t('请使用Chrome打开','e');return}
+  S.recog=new R();S.recog.lang='zh-CN';S.recog.continuous=true;S.recog.interimResults=true;
+  var final='';
+  S.recog.onresult=function(e){var t='';for(var i=e.resultIndex;i<e.results.length;i++){var x=e.results[i][0].transcript;if(e.results[i].isFinal){final+=x}else{t+=x}}document.getElementById('rt').value=final+(t?' ['+t+']':'')};
+  S.recog.onerror=function(e){t('语音错误: '+e.error,'e');S.rec=false;document.getElementById('rb').classList.remove('on');setSt('idle')};
+  S.recog.onend=function(){if(S.rec){try{S.recog.start()}catch(e){}return}document.getElementById('rt').value=final;document.getElementById('sb').disabled=false;S.rec=false;document.getElementById('rb').classList.remove('on');setSt('k','完成');toggleP('pn2')};
+  S.recog.start();S.rec=true;document.getElementById('rb').classList.add('on');setSt('o','录音中')}
+function stopRec(){if(S.recog){S.recog.stop();S.recog=null}S.rec=false;document.getElementById('rb').classList.remove('on');document.getElementById('pb').disabled=true}
+function startRec(){}
 function sit(){ut();S.ti=setInterval(ut,200)}
 function stt(){if(S.ti){clearInterval(S.ti);S.ti=null}}
 function ut(){var ms=S.paused?S.pe:Date.now()-S.rs;document.getElementById('tm').textContent=fmt(ms)}
@@ -142,7 +150,10 @@ function fmt(ms){var s=Math.floor(ms/1000);return String(Math.floor(s/60)).padSt
 function setSt(s,txt){var el=document.getElementById('st');el.className='tag '+s;el.textContent=txt||(s==='o'?'录音中':s==='k'?'完成':'就绪')}
 
 // ==================== 转写 ====================
-function doTrans(){if(!S.ab){t('请先录音','e');return}setSt('o','转写中...');document.getElementById('tb').disabled=true;
+// ==================== 转写 (云端模式自动完成无需此按钮) ====================
+function doTrans(){
+  if(S.recog){t('语音已自动识别完成，直接点击结构化', 's'); return;}
+  if(!S.ab){t('请先录音','e');return}
   cvt(S.ab).then(function(wav){var fd=new FormData();fd.append('file',wav,'recording.wav');return fetch('/api/transcribe',{method:'POST',body:fd})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail||'转写失败','e');setSt('k');document.getElementById('tb').disabled=false;return}document.getElementById('rt').value=d.text;document.getElementById('sb').disabled=false;setSt('k','转写完成');toggleP('pn2')}).catch(function(e){t('转写失败，请重试','e');setSt('idle');document.getElementById('tb').disabled=false})}
 function cvt(blob){return blob.arrayBuffer().then(function(ab){var ctx=new AudioContext({sampleRate:16000});return ctx.decodeAudioData(ab).then(function(buf){ctx.close();var octx=new OfflineAudioContext(1,buf.duration*16000,16000);var src=octx.createBufferSource();src.buffer=buf;src.connect(octx.destination);src.start();return octx.startRendering().then(function(rs){var ch=rs.getChannelData(0);var ns=ch.length;var wb=new ArrayBuffer(44+ns*2);var v=new DataView(wb);function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}ws(0,'RIFF');v.setUint32(4,36+ns*2,true);ws(8,'WAVE');ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,ns*2,true);var o=44;for(var i=0;i<ns;i++){var s=Math.max(-1,Math.min(1,ch[i]));v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true);o+=2}return new Blob([wb],{type:'audio/wav'})})})})}
 
