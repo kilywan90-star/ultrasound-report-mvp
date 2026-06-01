@@ -2,7 +2,12 @@
 
 from dotenv import load_dotenv
 from pathlib import Path
-load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+# Try project root .env first, fall back to parent directory
+_root = Path(__file__).resolve().parents[1]
+_env = _root / ".env"
+if not _env.exists():
+    _env = Path(__file__).resolve().parents[2] / ".env"
+load_dotenv(_env)
 
 import os
 import uuid
