@@ -125,49 +125,26 @@ class StructureRequest(BaseModel):
     exam_type: str = "腹部超声"
     patient_id: int = None
 
-def _wrap_findings_with_toggle(report: dict) -> dict:
-    """给每条 finding 包裹 checked + id 字段"""
-    findings = report.get("findings", [])
-    for i, f in enumerate(findings):
-        f["id"] = f"f{i}"
-        f["checked"] = True
-        # 病灶子项也包裹
-        lesions = f.get("lesions", [])
-        if isinstance(lesions, list):
-            for j, l in enumerate(lesions):
-                l["id"] = f"f{i}_l{j}"
-                l["checked"] = True
-    # impression 也包裹
-    impressions = report.get("impression", [])
-    for i, imp in enumerate(impressions):
-        imp["id"] = f"imp{i}"
-        imp["checked"] = True
+def _wrap_hints_with_toggle(report: dict) -> dict:
+    """给 study_hint 每条包裹 checked + id"""
+    hints = report.get("study_hint", [])
+    for i, h in enumerate(hints):
+        h["id"] = f"h{i}"
+        h["checked"] = True
     return report
 
 def _filter_checked(report: dict) -> dict:
-    """过滤掉 unchecked 的 findings/impression（无 checked 字段默认保留）"""
+    """过滤掉 unchecked 的 study_hint 条目"""
     r = dict(report)
-    r["findings"] = [
-        {k: v for k, v in f.items() if k not in ("id", "checked")}
-        for f in report.get("findings", []) if f.get("checked", True)
+    r["study_hint"] = [
+        {k: v for k, v in h.items() if k not in ("id", "checked")}
+        for h in report.get("study_hint", []) if h.get("checked", True)
     ]
-    for f in r["findings"]:
-        if "lesions" in f and isinstance(f["lesions"], list):
-            f["lesions"] = [
-                {k: v for k, v in l.items() if k not in ("id", "checked")}
-                for l in f["lesions"] if l.get("checked")
-            ]
-    r["impression"] = [
-        {k: v for k, v in imp.items() if k not in ("id", "checked")}
-        for imp in report.get("impression", []) if imp.get("checked", True)
-    ]
-    if "id" in r: del r["id"]
-    if "checked" in r: del r["checked"]
     return r
 
 @app.post("/api/structure")
 async def structure(req: StructureRequest):
-    """结构化 + 包裹 toggle 字段"""
+    """结构化 + 包裹 toggle 字段（新版双层格式）"""
     if not req.text or not req.text.strip(): raise HTTPException(400, "文本为空")
     if len(req.text) > 10000: raise HTTPException(400, "文本过长")
 
@@ -176,13 +153,12 @@ async def structure(req: StructureRequest):
     except Exception as e:
         raise HTTPException(500, f"结构化失败: {e}")
 
-    report = _wrap_findings_with_toggle(report)
+    report = _wrap_hints_with_toggle(report)
 
     report_id = None
     if req.patient_id:
-        tpl_key = match_template(req.exam_type)
         try:
-            r = db.report_create(req.patient_id, tpl_key, req.text, _filter_checked(report))
+            r = db.report_create(req.patient_id, match_template(req.exam_type), req.text, _filter_checked(report))
             report_id = r["id"]
         except Exception as e:
             logging.exception("报告草稿保存失败")

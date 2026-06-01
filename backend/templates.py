@@ -151,6 +151,24 @@ TEMPLATES = {
             },
         },
     },
+
+    "tcd": {
+        "name": "经颅多普勒(TCD)/脑血管超声",
+        "organs": ["大脑中动脉", "大脑前动脉", "大脑后动脉", "基底动脉", "椎动脉", "颈内动脉"],
+        "fields": {
+            "psv": "收缩期峰值流速(cm/s)",
+            "edv": "舒张末期流速(cm/s)",
+            "tav": "平均流速(cm/s)",
+            "ri": "阻力指数",
+            "pi": "脉动指数",
+            "spectrum": "频谱形态（正常/失常/波峰矮小/频窗充填）",
+            "flow_direction": "血流方向（正/反）",
+            "plaque": {
+                "location": "位置",
+                "stenosis": "狭窄程度（轻度/中度/重度）",
+            },
+        },
+    },
 }
 
 # 模板自动匹配规则
@@ -160,6 +178,7 @@ TEMPLATE_MATCH = {
     "妇科": "obgyn", "妇产": "obgyn", "产科": "obgyn", "子宫": "obgyn", "卵巢": "obgyn",
     "颈动脉": "vascular", "下肢血管": "vascular", "血管": "vascular", "下肢静脉": "vascular",
     "甲状腺": "thyroid", "乳腺": "thyroid", "小器官": "thyroid", "睾丸": "thyroid", "腮腺": "thyroid",
+    "脑血管": "tcd", "TCD": "tcd", "经颅": "tcd", "颅脑": "tcd", "偏头痛": "tcd", "脑动脉": "tcd", "基底动脉": "tcd",
 }
 
 

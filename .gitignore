@@ -20,3 +20,4 @@ Thumbs.db
 
 # Environment
 .env
+*.db-shm\n*.db-wal\ntest_results*.json
