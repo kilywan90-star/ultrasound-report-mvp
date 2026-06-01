@@ -139,8 +139,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
         <span style="font-size:10px;color:var(--text-muted)">保留 <b style="color:var(--success)" id="kc">0</b> 条</span>
       </div>
       <div class="panel-body">
-        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">点 <b style="color:var(--danger)">✕ 删除</b> 移除不需要的条目</div>
-        <div class="card-grid" id="fc"></div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:4px">超声所见可直接编辑。点 <b style="color:var(--danger)">✕ 删除</b> 移除不需要的诊断。</div>
+        <textarea class="raw-text" id="studySeeEdit" style="min-height:80px;max-height:200px" placeholder="AI 生成的超声所见..."></textarea>
         <div style="margin-top:8px"><h4 style="font-size:12px;color:var(--primary);margin-bottom:4px">超声提示</h4><div class="card-grid" id="ic"></div></div>
         <div style="margin-top:8px"><label style="font-size:11px;color:var(--text-secondary)">建议:</label><div contenteditable="true" id="rec" style="font-size:12px;padding:5px;border:1px solid var(--border);border-radius:var(--radius);margin-top:3px;min-height:32px"></div></div>
         <div class="action-row" style="margin-top:8px">
@@ -214,7 +214,7 @@ function resetWs(){
   S.dels=new Set(); S.report=null; S.finalText='';
   document.getElementById('rawText').value=''; document.getElementById('structBtn').disabled=true;
   document.getElementById('saveBtn').disabled=true; document.getElementById('sendBtn').disabled=true;
-  document.getElementById('fc').innerHTML=''; document.getElementById('ic').innerHTML='';
+  document.getElementById('ic').innerHTML=''; document.getElementById('studySeeEdit').value='';
   document.getElementById('rec').textContent=''; document.getElementById('preview').innerHTML='<p style="color:var(--text-muted);text-align:center;padding:30px">完成结构化后显示</p>';
   document.getElementById('kc').textContent='0';
 }
@@ -281,17 +281,17 @@ async function doStructure(){
   const tpl = TEMPLATES[tplKey];
   setStatus('on','结构化提取中...'); document.getElementById('structBtn').disabled=true;
 
-  const systemPrompt = `你是资深超声科主任医师。将口语化的超声口述转换为结构化 JSON。
+  const systemPrompt = `你是资深超声科主任医师。将口语化的超声口述转换为规范化超声报告。
 
 检查类型: ${tpl.name}
 覆盖脏器: ${tpl.organs.join('、')}
 
 规则:
-1. 缺失的字段填 null，绝不编造
-2. 口语→标准术语（"肝有点大"→"肝脏增大"，"胆囊没有"→"胆囊未见异常"）
-3. 每个提及的脏器都必须有一条 findings，包括正常脏器
-4. impression 按临床重要性排序，只列阳性发现。全部正常时输出"X检查未见明显异常"
-5. 标注 ICD-10 编码+名称（格式："K76.0 脂肪肝"），不知道名称就只写编码
+1. 缺失的测量值填"___mm"占位，绝不编造数值
+2. 口语→标准术语（"肝有点大"→"肝脏形态饱满"，"胆囊没有"→"胆囊未见异常"）
+3. study_see 按脏器分段，每段格式: "脏器名: 描述。" 每个提及的脏器都必须出现（包括正常脏器）
+4. study_hint 每条一行，按临床重要性排序，只列阳性发现。全部正常时输出"X检查未见明显异常"
+5. 标注 ICD-10 编码+名称（格式："K76.0 脂肪肝"）
 6. patient_info 全部填 null
 7. 只输出 JSON
 
@@ -299,36 +299,27 @@ async function doStructure(){
 {
   "patient_info":{"name":null,"gender":null,"age":null,"exam_id":null},
   "exam_info":{"modality":"${tpl.name}","device":null,"exam_date":null},
-  "findings":[{"organ":"脏器名",${tpl.fields}}],
-  "impression":[{"rank":1,"diagnosis":"疾病名","icd10":"编码 名称"}],
+  "study_see":"脏器分段描述。例如:\\n肝脏: 形态大小正常，实质回声均匀。\\n胆囊: 大小正常，壁光滑，腔内未见异常回声。\\n",
+  "study_hint":[{"rank":1,"diagnosis":"疾病名","icd10":"编码 名称"}],
   "recommendation":"建议"
 }`;
 
   try{
     const r = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+DS_KEY},
-      body:JSON.stringify({model:'deepseek-v4-flash',messages:[{role:'system',content:systemPrompt},{role:'user',content:'请将以下口述转换为结构化报告：\n\n'+text}],temperature:0.1,max_tokens:4096})
+      body:JSON.stringify({model:'deepseek-v4-flash',messages:[{role:'system',content:systemPrompt},{role:'user',content:'请将以下口述转换为规范化超声报告（注意：study_see 必须包含口述中提到的每一个脏器）：\\n\\n'+text}],temperature:0.1,max_tokens:4096})
     });
     const d = await r.json();
     if(!r.ok) throw new Error(d.error?.message||'API 调用失败');
     let content = d.choices[0].message.content;
-    // Extract JSON
     content = content.replace(/```(?:json)?\s*|\s*```/g, '').trim();
     if(content.startsWith('{')) content = content.substring(content.indexOf('{'), content.lastIndexOf('}')+1);
     const report = JSON.parse(content);
 
-    // Enrich ICD-10
-    (report.impression||[]).forEach(imp => {
-      if(imp.icd10 && !/[^\x00-\x7f]/.test(imp.icd10.split(' ')[0]||'')){
-        const code = imp.icd10.split(' ')[0];
-        const name = ICD10[code];
-        if(name && !imp.icd10.includes(name)) imp.icd10 = code + ' ' + name;
-      }
+    (report.study_hint||[]).forEach(imp => {
+      if(imp.icd10){ const code=imp.icd10.split(' ')[0]; const name=ICD10[code]; if(name&&!imp.icd10.includes(name)) imp.icd10=code+' '+name }
+      imp.id='h'+Math.random().toString(36).slice(2,8); imp.checked=true;
     });
-
-    // Add IDs
-    (report.findings||[]).forEach((f,i)=>f.id='f'+i);
-    (report.impression||[]).forEach((imp,i)=>imp.id='imp'+i);
 
     S.report = report; S.dels = new Set();
     renderCards(report);
@@ -341,18 +332,11 @@ async function doStructure(){
 }
 
 function renderCards(report){
-  const fc = document.getElementById('fc'); fc.innerHTML = '';
-  (report.findings||[]).forEach((f,i) => {
-    const div = document.createElement('div'); div.className = 'fcard'; div.setAttribute('data-fid',f.id);
-    const fields = Object.entries(f).filter(([k])=>!['organ','id','lesions'].includes(k)).map(([k,v])=>v!=null?`<div class="kv"><b>${k}:</b> ${esc(String(v))}</div>`:'').join('');
-    const lesions = (f.lesions&&f.lesions.length)?f.lesions.map((l,j)=>`<span style="display:inline-block;background:#fef2f2;border-radius:3px;padding:1px 5px;margin:1px 3px;font-size:10px;color:#991b1b">病灶${j+1}: ${[l.location,l.size,l.echo,l.morphology].filter(Boolean).join('/')||'未描述'}</span>`).join(''):'';
-    div.innerHTML = `<div class="ch"><span class="ct">${esc(f.organ||'脏器'+(i+1))}</span><button class="btn-del" onclick="delCard('f','${f.id}',this)">✕ 删除</button><button class="btn-res" onclick="resCard('f','${f.id}',this)">↩ 恢复</button></div><div class="cb">${fields}${lesions}</div>`;
-    fc.appendChild(div);
-  });
+  document.getElementById('studySeeEdit').value = report.study_see||'';
   const ic = document.getElementById('ic'); ic.innerHTML = '';
-  (report.impression||[]).forEach((imp,i) => {
-    const div = document.createElement('div'); div.className = 'icard'; div.setAttribute('data-iid',imp.id);
-    div.innerHTML = `<div class="ch"><span><span class="rk">${imp.rank||i+1}</span>${esc(imp.diagnosis||'')}</span><span style="font-size:10px;color:var(--text-secondary)">${imp.icd10?esc(imp.icd10):''}</span><button class="btn-del" onclick="delCard('i','${imp.id}',this)">✕ 删除</button><button class="btn-res" onclick="resCard('i','${imp.id}',this)">↩ 恢复</button></div>`;
+  (report.study_hint||[]).forEach((h,i) => {
+    const div = document.createElement('div'); div.className = 'icard'; div.setAttribute('data-hid',h.id);
+    div.innerHTML = `<div class="ch"><span><span class="rk">${h.rank||i+1}</span>${esc(h.diagnosis||'')}</span><span style="font-size:10px;color:var(--text-secondary)">${h.icd10?esc(h.icd10):''}</span><button class="btn-del" onclick="delHint('${h.id}',this)">✕ 删除</button><button class="btn-res" onclick="resHint('${h.id}',this)">↩ 恢复</button></div>`;
     ic.appendChild(div);
   });
   document.getElementById('rec').textContent = report.recommendation||'';
@@ -360,65 +344,49 @@ function renderCards(report){
   document.getElementById('saveBtn').disabled=false; document.getElementById('sendBtn').disabled=false;
 }
 
-function delCard(type, id, btn){
+function delHint(id, btn){
   S.dels.add(id);
-  btn.closest('.fcard,.icard').classList.add('del');
+  btn.closest('.icard').classList.add('del');
   btn.style.display='none'; btn.nextElementSibling.style.display='inline-block';
   updateKc(); updatePreview();
 }
-function resCard(type, id, btn){
+function resHint(id, btn){
   S.dels.delete(id);
-  btn.closest('.fcard,.icard').classList.remove('del');
+  btn.closest('.icard').classList.remove('del');
   btn.style.display='none'; btn.previousElementSibling.style.display='';
   updateKc(); updatePreview();
 }
 function updateKc(){
-  const t = (S.report?.findings||[]).length + (S.report?.impression||[]).length;
+  const t = (S.report?.study_hint||[]).length;
   document.getElementById('kc').textContent = t - S.dels.size;
 }
 function updatePreview(){
   const pv = document.getElementById('preview');
-  const fs = (S.report?.findings||[]).filter(f=>!S.dels.has(f.id));
-  const is = (S.report?.impression||[]).filter(i=>!S.dels.has(i.id));
-  if(!fs.length && !is.length){ pv.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:30px">所有条目已删除</p>'; return; }
-  let h = '<h3>超声所见</h3>';
-  fs.forEach(f=>{
-    h+=`<div class="fb"><b>${esc(f.organ||'')}</b><br>`;
-    Object.entries(f).filter(([k])=>!['organ','id','lesions'].includes(k)).forEach(([k,v])=>{if(v!=null)h+=`${k}: ${esc(String(v))}<br>`});
-    if(f.lesions) f.lesions.forEach((l,j)=>h+=`<span style="color:#991b1b">病灶${j+1}: ${[l.location,l.size,l.echo,l.morphology].filter(Boolean).join('/')}</span><br>`);
-    h+='</div>';
-  });
-  h+='<h3>超声提示</h3>';
-  is.forEach(imp=>h+=`<div class="ib"><b>${imp.rank}.</b> ${esc(imp.diagnosis||'')} ${imp.icd10?'<span style="color:var(--text-muted)">('+esc(imp.icd10)+')</span>':''}</div>`);
-  const rec = document.getElementById('rec').textContent.trim(); if(rec) h+=`<h3>建议</h3><p>${esc(rec)}</p>`;
-  pv.innerHTML = h;
+  const see = document.getElementById('studySeeEdit').value.trim();
+  const is = (S.report?.study_hint||[]).filter(h=>!S.dels.has(h.id));
+  const rec = document.getElementById('rec').textContent.trim();
+  if(!see && !is.length){ pv.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:30px">内容为空</p>'; return; }
+  let h = '<h3>超声所见</h3><div style="white-space:pre-wrap;line-height:1.8">'+esc(see)+'</div>';
+  if(is.length){ h+='<h3>超声提示</h3>'; is.forEach(x=>h+=`<div class="ib"><b>${x.rank}.</b> ${esc(x.diagnosis||'')} ${x.icd10?'<span style="color:var(--text-muted)">('+esc(x.icd10)+')</span>':''}</div>`)}
+  if(rec) h+=`<h3>建议</h3><p>${esc(rec)}</p>`; pv.innerHTML = h;
 }
 
 // ==================== Save / Send ====================
 function buildReport(){
-  const r = JSON.parse(JSON.stringify(S.report));
-  r.findings = r.findings.filter(f=>!S.dels.has(f.id));
-  r.impression = r.impression.filter(i=>!S.dels.has(i.id));
-  r.recommendation = document.getElementById('rec').textContent.trim();
-  return r;
+  return {study_see:document.getElementById('studySeeEdit').value.trim(),study_hint:(S.report?.study_hint||[]).filter(h=>!S.dels.has(h.id)).map(h=>({rank:h.rank,diagnosis:h.diagnosis,icd10:h.icd10})),recommendation:document.getElementById('rec').textContent.trim()}
 }
 function doSave(){
   if(!S.report){ toast('请先完成结构化','error'); return; }
-  const rpt = buildReport();
-  const key = 'rpt_'+S.sel.id;
-  localStorage[key] = JSON.stringify(rpt);
-  toast('报告已保存草稿','success');
+  localStorage['rpt_'+S.sel.id] = JSON.stringify(buildReport());
+  toast('报告已保存草稿，可继续修改','success');
 }
 function doSend(){
   if(!S.report){ toast('请先完成结构化','error'); return; }
-  if(!confirm('确认发送？发送后患者标记为已完成。')) return;
-  const rpt = buildReport();
-  const key = 'rpt_'+S.sel.id;
-  localStorage[key] = JSON.stringify(rpt);
+  if(!confirm('确认发送至PACS？发送后不可修改。')) return;
+  localStorage['rpt_'+S.sel.id] = JSON.stringify(buildReport());
   markDone();
-  toast('报告已确认，患者标记为已完成','success');
-  document.getElementById('sendBtn').disabled=true;
-  document.getElementById('saveBtn').disabled=true;
+  toast('报告已确认发送','success');
+  document.getElementById('sendBtn').disabled=true; document.getElementById('saveBtn').disabled=true;
 }
 
 // ==================== UI ====================
