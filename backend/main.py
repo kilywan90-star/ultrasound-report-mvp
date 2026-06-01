@@ -17,6 +17,8 @@ from pydantic import BaseModel
 from asr_client import transcribe_audio
 from llm_client import structure_report as llm_structure
 from templates import match_template, TEMPLATES
+from template_filler import match_and_fill
+from template_fetal import fill_fetal_template
 import db
 
 app = FastAPI(title="超声报告语音结构化", version="0.3.0")
@@ -123,7 +125,7 @@ async def transcribe(file: UploadFile = File(...)):
 class StructureRequest(BaseModel):
     text: str
     exam_type: str = "腹部超声"
-    patient_id: int = None
+    patient_id: str | None = None
 
 def _wrap_hints_with_toggle(report: dict) -> dict:
     """给 study_hint 每条包裹 checked + id"""
@@ -144,28 +146,47 @@ def _filter_checked(report: dict) -> dict:
 
 @app.post("/api/structure")
 async def structure(req: StructureRequest):
-    """结构化 + 包裹 toggle 字段（新版双层格式）"""
+    """结构化：优先固定模板填充，降级到LLM自由生成"""
     if not req.text or not req.text.strip(): raise HTTPException(400, "文本为空")
     if len(req.text) > 10000: raise HTTPException(400, "文本过长")
 
+    # 策略0: 胎儿/产科超声 → 专用固定模板
+    if any(kw in (req.exam_type + (req.text or "")[:80]) for kw in ["产科","胎儿","四维","排畸","孕","BPD","双顶径","股骨长","胎心"]):
+        report = fill_fetal_template(req.text)
+        report = _wrap_hints_with_toggle(report)
+        return {"success": True, "report": report, "report_id": None, "method": "fetal_template"}
+
+    # 策略1: 固定模板 + 数值填充
+    report = match_and_fill(req.text, req.exam_type)
+    if report and report.get("_template_matched"):
+        report = _wrap_hints_with_toggle(report)
+        report_id = None
+        if req.patient_id and req.patient_id.strip():
+            try:
+                pid = int(req.patient_id)
+                r = db.report_create(pid, match_template(req.exam_type), req.text, _filter_checked(report))
+                report_id = r["id"]
+            except (ValueError, Exception):
+                pass
+        return {"success": True, "report": report, "report_id": report_id, "method": "regex_fill"}
+
+    # 策略2: LLM 自由生成（降级）
     try:
         report = llm_structure(req.text, req.exam_type)
     except Exception as e:
         raise HTTPException(500, f"结构化失败: {e}")
 
     report = _wrap_hints_with_toggle(report)
-
     report_id = None
-    if req.patient_id:
+    if req.patient_id and req.patient_id.strip():
         try:
-            r = db.report_create(req.patient_id, match_template(req.exam_type), req.text, _filter_checked(report))
+            pid = int(req.patient_id)
+            r = db.report_create(pid, match_template(req.exam_type), req.text, _filter_checked(report))
             report_id = r["id"]
-        except Exception as e:
-            logging.exception("报告草稿保存失败")
-            return {"success": True, "report": report, "report_id": None,
-                    "warning": f"报告已生成但保存失败: {e}"}
+        except (ValueError, Exception):
+            pass
 
-    return {"success": True, "report": report, "report_id": report_id}
+    return {"success": True, "report": report, "report_id": report_id, "method": "llm_free"}
 
 # ==================== 报告管理 ====================
 

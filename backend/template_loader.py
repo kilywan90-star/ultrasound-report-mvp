@@ -1,12 +1,11 @@
-"""正式超声报告模板加载器 — 从 CSV 导入 4871 条疾病模板"""
+"""正式超声报告模板加载器"""
 
-import csv
-import re
+import csv, os, re
 from pathlib import Path
 from collections import defaultdict
 
 # 模板目录路径（指向桌面超声结构化报告文件夹）
-TEMPLATE_DIR = Path(r"C:\Users\Administrator\Desktop\超声结构化报告")
+TEMPLATE_DIR = Path(os.environ.get("TEMPLATE_DIR", r"C:\Users\Administrator\Desktop\超声结构化报告"))
 
 # 内存缓存
 _template_index: dict[str, list[dict]] = defaultdict(list)

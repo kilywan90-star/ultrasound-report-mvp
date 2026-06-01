@@ -1,7 +1,9 @@
-fastapi==0.115.*
-uvicorn[standard]==0.34.*
-python-dotenv==1.1.*
-python-multipart==0.0.*
-httpx==0.28.*
-websockets==14.*
-openai==1.*
+fastapi>=0.100
+uvicorn[standard]>=0.23
+python-dotenv>=1.0
+python-multipart>=0.0.5
+httpx>=0.24
+websockets>=12
+openai>=1.0
+dashscope>=1.20
+
