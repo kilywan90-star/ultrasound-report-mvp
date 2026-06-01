@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超声报告语音结构化</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#2563eb;--primary-light:#eff6ff;--danger:#dc2626;--danger-light:#fef2f2;
+  --success:#16a34a;--success-light:#f0fdf4;--warn:#f59e0b;
+  --bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--text:#0f172a;
+  --text-secondary:#64748b;--text-muted:#94a3b8;--radius:6px;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
+.top-bar{background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:white;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+.top-bar h1{font-size:15px;font-weight:600}
+.top-bar kbd{background:rgba(255,255,255,.15);border-radius:3px;padding:1px 5px;font-size:10px;margin:0 2px}
+.api-bar{padding:8px 16px;background:#fffbeb;border-bottom:1px solid #fde68a;display:flex;align-items:center;gap:8px;font-size:11px;flex-wrap:wrap}
+.api-bar input{padding:4px 8px;border:1px solid var(--border);border-radius:var(--radius);font-size:11px;width:280px;font-family:monospace}
+.api-bar button{padding:3px 10px;border-radius:var(--radius);border:none;cursor:pointer;font-size:10px;font-weight:500;background:var(--primary);color:white}
+.app{display:flex;height:calc(100vh - 80px)}
+.sidebar{width:260px;flex-shrink:0;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto}
+.sidebar-header{padding:10px 14px;font-size:13px;font-weight:600;border-bottom:1px solid var(--border);background:#f8fafc}
+.quick-add{padding:8px;border-bottom:1px solid var(--border)}
+.quick-add input,.quick-add select{padding:4px 6px;border:1px solid var(--border);border-radius:var(--radius);font-size:11px;font-family:inherit;outline:none;width:100%;margin-bottom:3px}
+.quick-add .row{display:flex;gap:3px;margin-bottom:3px}
+.quick-add input:focus,.quick-add select:focus{border-color:var(--primary)}
+.btn-xs{padding:3px 8px;border-radius:var(--radius);border:none;cursor:pointer;font-size:10px;font-weight:500;background:var(--primary);color:white}
+.patient-item{padding:8px 10px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;border-left:3px solid transparent;font-size:12px}
+.patient-item:hover{background:#f8fafc}
+.patient-item.active{background:var(--primary-light);border-left-color:var(--primary)}
+.patient-item .pi-name{font-weight:600}.patient-item .pi-exam{color:var(--primary);font-size:11px}
+.patient-item .badge{display:inline-block;padding:1px 5px;border-radius:6px;font-size:9px;margin-left:4px}
+.badge-wait{background:#dbeafe;color:#1e40af}.badge-done{background:#d1fae5;color:#065f46}
+
+.main{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
+.current-pt{padding:6px 12px;background:var(--primary-light);font-size:12px;border-radius:var(--radius)}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.panel-header{padding:7px 12px;background:#f8fafc;border-bottom:1px solid var(--border);font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:space-between;cursor:pointer}
+.panel-header .pn{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;align-items:center;justify-content:center;font-size:10px;margin-right:6px}
+.panel-body{padding:10px}.collapsed .panel-body{display:none}
+
+.audio-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.rec-btn{width:56px;height:56px;border-radius:50%;border:3px solid var(--danger);background:white;cursor:pointer;transition:all .2s;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.rec-btn:hover{transform:scale(1.05);box-shadow:0 4px 12px rgba(220,38,38,.2)}
+.rec-btn.on{border-color:#f00;animation:pulse 1.5s ease-in-out infinite;background:#fef2f2}
+.rec-btn .dot{width:22px;height:22px;border-radius:50%;background:var(--danger)}.rec-btn.on .dot{border-radius:4px;width:14px;height:14px}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,.4)}50%{box-shadow:0 0 0 10px rgba(220,38,38,0)}}
+.status-tag{font-size:10px;padding:2px 7px;border-radius:8px;font-weight:500}
+.status-tag.idle{background:#f1f5f9;color:var(--text-secondary)}
+.status-tag.on{background:var(--danger-light);color:var(--danger)}
+.status-tag.ok{background:var(--success-light);color:var(--success)}
+
+.raw-text{width:100%;min-height:70px;max-height:120px;padding:7px;border:1px solid var(--border);border-radius:var(--radius);font-size:12px;line-height:1.6;resize:vertical;font-family:inherit;background:#fafbfc}
+
+.card-grid{display:flex;flex-wrap:wrap;gap:6px}
+.fcard,.icard{border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;min-width:200px;flex:1;max-width:320px;transition:all .2s}
+.fcard{border-left:3px solid var(--success);background:#f8fafc}
+.fcard.del{opacity:.3;border-left-color:var(--danger)}
+.fcard .ch,.icard .ch{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}
+.fcard .ct{font-weight:600;font-size:12px;color:var(--primary)}
+.fcard .cb{font-size:11px;color:var(--text-secondary);line-height:1.5}
+.fcard .cb .kv{margin:1px 0}.fcard .cb .kv b{color:var(--text)}
+.icard .rk{display:inline-flex;width:16px;height:16px;border-radius:50%;background:var(--primary);color:white;align-items:center;justify-content:center;font-size:9px;margin-right:4px}
+.btn-del{font-size:10px;padding:1px 7px;border-radius:3px;border:1px solid var(--danger);color:var(--danger);background:#fff;cursor:pointer;transition:all .15s}
+.btn-del:hover{background:var(--danger);color:white}
+.btn-res{font-size:10px;padding:1px 7px;border-radius:3px;border:1px solid var(--primary);color:var(--primary);background:#fff;cursor:pointer;display:none}
+.btn-res:hover{background:var(--primary);color:white}
+.action-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.btn{padding:5px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:11px;font-weight:500;transition:all .15s;font-family:inherit}
+.btn:hover{background:#f1f5f9}
+.btn-primary{background:var(--primary);color:white;border-color:var(--primary)}.btn-primary:hover{background:#1d4ed8}
+.btn-danger{background:var(--danger);color:white;border-color:var(--danger)}.btn-danger:hover{background:#b91c1c}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+.preview{font-size:12px;line-height:1.7;padding:12px;border:1px solid var(--border);border-radius:var(--radius);background:#fafbfc;min-height:100px;max-height:300px;overflow-y:auto}
+.preview h3{font-size:13px;color:var(--primary);margin:10px 0 5px;border-bottom:1px solid var(--border);padding-bottom:3px}
+.preview .fb{margin:6px 0;padding:6px;background:white;border-radius:var(--radius);border:1px solid var(--border)}
+.preview .ib{margin:3px 0;padding:3px 6px;background:white;border-radius:var(--radius)}
+
+.toast-container{position:fixed;bottom:16px;right:16px;z-index:999}
+.toast{padding:8px 16px;border-radius:var(--radius);color:white;font-size:12px;margin-top:4px;animation:slideUp .3s ease;box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.toast.error{background:var(--danger)}.toast.success{background:var(--success)}
+@keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>超声报告语音结构化</h1>
+  <span style="font-size:11px;opacity:.8"><kbd>Ctrl+R</kbd> 录音 <kbd>Ctrl+S</kbd> 保存 <kbd>Ctrl+Enter</kbd> 发送</span>
+</div>
+
+<div class="api-bar" id="apiBar">
+  <span style="font-weight:600">DeepSeek Key:</span>
+  <input id="apiKeyInput" type="password" placeholder="sk-...">
+  <button onclick="saveApiKey()">保存</button>
+  <span id="apiStatus" style="font-size:10px;color:var(--text-muted)">请输入 API Key 后开始使用</span>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">患者队列</div>
+    <div class="quick-add">
+      <div class="row"><input id="qn" placeholder="姓名" maxlength="20" style="flex:1"><select id="qg" style="width:50px"><option value="">性</option><option value="男">男</option><option value="女">女</option></select><input id="qa" placeholder="年龄" type="number" min="0" max="200" style="width:46px"></div>
+      <div class="row"><input id="qe" placeholder="检查类型（腹部超声）" style="flex:1"><button class="btn-xs" onclick="addPatient()">入队</button></div>
+    </div>
+    <div id="patientList" style="flex:1;overflow-y:auto"><div style="text-align:center;padding:30px;color:var(--text-muted);font-size:12px">暂无等候患者</div></div>
+  </aside>
+
+  <main class="main" id="mainArea">
+    <div class="current-pt" id="curPt" style="display:none"></div>
+
+    <div class="panel" id="p1">
+      <div class="panel-header" onclick="toggleP('p1')"><div><span class="pn">1</span>语音录入 <span class="status-tag idle" id="st">就绪</span></div></div>
+      <div class="panel-body">
+        <div class="audio-row">
+          <button class="rec-btn" id="recBtn" onclick="toggleRec()"><div class="dot"></div></button>
+          <div style="font-size:12px;color:var(--text-secondary)">点击开始口述超声所见</div>
+        </div>
+        <div style="margin-top:6px;font-size:10px;color:var(--text-muted)">使用浏览器内置语音识别（Chrome 效果最佳）</div>
+        <div class="action-row">
+          <button class="btn btn-primary" id="structBtn" onclick="doStructure()" disabled>结构化提取</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="p2">
+      <div class="panel-header" onclick="toggleP('p2')"><div><span class="pn">2</span>识别文本</div></div>
+      <div class="panel-body">
+        <textarea class="raw-text" id="rawText" placeholder="语音识别文本将显示在此处..."></textarea>
+      </div>
+    </div>
+
+    <div class="panel" id="p3">
+      <div class="panel-header" onclick="toggleP('p3')">
+        <div><span class="pn">3</span>逐条审核</div>
+        <span style="font-size:10px;color:var(--text-muted)">保留 <b style="color:var(--success)" id="kc">0</b> 条</span>
+      </div>
+      <div class="panel-body">
+        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:6px">点 <b style="color:var(--danger)">✕ 删除</b> 移除不需要的条目</div>
+        <div class="card-grid" id="fc"></div>
+        <div style="margin-top:8px"><h4 style="font-size:12px;color:var(--primary);margin-bottom:4px">超声提示</h4><div class="card-grid" id="ic"></div></div>
+        <div style="margin-top:8px"><label style="font-size:11px;color:var(--text-secondary)">建议:</label><div contenteditable="true" id="rec" style="font-size:12px;padding:5px;border:1px solid var(--border);border-radius:var(--radius);margin-top:3px;min-height:32px"></div></div>
+        <div class="action-row" style="margin-top:8px">
+          <button class="btn btn-primary" onclick="doSave()" id="saveBtn" disabled>保存草稿</button>
+          <button class="btn btn-danger" onclick="doSend()" id="sendBtn" disabled>确认发送</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" id="p4">
+      <div class="panel-header" onclick="toggleP('p4')"><div><span class="pn">4</span>报告预览</div></div>
+      <div class="panel-body"><div class="preview" id="preview"><p style="color:var(--text-muted);text-align:center;padding:30px">完成结构化后显示</p></div></div>
+    </div>
+  </main>
+</div>
+
+<div class="toast-container" id="tc"></div>
+
+<script>
+// ==================== Config ====================
+let DS_KEY = '';
+if (localStorage.dsKey) { DS_KEY = localStorage.dsKey; document.getElementById('apiKeyInput').value = DS_KEY; document.getElementById('apiStatus').textContent = 'API Key 已就绪 ✓'; document.getElementById('apiStatus').style.color = 'var(--success)'; }
+function saveApiKey(){ DS_KEY = document.getElementById('apiKeyInput').value.trim(); if(!DS_KEY)return; localStorage.dsKey = DS_KEY; document.getElementById('apiStatus').textContent = 'API Key 已就绪 ✓'; document.getElementById('apiStatus').style.color = 'var(--success)'; toast('API Key 已保存','success'); }
+
+// ==================== Templates ====================
+const TEMPLATES = {
+  abdomen: {name:'腹部超声',organs:['肝脏','胆囊','胆总管','胰腺','脾脏','左肾','右肾','膀胱','前列腺','子宫','卵巢','腹腔'],fields:'size:大小,shape:形态(正常/增大/缩小/饱满/不规则),border:边界(清晰/模糊/光滑/不规则/毛糙),echo_pattern:回声(均匀/不均匀/增粗/增强/减低/细腻),lesions:[{location:位置,size:大小,echo:回声类型,border:边界,morphology:形态,acoustic_shadow:后方声影,blood_flow:血流信号}],intrahepatic_duct:肝内胆管,common_bile_duct:胆总管内径'},
+  cardiac:{name:'心脏超声',organs:['左心室','左心房','右心室','右心房','二尖瓣','主动脉瓣','三尖瓣','肺动脉瓣','室间隔','左室后壁','心包'],fields:'size:内径(mm),thickness:厚度(mm),motion:运动,ef:EF值(%),regurgitation:反流程度,stenosis:狭窄程度,valve_area:瓣口面积(cm²),velocity:峰值流速(cm/s),effusion:积液'},
+  obgyn:{name:'妇产超声',organs:['子宫','宫颈','左侧卵巢','右侧卵巢','盆腔'],fields:'size:大小,position:位置,myometrium:肌壁回声,endometrium:内膜厚度(mm),lesions:[{location:位置,size:大小,echo:回声类型,description:描述}],pelvic_fluid:盆腔积液\n如果有胎儿，额外添加: organ:胎儿,bpd:双顶径(mm),hc:头围(mm),ac:腹围(mm),fl:股骨长(mm),hr:胎心率'},
+  vascular:{name:'血管超声',organs:['颈总动脉','颈内动脉','颈外动脉','椎动脉','下肢动脉','下肢静脉','腹主动脉'],fields:'imt:内膜中层厚度(mm),diameter:内径(mm),plaques:[{location:位置,size:大小,echo:回声类型,stenosis:狭窄程度}],flow_velocity:{psv:收缩期峰值流速,edv:舒张末期流速,ri:阻力指数}'},
+  thyroid:{name:'小器官超声',organs:['甲状腺左叶','甲状腺右叶','甲状腺峡部','左侧乳腺','右侧乳腺','淋巴结'],fields:'size:大小,echo:回声, vascularity:血供,nodules:[{location:位置,size:大小,echo:回声类型,border:边界,shape:形态,calcification:钙化,tirads:TI-RADS分类,birads:BI-RADS分类}]'}
+};
+const TPL_MATCH = {'腹部':'abdomen','肝胆':'abdomen','泌尿':'abdomen','心脏':'cardiac','心超':'cardiac','心彩':'cardiac','妇科':'obgyn','妇产':'obgyn','产科':'obgyn','子宫':'obgyn','卵巢':'obgyn','颈动脉':'vascular','下肢血管':'vascular','血管':'vascular','甲状腺':'thyroid','乳腺':'thyroid','小器官':'thyroid'};
+function matchTpl(exam){ for(let [k,v] of Object.entries(TPL_MATCH)) if(exam.includes(k)) return v; return 'abdomen'; }
+
+const ICD10 = {'K76.0':'脂肪肝','K74.6':'肝硬化','K80.0':'胆囊结石伴急性胆囊炎','K80.1':'胆囊结石伴慢性胆囊炎','K80.2':'胆囊结石','K80.3':'胆管结石','K80.5':'胆总管结石','K81.0':'急性胆囊炎','K81.1':'慢性胆囊炎','K85.9':'急性胰腺炎','K35.9':'急性阑尾炎','Q44.6':'肝囊肿','D18.0':'肝血管瘤','C22.9':'肝癌','N28.1':'肾囊肿','N20.0':'肾结石','N13.3':'肾积水','N40':'前列腺增生','C64':'肾细胞癌','Q61.2':'多囊肾','N18.9':'慢性肾病','C67.9':'膀胱肿瘤','D25.9':'子宫肌瘤','N80.0':'子宫腺肌症','N84.0':'子宫内膜息肉','N83.2':'卵巢囊肿','D27.9':'卵巢畸胎瘤','C56':'卵巢癌','O00.9':'异位妊娠','O44.9':'前置胎盘','O20.9':'妊娠期出血','I05.0':'二尖瓣狭窄','I34.0':'二尖瓣关闭不全','I35.0':'主动脉瓣狭窄','I35.1':'主动脉瓣关闭不全','I07.1':'三尖瓣关闭不全','I42.0':'扩张型心肌病','I42.1':'肥厚型心肌病','I25.1':'冠心病','I31.3':'心包积液','I27.0':'肺动脉高压','I71.4':'腹主动脉瘤','Q21.0':'室间隔缺损','Q21.1':'房间隔缺损','I70.0':'动脉粥样硬化','I65.2':'颈动脉狭窄','I80.2':'深静脉血栓','E05.0':'甲亢','E04.1':'甲状腺结节','C73':'甲状腺癌','N60.9':'乳腺纤维腺瘤','C50.9':'乳腺癌','R16.1':'脾大','R18':'腹水','R59.9':'淋巴结肿大','E21.0':'甲状旁腺腺瘤','D30.0':'肾错构瘤'};
+
+// ==================== State ====================
+let S = {sel:null, dels:new Set(), report:null, recog:null, recognizing:false, finalText:''};
+
+// ==================== Patients (localStorage) ====================
+function getPatients(){ try{ return JSON.parse(localStorage.pts||'[]'); }catch(e){return[]} }
+function savePatients(pts){ localStorage.pts = JSON.stringify(pts); }
+function loadQueue(){ renderList(getPatients()); }
+function renderList(pts){
+  const el = document.getElementById('patientList');
+  if(!pts.length){ el.innerHTML = '<div style="text-align:center;padding:30px;color:var(--text-muted);font-size:12px">暂无等候患者</div>'; return; }
+  el.innerHTML = pts.map(p => {
+    const a = S.sel && S.sel.id === p.id ? ' active' : '';
+    return `<div class="patient-item${a}" onclick="selPatient('${p.id}')">
+      <div><span class="pi-name">${esc(p.name)}</span> ${esc(p.gender)} ${p.age}岁<span class="badge ${p.status==='已完成'?'badge-done':'badge-wait'}">${p.status||'等候'}</span></div>
+      <div class="pi-exam">${esc(p.exam_type)}</div>
+    </div>`;
+  }).join('');
+}
+function addPatient(){
+  const n=document.getElementById('qn').value.trim(), g=document.getElementById('qg').value, a=parseInt(document.getElementById('qa').value), e=document.getElementById('qe').value.trim();
+  if(!n||!g||!a||!e){toast('请填写完整','error');return}
+  const p = {id:Date.now().toString(36),name:n,gender:g,age:a,exam_type:e,status:'等候'};
+  const pts = getPatients(); pts.unshift(p); savePatients(pts);
+  document.getElementById('qn').value='';document.getElementById('qa').value='';document.getElementById('qe').value='';
+  loadQueue(); selPatient(p.id); toast('已添加: '+n,'success');
+}
+function selPatient(id){
+  const pts = getPatients(); const p = pts.find(x=>x.id===id); if(!p)return;
+  S.sel = p; loadQueue();
+  document.getElementById('curPt').style.display=''; document.getElementById('curPt').innerHTML=`<b>${esc(p.name)}</b> ${esc(p.gender)} ${p.age}岁 — ${esc(p.exam_type)}`;
+  resetWs();
+}
+function resetWs(){
+  S.dels=new Set(); S.report=null; S.finalText='';
+  document.getElementById('rawText').value=''; document.getElementById('structBtn').disabled=true;
+  document.getElementById('saveBtn').disabled=true; document.getElementById('sendBtn').disabled=true;
+  document.getElementById('fc').innerHTML=''; document.getElementById('ic').innerHTML='';
+  document.getElementById('rec').textContent=''; document.getElementById('preview').innerHTML='<p style="color:var(--text-muted);text-align:center;padding:30px">完成结构化后显示</p>';
+  document.getElementById('kc').textContent='0';
+}
+function markDone(){
+  if(!S.sel) return;
+  const pts = getPatients(); const p = pts.find(x=>x.id===S.sel.id); if(p) p.status='已完成';
+  savePatients(pts); loadQueue();
+}
+
+// ==================== Speech Recognition ====================
+function toggleRec(){
+  if(S.recognizing){ stopRec(); return; }
+  if(!S.sel){ toast('请先选择患者','error'); return; }
+  startRec();
+}
+function startRec(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){ toast('浏览器不支持语音识别，请使用 Chrome','error'); return; }
+  S.recog = new SpeechRecognition();
+  S.recog.lang = 'zh-CN';
+  S.recog.continuous = true;
+  S.recog.interimResults = true;
+  S.recog.maxAlternatives = 1;
+  S.finalText = '';
+
+  S.recog.onresult = (e) => {
+    let interim = '';
+    for(let i=e.resultIndex; i<e.results.length; i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) S.finalText += t;
+      else interim += t;
+    }
+    document.getElementById('rawText').value = S.finalText + (interim ? ' ['+interim+']' : '');
+  };
+  S.recog.onerror = (e) => { toast('识别错误: '+e.error,'error'); stopRec(); };
+  S.recog.onend = () => {
+    if(S.recognizing){ try{S.recog.start()}catch(e){} return; }
+    document.getElementById('rawText').value = S.finalText;
+    document.getElementById('structBtn').disabled = !S.finalText.trim();
+    setStatus('idle');
+  };
+  S.recog.start();
+  S.recognizing = true;
+  document.getElementById('recBtn').classList.add('on'); setStatus('on','录音中...');
+}
+function stopRec(){
+  S.recognizing = false;
+  if(S.recog) S.recog.stop();
+  document.getElementById('recBtn').classList.remove('on');
+  document.getElementById('rawText').value = S.finalText;
+  document.getElementById('structBtn').disabled = !S.finalText.trim();
+  setStatus('idle');
+}
+function setStatus(s,t){ const el=document.getElementById('st'); el.className='status-tag '+s; el.textContent = t||(s==='on'?'录音中':'就绪'); }
+
+// ==================== DeepSeek Structure ====================
+async function doStructure(){
+  if(!DS_KEY){ toast('请先输入 DeepSeek API Key','error'); return; }
+  const text = document.getElementById('rawText').value.trim();
+  if(!text){ toast('请先完成语音识别','error'); return; }
+  if(!S.sel){ toast('请先选择患者','error'); return; }
+
+  const tplKey = matchTpl(S.sel.exam_type);
+  const tpl = TEMPLATES[tplKey];
+  setStatus('on','结构化提取中...'); document.getElementById('structBtn').disabled=true;
+
+  const systemPrompt = `你是资深超声科主任医师。将口语化的超声口述转换为结构化 JSON。
+
+检查类型: ${tpl.name}
+覆盖脏器: ${tpl.organs.join('、')}
+
+规则:
+1. 缺失的字段填 null，绝不编造
+2. 口语→标准术语（"肝有点大"→"肝脏增大"，"胆囊没有"→"胆囊未见异常"）
+3. 每个提及的脏器都必须有一条 findings，包括正常脏器
+4. impression 按临床重要性排序，只列阳性发现。全部正常时输出"X检查未见明显异常"
+5. 标注 ICD-10 编码+名称（格式："K76.0 脂肪肝"），不知道名称就只写编码
+6. patient_info 全部填 null
+7. 只输出 JSON
+
+输出格式:
+{
+  "patient_info":{"name":null,"gender":null,"age":null,"exam_id":null},
+  "exam_info":{"modality":"${tpl.name}","device":null,"exam_date":null},
+  "findings":[{"organ":"脏器名",${tpl.fields}}],
+  "impression":[{"rank":1,"diagnosis":"疾病名","icd10":"编码 名称"}],
+  "recommendation":"建议"
+}`;
+
+  try{
+    const r = await fetch('https://api.deepseek.com/v1/chat/completions', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+DS_KEY},
+      body:JSON.stringify({model:'deepseek-v4-flash',messages:[{role:'system',content:systemPrompt},{role:'user',content:'请将以下口述转换为结构化报告：\n\n'+text}],temperature:0.1,max_tokens:4096})
+    });
+    const d = await r.json();
+    if(!r.ok) throw new Error(d.error?.message||'API 调用失败');
+    let content = d.choices[0].message.content;
+    // Extract JSON
+    content = content.replace(/```(?:json)?\s*|\s*```/g, '').trim();
+    if(content.startsWith('{')) content = content.substring(content.indexOf('{'), content.lastIndexOf('}')+1);
+    const report = JSON.parse(content);
+
+    // Enrich ICD-10
+    (report.impression||[]).forEach(imp => {
+      if(imp.icd10 && !/[^\x00-\x7f]/.test(imp.icd10.split(' ')[0]||'')){
+        const code = imp.icd10.split(' ')[0];
+        const name = ICD10[code];
+        if(name && !imp.icd10.includes(name)) imp.icd10 = code + ' ' + name;
+      }
+    });
+
+    // Add IDs
+    (report.findings||[]).forEach((f,i)=>f.id='f'+i);
+    (report.impression||[]).forEach((imp,i)=>imp.id='imp'+i);
+
+    S.report = report; S.dels = new Set();
+    renderCards(report);
+    setStatus('ok','完成');
+    document.getElementById('structBtn').disabled=false;
+  }catch(e){
+    setStatus('idle'); document.getElementById('structBtn').disabled=false;
+    toast(e.message,'error');
+  }
+}
+
+function renderCards(report){
+  const fc = document.getElementById('fc'); fc.innerHTML = '';
+  (report.findings||[]).forEach((f,i) => {
+    const div = document.createElement('div'); div.className = 'fcard'; div.setAttribute('data-fid',f.id);
+    const fields = Object.entries(f).filter(([k])=>!['organ','id','lesions'].includes(k)).map(([k,v])=>v!=null?`<div class="kv"><b>${k}:</b> ${esc(String(v))}</div>`:'').join('');
+    const lesions = (f.lesions&&f.lesions.length)?f.lesions.map((l,j)=>`<span style="display:inline-block;background:#fef2f2;border-radius:3px;padding:1px 5px;margin:1px 3px;font-size:10px;color:#991b1b">病灶${j+1}: ${[l.location,l.size,l.echo,l.morphology].filter(Boolean).join('/')||'未描述'}</span>`).join(''):'';
+    div.innerHTML = `<div class="ch"><span class="ct">${esc(f.organ||'脏器'+(i+1))}</span><button class="btn-del" onclick="delCard('f','${f.id}',this)">✕ 删除</button><button class="btn-res" onclick="resCard('f','${f.id}',this)">↩ 恢复</button></div><div class="cb">${fields}${lesions}</div>`;
+    fc.appendChild(div);
+  });
+  const ic = document.getElementById('ic'); ic.innerHTML = '';
+  (report.impression||[]).forEach((imp,i) => {
+    const div = document.createElement('div'); div.className = 'icard'; div.setAttribute('data-iid',imp.id);
+    div.innerHTML = `<div class="ch"><span><span class="rk">${imp.rank||i+1}</span>${esc(imp.diagnosis||'')}</span><span style="font-size:10px;color:var(--text-secondary)">${imp.icd10?esc(imp.icd10):''}</span><button class="btn-del" onclick="delCard('i','${imp.id}',this)">✕ 删除</button><button class="btn-res" onclick="resCard('i','${imp.id}',this)">↩ 恢复</button></div>`;
+    ic.appendChild(div);
+  });
+  document.getElementById('rec').textContent = report.recommendation||'';
+  updateKc(); updatePreview();
+  document.getElementById('saveBtn').disabled=false; document.getElementById('sendBtn').disabled=false;
+}
+
+function delCard(type, id, btn){
+  S.dels.add(id);
+  btn.closest('.fcard,.icard').classList.add('del');
+  btn.style.display='none'; btn.nextElementSibling.style.display='inline-block';
+  updateKc(); updatePreview();
+}
+function resCard(type, id, btn){
+  S.dels.delete(id);
+  btn.closest('.fcard,.icard').classList.remove('del');
+  btn.style.display='none'; btn.previousElementSibling.style.display='';
+  updateKc(); updatePreview();
+}
+function updateKc(){
+  const t = (S.report?.findings||[]).length + (S.report?.impression||[]).length;
+  document.getElementById('kc').textContent = t - S.dels.size;
+}
+function updatePreview(){
+  const pv = document.getElementById('preview');
+  const fs = (S.report?.findings||[]).filter(f=>!S.dels.has(f.id));
+  const is = (S.report?.impression||[]).filter(i=>!S.dels.has(i.id));
+  if(!fs.length && !is.length){ pv.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:30px">所有条目已删除</p>'; return; }
+  let h = '<h3>超声所见</h3>';
+  fs.forEach(f=>{
+    h+=`<div class="fb"><b>${esc(f.organ||'')}</b><br>`;
+    Object.entries(f).filter(([k])=>!['organ','id','lesions'].includes(k)).forEach(([k,v])=>{if(v!=null)h+=`${k}: ${esc(String(v))}<br>`});
+    if(f.lesions) f.lesions.forEach((l,j)=>h+=`<span style="color:#991b1b">病灶${j+1}: ${[l.location,l.size,l.echo,l.morphology].filter(Boolean).join('/')}</span><br>`);
+    h+='</div>';
+  });
+  h+='<h3>超声提示</h3>';
+  is.forEach(imp=>h+=`<div class="ib"><b>${imp.rank}.</b> ${esc(imp.diagnosis||'')} ${imp.icd10?'<span style="color:var(--text-muted)">('+esc(imp.icd10)+')</span>':''}</div>`);
+  const rec = document.getElementById('rec').textContent.trim(); if(rec) h+=`<h3>建议</h3><p>${esc(rec)}</p>`;
+  pv.innerHTML = h;
+}
+
+// ==================== Save / Send ====================
+function buildReport(){
+  const r = JSON.parse(JSON.stringify(S.report));
+  r.findings = r.findings.filter(f=>!S.dels.has(f.id));
+  r.impression = r.impression.filter(i=>!S.dels.has(i.id));
+  r.recommendation = document.getElementById('rec').textContent.trim();
+  return r;
+}
+function doSave(){
+  if(!S.report){ toast('请先完成结构化','error'); return; }
+  const rpt = buildReport();
+  const key = 'rpt_'+S.sel.id;
+  localStorage[key] = JSON.stringify(rpt);
+  toast('报告已保存草稿','success');
+}
+function doSend(){
+  if(!S.report){ toast('请先完成结构化','error'); return; }
+  if(!confirm('确认发送？发送后患者标记为已完成。')) return;
+  const rpt = buildReport();
+  const key = 'rpt_'+S.sel.id;
+  localStorage[key] = JSON.stringify(rpt);
+  markDone();
+  toast('报告已确认，患者标记为已完成','success');
+  document.getElementById('sendBtn').disabled=true;
+  document.getElementById('saveBtn').disabled=true;
+}
+
+// ==================== UI ====================
+function toggleP(id){ document.getElementById(id).classList.toggle('collapsed'); }
+function esc(s){ return s!=null?String(s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'})[c]):''; }
+function toast(m,t){ const c=document.getElementById('tc'); const d=document.createElement('div'); d.className='toast '+t; d.textContent=m; c.appendChild(d); setTimeout(()=>d.remove(),3500); }
+
+// Keyboard
+document.addEventListener('keydown',e=>{
+  if(e.ctrlKey&&e.key==='r'){ e.preventDefault(); toggleRec(); }
+  if(e.ctrlKey&&e.key==='s'){ e.preventDefault(); doSave(); }
+  if(e.ctrlKey&&e.key==='Enter'){ e.preventDefault(); doSend(); }
+  if(e.key==='Escape'){ e.preventDefault(); if(S.sel) resetWs(); }
+});
+
+loadQueue();
+</script>
+</body>
+</html>
