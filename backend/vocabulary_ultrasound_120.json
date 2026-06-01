@@ -1,0 +1,2502 @@
+[
+  {
+    "text": "胆囊结石",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胆总管结石",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肝内胆管结石",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "泥沙样结石",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "充满型结石",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肾结石",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "输尿管结石",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "膀胱结石",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊息肉",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊息肉样病变",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "脂肪肝",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肝硬化",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肝囊肿",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "多囊肝",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "多囊肾",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肝血管瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肝占位",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肝癌",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肝转移瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肾囊肿",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肾积水",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肾错构瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肾细胞癌",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫肌瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫腺肌症",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫内膜息肉",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "卵巢囊肿",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "卵巢畸胎瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "卵巢巧克力囊肿",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "前列腺增生",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "前列腺钙化",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "前列腺癌",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状腺结节",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状腺癌",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺结节",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺纤维腺瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺癌",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "二尖瓣狭窄",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "二尖瓣关闭不全",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "二尖瓣脱垂",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "主动脉瓣狭窄",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "主动脉瓣关闭不全",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "三尖瓣反流",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "房间隔缺损",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "室间隔缺损",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "动脉导管未闭",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "法洛四联症",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "扩张型心肌病",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肥厚型心肌病",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "限制型心肌病",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "心包积液",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "缩窄性心包炎",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "感染性心内膜炎",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "左心房粘液瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肺动脉高压",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "颈动脉斑块",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "颈动脉狭窄",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "下肢静脉血栓",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "下肢动脉闭塞",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "腹主动脉瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "主动脉夹层",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "深静脉血栓",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "淋巴水肿",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "急性阑尾炎",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肠套叠",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "急性胰腺炎",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "慢性胰腺炎",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胰腺假性囊肿",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胰腺癌",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "脾破裂",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "脾大",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "副脾",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "腹腔积液",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "腹水",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "盆腔积液",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胸腔积液",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "膀胱肿瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "膀胱憩室",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肾上腺占位",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "嗜铬细胞瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "肾动脉狭窄",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "盆腔炎性包块",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "异位妊娠",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "葡萄胎",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "前置胎盘",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胎盘早剥",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胎儿畸形",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "无回声区",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "低回声结节",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "高回声团",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "强回声斑",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "混合回声肿块",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "等回声结节",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "囊实性包块",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "占位性病变",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "弥漫性病变",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "后方声影",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "后方回声增强",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "后方回声衰减",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "彗星尾征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "靶环征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "假肾征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "脂液分层征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "套袖征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "同心圆征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "双筒枪征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "平行管征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "牛眼征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "火海征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "SAM征",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "室壁瘤",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "矛盾运动",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "节段性室壁运动异常",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "回声增粗",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "回声不均匀",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "回声减低",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "回声增强",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "边界不清",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "形态不规则",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "蟹足状",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "分叶状",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "毛刺状",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "微小钙化",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "粗大钙化",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "环状钙化",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "血流信号丰富",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "点状血流信号",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "条状血流信号",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "未见血流信号",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "周边环形血流",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "动脉频谱",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "阻力指数",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "搏动指数",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "收缩期峰值流速",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "舒张末期流速",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "内膜中层厚度",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "TI-RADS",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "BI-RADS",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "超声造影",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "弹性成像",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "剪切波弹性成像",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "CDFI",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "PW",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "CW",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "M型超声",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "彩色多普勒",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "频谱多普勒",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "射血分数",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "右叶斜径",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "双顶径",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "股骨长",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "羊水指数",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胎心搏动",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "头位",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "臀位",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "横位",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "未见异常",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "未见明显异常",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "建议定期复查",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "建议进一步检查",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "超声所见",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "超声提示",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "腹部彩超",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "心脏彩超",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "超声心动图",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊壁毛糙",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "边界清晰",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "边界模糊",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "形态规则",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "类圆形",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "不规则形",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "极低回声",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "回声均匀",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "液性暗区",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "声影",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "前后径",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "纵横比",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "皮髓质分界清晰",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "皮髓质分界不清",
+    "weight": 5,
+    "lang": "zh"
+  },
+  {
+    "text": "左心室舒张末内径",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "左心室收缩末内径",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "室间隔厚度",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "左室后壁厚度",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "短轴缩短率",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "每搏输出量",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "心输出量",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "二尖瓣口面积",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "主动脉瓣口面积",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "跨瓣压差",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "瓣膜钙化",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "瓣膜增厚",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "瓣膜脱垂",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "瓣膜穿孔",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腱索断裂",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "乳头肌功能不全",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "心室壁肥厚",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "心肌动度减低",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "右心房增大",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "右心室增大",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "左心房增大",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "左心室增大",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "全心增大",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "人工瓣膜",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "生物瓣",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "机械瓣",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "卵圆孔未闭",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "永存左上腔静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肺静脉异位引流",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "大动脉转位",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "右室双出口",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "单心室",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "Ebstein畸形",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "马凡综合征",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "川崎病",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "心内膜弹力纤维增生症",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "左心室舒张功能减低",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "限制性充盈障碍",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "E峰",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "A峰",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "E/A比值",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "组织多普勒",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "应变率",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "心腔血栓",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "心房颤动",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "左心耳血栓",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝脏",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆总管",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝内胆管",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胰腺",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胰管",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脾脏",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "左肾",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "右肾",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "双肾",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾上腺",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "输尿管",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "膀胱",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "尿道",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "前列腺",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "精囊腺",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "睾丸",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "附睾",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "阴囊",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "宫颈",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "卵巢",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "输卵管",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "盆腔",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "阑尾",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腹腔",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腹膜后",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状腺",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状旁腺",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "颌下腺",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腮腺",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "淋巴结",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "锁骨上淋巴结",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腋窝淋巴结",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腹股沟淋巴结",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "颈部淋巴结",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "门静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脾静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肠系膜上静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肠系膜上动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腹腔干",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "下腔静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腹主动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "髂动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "髂静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "股总动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "股浅动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腘动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胫前动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胫后动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "足背动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "大隐静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "小隐静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "颈总动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "颈内动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "颈外动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "椎动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "锁骨下动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "无名动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "Willis环",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "大脑中动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "颞浅动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "左叶前后径",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "门静脉内径",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脾脏肋间厚",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脾脏长径",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "头围",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腹围",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肱骨长",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "最大羊水深度",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胎盘厚度",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胎盘成熟度",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "宫颈长度",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫内膜厚度",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "卵泡大小",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "残余尿量",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "膀胱容量",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状腺左叶",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状腺右叶",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状腺峡部",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "炎性假瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆泥淤积",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊腺肌症",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊癌",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝腺瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝局灶性结节样增生",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝脓肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝包虫病",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝血肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "布加综合征",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "门静脉血栓",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "门静脉海绵样变性",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胰腺囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胰头占位",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胰腺导管内乳头状黏液瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胰岛素瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胃泌素瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脾囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脾梗死",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脾淋巴瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脾血管瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾盂肾炎",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾结核",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾脓肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾周积液",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾包膜下血肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "巨输尿管",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "输尿管囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "膀胱颈梗阻",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "膀胱小梁形成",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "神经源性膀胱",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "尿道狭窄",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "前列腺囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "前列腺脓肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "前列腺增生结节",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "睾丸鞘膜积液",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "精索静脉曲张",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "睾丸扭转",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "睾丸炎",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "附睾炎",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "睾丸肿瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "精原细胞瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "隐睾",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫内膜异位症",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫切口憩室",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "宫内节育器",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "宫内残留",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "宫腔粘连",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫畸形",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "纵隔子宫",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "双角子宫",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "单角子宫",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "始基子宫",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "卵巢过度刺激综合征",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "卵巢扭转",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "多囊卵巢综合征",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "卵泡囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "黄体囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "黄体血肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "宫颈纳氏囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "宫颈肥大",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "宫颈息肉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "宫颈癌",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫内膜癌",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "子宫肉瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "输卵管积水",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "输卵管积脓",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "盆腔脓肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "早孕",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "中期妊娠",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "晚期妊娠",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胚芽",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "卵黄囊",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胎动",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胎方位",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "羊水过少",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "羊水过多",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胎盘前置",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胎盘植入",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胎盘粘连",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脐带绕颈",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脐动脉血流",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脐带先露",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "单脐动脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胎儿生长受限",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "巨大儿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "无脑儿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脊柱裂",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脑积水",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "唇腭裂",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "先天性心脏病",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状腺弥漫性病变",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "桥本氏甲状腺炎",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "亚急性甲状腺炎",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲亢",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状腺腺瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状旁腺腺瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状旁腺增生",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺增生",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺导管扩张",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "导管内乳头状瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "叶状肿瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺炎",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺脓肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腋淋巴结肿大",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "反应性增生",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "淋巴瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "淋巴结转移",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "淋巴结结核",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腮腺混合瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腮腺炎",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腮腺淋巴上皮病",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "涎石症",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "颌下腺炎",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "皮脂腺囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脂肪瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "血管瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "纤维瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "神经鞘瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "神经纤维瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "软组织肉瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腹壁疝",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腹股沟疝",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "股疝",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "脐疝",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "切口疝",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "食管裂孔疝",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "膈疝",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "动脉硬化",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "动脉粥样硬化",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "软斑块",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "硬斑块",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "混合性斑块",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "溃疡斑块",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "附壁血栓",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "动脉闭塞",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "侧支循环",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "盗血综合征",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "锁骨下动脉盗血",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "动静脉瘘",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "假性动脉瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "真性动脉瘤",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "血管内支架",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "人工血管",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "静脉瓣功能不全",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "穿通支静脉",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "淋巴囊肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "未见占位性病变",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "未见明确占位",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "未见明显占位",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "建议穿刺活检",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "建议增强CT",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "建议MRI检查",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "建议超声造影",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "建议随访",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "请结合临床",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "超声诊断",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "超声描述",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "超声表现",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "声像图特征",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "腹部超声",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "泌尿系超声",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "妇科超声",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "产科超声",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "经胸超声心动图",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "经食管超声心动图",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "血管超声",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "血管彩超",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "甲状腺彩超",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "乳腺彩超",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "阴囊彩超",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "浅表器官超声",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "床旁超声",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "术中超声",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "介入超声",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "超声内镜",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆总管扩张",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝内胆管扩张",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肝外胆管扩张",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "集合系统分离",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾盂分离",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾盂扩张",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "肾盏扩张",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "输尿管扩张",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胰管扩张",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊壁增厚",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊壁水肿",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "双边征",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊张力高",
+    "weight": 4,
+    "lang": "zh"
+  },
+  {
+    "text": "胆囊收缩功能",
+    "weight": 4,
+    "lang": "zh"
+  }
+]
