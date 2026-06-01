@@ -12,7 +12,13 @@ venv/
 
 # Database & backups
 *.db
+*.db-shm
+*.db-wal
 audio_backups/
+
+# Test outputs
+test_results*.json
+*_debug*.txt
 
 # OS
 .DS_Store
@@ -20,4 +26,3 @@ Thumbs.db
 
 # Environment
 .env
-*.db-shm\n*.db-wal\ntest_results*.json
