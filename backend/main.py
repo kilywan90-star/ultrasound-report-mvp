@@ -14,7 +14,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
-from asr_client import transcribe_audio
+try:
+    from asr_client import transcribe_audio
+    ASR_AVAILABLE = True
+except (ImportError, ModuleNotFoundError):
+    ASR_AVAILABLE = False
+    async def transcribe_audio(*a, **kw): raise RuntimeError("ASR不可用")
+
 from llm_client import structure_report as llm_structure
 from templates import match_template, TEMPLATES
 from template_filler import match_and_fill
@@ -35,7 +41,7 @@ AUDIO_DIR.mkdir(exist_ok=True)
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "version": "0.3.0"}
+    return {"status": "ok", "version": "0.3.0", "asr_available": ASR_AVAILABLE}
 
 @app.get("/api/templates")
 async def list_templates():

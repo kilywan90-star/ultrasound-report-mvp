@@ -113,7 +113,7 @@ textarea.txt:focus{outline:none;border-color:#2563eb}
 <div class="toasts" id="toasts"></div>
 
 <script>
-var S={sel:null,dels:new Set(),rpt:null,ac:[],ab:null,rec:false,paused:false,mr:null,rs:0,pe:0,ti:null};
+var S={sel:null,dels:new Set(),rpt:null,ac:[],ab:null,rec:false,recog:null,paused:false,mr:null,rs:0,pe:0,ti:null};
 
 // ==================== 患者 ====================
 async function lq(){try{var r=await fetch('/api/patients/queue');var d=await r.json();rl(d.patients||[])}catch(e){}}
@@ -142,7 +142,27 @@ function fmt(ms){var s=Math.floor(ms/1000);return String(Math.floor(s/60)).padSt
 function setSt(s,txt){var el=document.getElementById('st');el.className='tag '+s;el.textContent=txt||(s==='o'?'录音中':s==='k'?'完成':'就绪')}
 
 // ==================== 转写 ====================
-function doTrans(){if(!S.ab){t('请先录音','e');return}setSt('o','转写中...');document.getElementById('tb').disabled=true;
+// ==================== 录音 (智能切换: 服务器ASR / 浏览器语音) ====================
+var ASR_MODE='server';
+
+fetch('/api/health').then(function(r){return r.json()}).then(function(d){
+  if(!d.asr_available){ASR_MODE='browser';document.getElementById('tb').textContent='开始语音';document.getElementById('tb').style.background='#16a34a';document.getElementById('tb').style.borderColor='#16a34a'}
+}).catch(function(){});
+
+function toggleRec(){if(!S.sel){t('请先选择患者','e');return}
+  if(ASR_MODE==='browser'){browserRec();return}
+  if(S.rec){stopRec();return}startRec()}
+
+function browserRec(){var R=window.SpeechRecognition||window.webkitSpeechRecognition;if(!R){t('请使用Chrome浏览器','e');return}
+  if(S.recog){S.recog.stop();S.recog=null;S.rec=false;document.getElementById('rb').classList.remove('on');setSt('idle');return}
+  S.recog=new R();S.recog.lang='zh-CN';S.recog.continuous=true;S.recog.interimResults=true;var final='';
+  S.recog.onresult=function(e){var t='';for(var i=e.resultIndex;i<e.results.length;i++){var x=e.results[i][0].transcript;if(e.results[i].isFinal)final+=x;else t+=x}document.getElementById('rt').value=final+(t?' ['+t+']':'')};
+  S.recog.onerror=function(e){t('识别错误: '+e.error,'e');S.recog.stop();S.recog=null;S.rec=false;document.getElementById('rb').classList.remove('on');setSt('idle')};
+  S.recog.onend=function(){if(S.rec){try{S.recog.start()}catch(e){}return}document.getElementById('rt').value=final;document.getElementById('sb').disabled=false;setSt('k','语音完成')};
+  S.recog.start();S.rec=true;document.getElementById('rb').classList.add('on');setSt('o','录音中...')}
+
+function doTrans(){if(ASR_MODE==='browser'){browserRec();return}
+  if(!S.ab){t('请先录音','e');return}setSt('o','转写中...');document.getElementById('tb').disabled=true;
   cvt(S.ab).then(function(wav){var fd=new FormData();fd.append('file',wav,'recording.wav');return fetch('/api/transcribe',{method:'POST',body:fd})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail||'转写失败','e');setSt('k');document.getElementById('tb').disabled=false;return}document.getElementById('rt').value=d.text;document.getElementById('sb').disabled=false;setSt('k','转写完成');toggleP('pn2')}).catch(function(e){t('转写失败，请重试','e');setSt('idle');document.getElementById('tb').disabled=false})}
 function cvt(blob){return blob.arrayBuffer().then(function(ab){var ctx=new AudioContext({sampleRate:16000});return ctx.decodeAudioData(ab).then(function(buf){ctx.close();var octx=new OfflineAudioContext(1,buf.duration*16000,16000);var src=octx.createBufferSource();src.buffer=buf;src.connect(octx.destination);src.start();return octx.startRendering().then(function(rs){var ch=rs.getChannelData(0);var ns=ch.length;var wb=new ArrayBuffer(44+ns*2);var v=new DataView(wb);function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}ws(0,'RIFF');v.setUint32(4,36+ns*2,true);ws(8,'WAVE');ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,ns*2,true);var o=44;for(var i=0;i<ns;i++){var s=Math.max(-1,Math.min(1,ch[i]));v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true);o+=2}return new Blob([wb],{type:'audio/wav'})})})})}
 
