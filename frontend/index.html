@@ -71,41 +71,41 @@ textarea.txt:focus{outline:none;border-color:#2563eb}
   <h3>患者队列</h3>
   <div class="qa">
     <div class="row"><input id="qn" placeholder="姓名" style="flex:1"><select id="qg" style="width:46px"><option value="">性</option><option value="男">男</option><option value="女">女</option></select><input id="qa" placeholder="年龄" type="number" min="1" max="200" style="width:44px"></div>
-    <div class="row"><input id="qe" placeholder="检查类型（腹部超声）" style="flex:1"><button onclick="addPt()">入队</button></div>
+    <div class="row"><select id="qe" style="flex:1"><option value="">选择检查部位...</option><option value="产科超声">产科超声</option><option value="腹部超声">腹部超声</option><option value="心脏超声">心脏超声</option><option value="甲状腺超声">甲状腺超声</option><option value="乳腺超声">乳腺超声</option><option value="血管超声">血管超声</option><option value="妇科超声">妇科超声</option></select><button onclick="addPt()">入队</button></div>
   </div>
   <div class="plist" id="pl"></div>
 </aside>
 
-<main class="main">
+<main class="main" style="flex-direction:row;gap:8px;padding:8px">
   <div style="padding:5px 10px;background:#eff6ff;border-radius:4px;font-size:12px;display:none" id="cp"></div>
 
-  <div class="pn" id="pn1">
-    <h4 onclick="toggleP('pn1')">1 语音录入 <span class="tag idle" id="st">就绪</span></h4>
-    <div class="b">
-      <div class="rec-row"><button class="rec-btn" id="rb" onclick="toggleRec()"><div class="dot"></div></button><span style="font-size:11px;color:#64748b">点击录音，口述超声所见</span><span id="tm" style="font-size:16px;font-weight:500">00:00</span></div>
-      <div class="btns"><button class="btn" id="pb" onclick="togglePause()" disabled>暂停</button><button class="btn btn-p" id="tb" onclick="doTrans()" disabled>转写语音</button><button class="btn btn-p" id="sb" onclick="doStruct()" disabled>结构化提取</button></div>
+  <!-- 左列: 语音录入 + 识别文本 -->
+  <div class="pn" id="pn1" style="flex:1.5;min-width:360px">
+    <h4 onclick="toggleP('pn1')">1 语音录入与识别 <span class="tag idle" id="st">就绪</span></h4>
+    <div class="b" style="display:flex;flex-direction:column">
+      <div class="rec-row"><button class="rec-btn" id="rb" onclick="toggleRec()"><div class="dot"></div></button><span style="font-size:11px;color:#64748b">点击录音，口述超声所见</span><span id="tm" style="font-size:16px;font-weight:500">00:00</span><button class="btn" id="playb" onclick="playAudio()" style="display:none;font-size:14px;padding:4px 10px" title="播放回听">&#9654;</button></div>
+      <div id="raw" style="font-size:11px;color:#64748b;margin-bottom:4px;min-height:18px;word-break:break-all"></div>
+      <textarea class="txt" id="rt" placeholder="识别文本显示在此处..." style="width:100%;min-height:120px;flex:1;resize:none;font-size:12px"></textarea>
+      <div class="btns" style="margin-top:6px"><button class="btn" id="pb" onclick="togglePause()" disabled>暂停</button><button class="btn btn-p" id="tb" onclick="doTrans()" disabled>转写</button><button class="btn btn-p" id="sb" onclick="doStruct()" disabled>结构化提取</button></div>
     </div>
   </div>
 
-  <div class="pn coll" id="pn2">
-    <h4 onclick="toggleP('pn2')">2 识别文本</h4>
-    <div class="b"><textarea class="txt" id="rt" placeholder="语音识别文本显示在此处..."></textarea></div>
-  </div>
-
-  <div class="pn coll" id="pn3">
-    <h4 onclick="toggleP('pn3')">3 结构化报告 — 逐条审核 <span style="font-size:10px;color:#64748b">保留 <b style="color:#16a34a" id="kc">0</b> 条</span></h4>
-    <div class="b">
+  <!-- 中列: 结构化报告 — 逐条审核 -->
+  <div class="pn" id="pn2" style="flex:1.2;min-width:360px">
+    <h4 onclick="toggleP('pn2')">2 结构化报告 — 逐条审核 <span style="font-size:10px;color:#64748b">保留 <b style="color:#16a34a" id="kc">0</b> 条</span></h4>
+    <div class="b" style="display:flex;flex-direction:column">
       <label style="font-size:11px;font-weight:600;color:#64748b">超声所见（可直接编辑）:</label>
-      <div class="ed" contenteditable="true" id="se"></div>
+      <div class="ed" contenteditable="true" id="se" oninput="onEdit()" style="flex:1;min-height:120px"></div>
       <div style="margin-top:6px"><h4 style="font-size:11px;color:#2563eb;margin-bottom:3px">超声提示（可删除/恢复）</h4><div class="cards" id="hc"></div></div>
-      <label style="font-size:11px;color:#64748b">建议:</label><div contenteditable="true" id="rc" style="font-size:11px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;margin-top:2px;min-height:28px"></div>
-      <div class="btns"><button class="btn btn-p" onclick="doSave()" id="svb" disabled>保存草稿</button><button class="btn btn-d" onclick="doSend()" id="sdb" disabled>发送至PACS</button></div>
+      <label style="font-size:11px;color:#64748b">建议:</label><div contenteditable="true" id="rc" style="font-size:11px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;margin-top:2px;min-height:28px" oninput="onEdit()"></div>
+      <div class="btns"><button class="btn btn-p" onclick="doSave()" id="svb" disabled>保存草稿</button><button class="btn" onclick="doUpdatePreview()" id="upb" disabled>刷新预览</button><button class="btn btn-d" onclick="doSend()" id="sdb" disabled>发送至PACS</button></div>
     </div>
   </div>
 
-  <div class="pn coll" id="pn4">
-    <h4 onclick="toggleP('pn4')">4 报告预览</h4>
-    <div class="b"><div class="preview" id="pv"><p style="color:#64748b;text-align:center;padding:20px">完成结构化后显示</p></div></div>
+  <!-- 右列: 报告预览 -->
+  <div class="pn" id="pn3" style="flex:1;min-width:280px;max-width:400px">
+    <h4 onclick="toggleP('pn3')">3 报告预览</h4>
+    <div class="b"><div class="preview" id="pv" style="min-height:200px"><p style="color:#64748b;text-align:center;padding:20px">完成结构化后显示</p></div></div>
   </div>
 </main>
 </div>
@@ -113,49 +113,81 @@ textarea.txt:focus{outline:none;border-color:#2563eb}
 <div class="toasts" id="toasts"></div>
 
 <script>
-var S={sel:null,dels:new Set(),rpt:null,ac:[],ab:null,rec:false,recog:null,paused:false,mr:null,rs:0,pe:0,ti:null};
+var S={sel:null,dels:new Set(),rpt:null,ac:[],ab:null,rec:false,mr:null,paused:false,rs:0,pe:0,ti:null,au:null};
 
 // ==================== 患者 ====================
 async function lq(){try{var r=await fetch('/api/patients/queue');var d=await r.json();rl(d.patients||[])}catch(e){}}
 function rl(pts){
   var el=document.getElementById('pl');
-  if(!pts.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#64748b;font-size:11px">暂无等候患者</div>';return}
+  if(!pts.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#64748b;font-size:11px">暂�~W�等候患者</div>';return}
   el.innerHTML=pts.map(function(p){
     var a=S.sel&&S.sel.id===p.id?' on':'';var st=p.status||'等候';var sc=st==='已完成'?'bdg-d':'bdg-w';
     return '<div class="pi'+a+'" onclick="sp('+p.id+')"><div><span class="n">'+e(p.name)+'</span> '+e(p.gender)+' '+p.age+'岁<span class="tag" style="background:'+(st==='已完成'?'#d1fae5':'#dbeafe')+';color:'+(st==='已完成'?'#065f46':'#1e40af')+';font-size:9px;margin-left:3px">'+st+'</span></div><div class="e">'+e(p.exam_type)+(p.exam_part?' / '+e(p.exam_part):'')+'</div></div>'
   }).join('')}
 function addPt(){var n=document.getElementById('qn').value.trim(),g=document.getElementById('qg').value,a=parseInt(document.getElementById('qa').value),e=document.getElementById('qe').value.trim();if(!n||!g||!a||!e){t('请填写完整','e');return}
   fetch('/api/patients/quick-add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,gender:g,age:a,exam_type:e})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail,'e');return}document.getElementById('qn').value='';document.getElementById('qa').value='';document.getElementById('qe').value='';lq();sp(d.patient.id);t('已添加: '+n,'s')}).catch(function(e){t(e.message,'e')})}
-function sp(id){fetch('/api/patients/queue').then(function(r){return r.json()}).then(function(d){var p=d.patients.find(function(x){return x.id===id});if(!p)return;S.sel=p;lq();var cp=document.getElementById('cp');cp.style.display='';cp.innerHTML='<b>'+e(p.name)+'</b> '+e(p.gender)+' '+p.age+'岁 — '+e(p.exam_type);rs()}).catch(function(){})}
-function rs(){S.dels=new Set();S.rpt=null;S.ac=[];S.ab=null;document.getElementById('rt').value='';document.getElementById('sb').disabled=true;document.getElementById('svb').disabled=true;document.getElementById('sdb').disabled=true;document.getElementById('hc').innerHTML='';document.getElementById('se').innerHTML='';document.getElementById('rc').textContent='';document.getElementById('pv').innerHTML='<p style=\"color:#64748b;text-align:center;padding:20px\">完成结构化后显示</p>';document.getElementById('kc').textContent='0'}
+function sp(id){fetch('/api/patients/queue').then(function(r){return r.json()}).then(function(d){var p=d.patients.find(function(x){return x.id===id});if(!p)return;S.sel=p;lq();rs()}).catch(function(){})}
+function rs(){S.dels=new Set();S.rpt=null;S.ac=[];S.ab=null;document.getElementById('rt').value='';document.getElementById('raw').textContent='';document.getElementById('sb').disabled=true;document.getElementById('svb').disabled=true;document.getElementById('sdb').disabled=true;document.getElementById('upb').disabled=true;document.getElementById('hc').innerHTML='';document.getElementById('se').innerHTML='';document.getElementById('rc').textContent='';document.getElementById('pv').innerHTML='<p style=\"color:#64748b;text-align:center;padding:20px\">完成结构化后显示</p>';document.getElementById('kc').textContent='0'}
 function done(){if(!S.sel)return;fetch('/api/patients/'+S.sel.id+'/status?status=已完成',{method:'PUT'}).catch(function(){});lq()}
 
-// ==================== 录音 ====================
+// ==================== 录音 (MediaRecorder + 后端阿里云百炼ASR) ====================
 function toggleRec(){if(!S.sel){t('请先选择患者','e');return}
   if(S.rec){stopRec();return}
-  var R=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!R){t('请使用Chrome打开','e');return}
-  S.recog=new R();S.recog.lang='zh-CN';S.recog.continuous=true;S.recog.interimResults=true;
-  var final='';
-  S.recog.onresult=function(e){var t='';for(var i=e.resultIndex;i<e.results.length;i++){var x=e.results[i][0].transcript;if(e.results[i].isFinal){final+=x}else{t+=x}}document.getElementById('rt').value=final+(t?' ['+t+']':'')};
-  S.recog.onerror=function(e){t('语音错误: '+e.error,'e');S.rec=false;document.getElementById('rb').classList.remove('on');setSt('idle')};
-  S.recog.onend=function(){if(S.rec){try{S.recog.start()}catch(e){}return}document.getElementById('rt').value=final;document.getElementById('sb').disabled=false;S.rec=false;document.getElementById('rb').classList.remove('on');setSt('k','完成');toggleP('pn2')};
-  S.recog.start();S.rec=true;document.getElementById('rb').classList.add('on');setSt('o','录音中')}
-function stopRec(){if(S.recog){S.recog.stop();S.recog=null}S.rec=false;document.getElementById('rb').classList.remove('on');document.getElementById('pb').disabled=true}
-function startRec(){}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    S.mr=new MediaRecorder(stream,{mimeType:'audio/webm;codecs=opus'});
+    S.ac=[];S.rs=Date.now();S.pe=0;S.paused=false;sit();
+    S.mr.ondataavailable=function(e){if(e.data.size>0)S.ac.push(e.data)};
+    S.mr.onstop=function(){
+      stream.getTracks().forEach(function(t){t.stop()});
+      if(!S.ac.length)return;
+      S.ab=new Blob(S.ac,{type:'audio/webm'});
+      document.getElementById('tb').disabled=false;
+      // 自动上传转写
+      doTransAuto();
+    };
+    S.mr.start(1000);S.rec=true;document.getElementById('rb').classList.add('on');
+    document.getElementById('pb').disabled=false;document.getElementById('playb').style.display='none';setSt('o','录音中');
+  }).catch(function(e){t('麦克风权限未授予: '+e.message,'e')})}
+function stopRec(){stt();
+  if(S.mr&&S.mr.state!=='inactive'){S.mr.stop();S.mr=null}
+  S.rec=false;document.getElementById('rb').classList.remove('on');document.getElementById('pb').disabled=true}
+function playAudio(){
+  if(!S.ab)return;
+  if(S.au){S.au.pause();S.au=null;document.getElementById('playb').textContent='▶';return}
+  var url=URL.createObjectURL(S.ab);
+  S.au=new Audio(url);
+  S.au.onended=function(){document.getElementById('playb').textContent='▶';S.au=null;URL.revokeObjectURL(url)};
+  S.au.play();
+  document.getElementById('playb').textContent='⏸';
+}
+function togglePause(){
+  if(!S.mr||S.mr.state==='inactive')return;
+  if(S.paused){S.mr.resume();S.rs=Date.now()-S.pe;S.paused=false;document.getElementById('pb').textContent='暂停'}
+  else{S.mr.pause();S.pe=Date.now()-S.rs;S.paused=true;document.getElementById('pb').textContent='继续'}}
 function sit(){ut();S.ti=setInterval(ut,200)}
 function stt(){if(S.ti){clearInterval(S.ti);S.ti=null}}
 function ut(){var ms=S.paused?S.pe:Date.now()-S.rs;document.getElementById('tm').textContent=fmt(ms)}
 function fmt(ms){var s=Math.floor(ms/1000);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
 function setSt(s,txt){var el=document.getElementById('st');el.className='tag '+s;el.textContent=txt||(s==='o'?'录音中':s==='k'?'完成':'就绪')}
 
-// ==================== 转写 ====================
-// ==================== 转写 (云端模式自动完成无需此按钮) ====================
-function doTrans(){
-  if(S.recog){t('语音已自动识别完成，直接点击结构化', 's'); return;}
+// ==================== 转写 (MediaRecorder 录音 → 上传后端 → 阿里云百炼ASR) ====================
+function doTransAuto(){
   if(!S.ab){t('请先录音','e');return}
-  cvt(S.ab).then(function(wav){var fd=new FormData();fd.append('file',wav,'recording.wav');return fetch('/api/transcribe',{method:'POST',body:fd})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail||'转写失败','e');setSt('k');document.getElementById('tb').disabled=false;return}document.getElementById('rt').value=d.text;document.getElementById('sb').disabled=false;setSt('k','转写完成');toggleP('pn2')}).catch(function(e){t('转写失败，请重试','e');setSt('idle');document.getElementById('tb').disabled=false})}
-function cvt(blob){return blob.arrayBuffer().then(function(ab){var ctx=new AudioContext({sampleRate:16000});return ctx.decodeAudioData(ab).then(function(buf){ctx.close();var octx=new OfflineAudioContext(1,buf.duration*16000,16000);var src=octx.createBufferSource();src.buffer=buf;src.connect(octx.destination);src.start();return octx.startRendering().then(function(rs){var ch=rs.getChannelData(0);var ns=ch.length;var wb=new ArrayBuffer(44+ns*2);var v=new DataView(wb);function ws(o,s){for(var i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))}ws(0,'RIFF');v.setUint32(4,36+ns*2,true);ws(8,'WAVE');ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,ns*2,true);var o=44;for(var i=0;i<ns;i++){var s=Math.max(-1,Math.min(1,ch[i]));v.setInt16(o,s<0?s*0x8000:s*0x7FFF,true);o+=2}return new Blob([wb],{type:'audio/wav'})})})})}
+  setSt('o','转写中...');document.getElementById('tb').disabled=true;
+  var fd=new FormData();fd.append('file',S.ab,'recording.webm');
+  fetch('/api/transcribe',{method:'POST',body:fd}).then(function(r){return r.json()}).then(function(d){
+    if(!d.success){t(d.detail||'转写失败','e');setSt('idle');document.getElementById('tb').disabled=false;return}
+    // 原始ASR文本显示在录音按钮旁
+    document.getElementById('raw').textContent='原始: '+(d.raw_text||d.text||'');
+    // 纠错后文本填入"识别文本"区
+    document.getElementById('rt').value=d.text||'';
+    document.getElementById('sb').disabled=false;
+    document.getElementById('playb').style.display=''; // 显示播放按钮
+    setSt('k','转写完成');
+  }).catch(function(e){t('转写失败，请重试','e');setSt('idle');document.getElementById('tb').disabled=false})}
+function doTrans(){
+  if(!S.ab){t('请先录音','e');return}
+  doTransAuto()}
 
 // ==================== 结构化 ====================
 function doStruct(){var text=document.getElementById('rt').value.trim();if(!text){t('请先转写','e');return}if(!S.sel){t('请先选择患者','e');return}
@@ -163,8 +195,13 @@ function doStruct(){var text=document.getElementById('rt').value.trim();if(!text
   fetch('/api/structure',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,exam_type:S.sel.exam_type,patient_id:String(S.sel.id)})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail||'失败','e');setSt('idle');document.getElementById('sb').disabled=false;return}
     S.rpt=d.report;S.dels=new Set();document.getElementById('se').innerHTML=d.report.study_see||'';renderHints(d.report);
     document.getElementById('rc').textContent=d.report.recommendation||'';up();ukc();
-    document.getElementById('svb').disabled=false;document.getElementById('sdb').disabled=false;
-    setSt('k','完成');document.getElementById('sb').disabled=false;toggleP('pn2');toggleP('pn3')
+    document.getElementById('svb').disabled=false;document.getElementById('sdb').disabled=false;document.getElementById('upb').disabled=false;
+    setSt('k','完成');document.getElementById('sb').disabled=false;toggleP('pn2');toggleP('pn3');
+    // 规则兜底提示
+    if(d.method==='rule_fallback'){t('AI分析暂不可用，已使用规则库生成','e')}
+    // 必填项提醒：检查 unfill 标签数量
+    var unfillCount=(document.getElementById('se').innerHTML.match(/unfill/g)||[]).length;
+    if(unfillCount>10){t('报告有'+unfillCount+'个空字段，建议补充','e')}
   }).catch(function(e){t('结构化失败','e');setSt('idle');document.getElementById('sb').disabled=false})}
 function renderHints(rpt){var hc=document.getElementById('hc');hc.innerHTML='';(rpt.study_hint||[]).forEach(function(h,i){var d=document.createElement('div');d.className='hcard';d.innerHTML='<div class="hh"><span style="font-weight:600;color:#2563eb">'+h.rank+'. '+e(h.diagnosis||'')+'</span><span style="font-size:9px;color:#64748b">'+(h.icd10?e(h.icd10):'')+'</span><button class="btn-del" onclick="dh(this,\''+h.id+'\')">✕ 删除</button><button class="btn-res" onclick="eh(this,\''+h.id+'\')">↩ 恢复</button></div>';hc.appendChild(d)})}
 function dh(btn,id){S.dels.add(id);btn.closest('.hcard').classList.add('off');btn.style.display='none';btn.nextElementSibling.style.display='inline-block';up();ukc()}
@@ -177,8 +214,10 @@ function up(){var pv=document.getElementById('pv');var see=document.getElementBy
   if(rec)h+='<div style=\"font-weight:600;color:#2563eb;margin:8px 0 3px;border-bottom:1px solid #e2e8f0;font-size:12px\">建议</div><p>'+e(rec)+'</p>';pv.innerHTML=h}
 
 // ==================== 保存/发送 ====================
+function onEdit(){document.getElementById('upb').disabled=false}
+function doUpdatePreview(){if(!S.rpt){t('请先完成结构化','e');return};up();t('预览已刷新','s');document.getElementById('pv').scrollIntoView({behavior:'smooth'})}
 function br(){return{study_see:document.getElementById('se').innerText.trim(),study_hint:(S.rpt?S.rpt.study_hint||[]:[]).filter(function(h){return !S.dels.has(h.id)}).map(function(h){return{rank:h.rank,diagnosis:h.diagnosis,icd10:h.icd10}}),recommendation:document.getElementById('rc').textContent.trim()}}
-function doSave(){if(!S.rpt){t('请先完成结构化','e');return}localStorage['rpt_'+S.sel.id]=JSON.stringify(br());t('已保存草稿，可继续修改','s')}
+function doSave(){if(!S.rpt){t('请先完成结构化','e');return};up();localStorage['rpt_'+S.sel.id]=JSON.stringify(br());document.getElementById('upb').disabled=true;t('已保存草稿，可继续修改','s')}
 function doSend(){if(!S.rpt){t('请先完成结构化','e');return}if(!confirm('确认发送至PACS？发送后不可修改。'))return;doSave();done();document.getElementById('sdb').disabled=true;document.getElementById('svb').disabled=true;t('已发送至PACS','s')}
 
 // ==================== 工具 ====================

@@ -50,9 +50,17 @@ def init_db():
             updated_at  TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
         );
 
-        CREATE INDEX IF NOT EXISTS idx_patients_status ON patients(status);
-        CREATE INDEX IF NOT EXISTS idx_reports_patient ON reports(patient_id);
-    """)
+        CREATE TABLE IF NOT EXISTS audit_log (
+            id          INTEGER PRIMARY KEY AUTOINCREMENT,
+            patient_id  INTEGER,
+            action      TEXT    NOT NULL,
+            input_text  TEXT,
+            output_text TEXT,
+            detail      TEXT,
+            operator    TEXT    NOT NULL DEFAULT 'system',
+            created_at  TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
+        );
+        """)
     c.commit()
 
 
@@ -163,6 +171,20 @@ def report_confirm(report_id: int, edited: dict) -> dict | None:
         patient_update_status(r["patient_id"], "已完成")
     c.commit()
     return report_get(report_id)
+
+
+# ==================== 操作留痕 ====================
+
+def audit_log(action: str, patient_id: int = None, input_text: str = None,
+              output_text: str = None, detail: dict = None, operator: str = "system"):
+    c = _conn()
+    c.execute(
+        "INSERT INTO audit_log (patient_id, action, input_text, output_text, detail, operator) VALUES (?,?,?,?,?,?)",
+        (patient_id, action, input_text[:500] if input_text else None,
+         output_text[:500] if output_text else None,
+         json.dumps(detail, ensure_ascii=False) if detail else None, operator),
+    )
+    c.commit()
 
 
 # 启动时建表

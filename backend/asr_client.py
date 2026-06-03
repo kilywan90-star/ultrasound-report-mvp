@@ -4,7 +4,8 @@ import os, asyncio, tempfile, dashscope, time
 from asr_correction import correct_ASR_text
 
 
-async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> str:
+async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> dict:
+    """返回 {"raw": 原始ASR文本, "text": 纠错后文本}"""
     api_key = os.getenv("DASHSCOPE_API_KEY")
     if not api_key:
         raise RuntimeError("DASHSCOPE_API_KEY 环境变量未设置")
@@ -31,13 +32,14 @@ async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> str:
             if response.status_code == 200:
                 content = response.output.choices[0].message.content
                 if isinstance(content, list):
-                    text = "".join(c.get("text","") if isinstance(c,dict) else str(c) for c in content)
+                    raw_text = "".join(c.get("text","") if isinstance(c,dict) else str(c) for c in content)
                 else:
-                    text = str(content) if content else ""
-                if text.strip():
+                    raw_text = str(content) if content else ""
+                if raw_text.strip():
                     try: os.unlink(tmp_path)
                     except: pass
-                    return correct_ASR_text(text.strip())
+                    corrected = correct_ASR_text(raw_text.strip())
+                    return {"raw": raw_text.strip(), "text": corrected}
                 else:
                     last_error = "ASR 未返回识别文本"
             else:
