@@ -89,7 +89,7 @@ class PatientAddRequest(BaseModel):
 @app.post("/api/patients/quick-add")
 async def patient_quick_add(req: PatientAddRequest):
     if not req.name.strip(): raise HTTPException(400, "姓名不能为空")
-    if req.gender not in ("男","女"): raise HTTPException(400, "性别只能为 男 或 女")
+    if req.gender not in ("男","女","M","F"): raise HTTPException(400, "性别只能为 男 或 女")
     if req.age < 0 or req.age > 150: raise HTTPException(400, "年龄不合法(0-150)")
     if len(req.name.strip()) < 1: raise HTTPException(400, "姓名至少1个字符")
     if not req.exam_type.strip(): raise HTTPException(400, "检查类型不能为空")

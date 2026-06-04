@@ -39,7 +39,7 @@ async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> dict:
                     raw_text = str(content) if content else ""
                 if raw_text.strip():
                     try: os.unlink(tmp_path)
-                    except: pass
+                    except OSError: pass
                     corrected = correct_ASR_text(raw_text.strip())
                     return {"raw": raw_text.strip(), "text": corrected}
                 else:
@@ -56,7 +56,7 @@ async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> dict:
             time.sleep(1.5)
 
     try: os.unlink(tmp_path)
-    except: pass
+    except OSError: pass
     raise RuntimeError(f"语音识别失败({len(str(last_error))}): {last_error}")
 
 
@@ -116,4 +116,4 @@ async def transcribe_audio_stream(audio_data: bytes, sample_rate: int = 16000):
         yield {"text": "", "accumulated": "", "corrected": "", "is_final": True, "error": str(e)}
     finally:
         try: os.unlink(tmp_path)
-        except: pass
+        except OSError: pass
