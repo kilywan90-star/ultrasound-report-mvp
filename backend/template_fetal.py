@@ -88,19 +88,39 @@ OPT_RESET={"_pos_head":("_pos_head","_pos_breach","_pos_trans"),"_pos_breach":("
 OPTION_KEYS = set(OPT_RESET.keys()) | {key for _,key in OPTIONS_ANTONYM}
 
 def fill_fetal_template(raw_text:str)->dict:
-    raw_text = cn_to_arabic(raw_text)  # ASR可能返回中文数字，先转阿拉伯
-    # 单位转换: 公斤→克 (模板胎儿体重单位是±克)
+    raw_text = cn_to_arabic(raw_text)
     raw_text = re.sub(r'(\d+(?:\.\d+)?)\s*公斤', lambda m: str(int(float(m.group(1))*1000))+'克', raw_text)
     raw_text = re.sub(r'(\d+(?:\.\d+)?)\s*(?:kg|千克)', lambda m: str(int(float(m.group(1))*1000))+'克', raw_text, flags=re.IGNORECASE)
-    # 平面→平段
     raw_text = raw_text.replace('平面','平段')
     vals={}; opts={"_neck_none":"selected"}; ga_val=None
+
+    # 优先从检查上下文(四维/中孕/早孕)提取明确的孕周
+    import re as _re2
+    ga_explicit_patterns = [
+        r"[四4][维維]\s*(\d{2})\s*[-~～到至为]\s*(\d{2})",
+        r"中[晚]?孕\s*\D{0,4}(\d{2})\s*[-~～到至为]\s*(\d{2})",
+        r"早孕\s*\D{0,4}(\d{2})\s*[-~～到至为]\s*(\d{2})",
+    ]
+    ga_explicit_val = None
+    for p in ga_explicit_patterns:
+        m = _re2.search(p, raw_text)
+        if m:
+            g1, g2 = int(m.group(1)), int(m.group(2))
+            if 14 <= g1 <= 42 and 14 <= g2 <= 42:
+                ga_explicit_val = f"{g1}-{g2}"
+                break
 
     for pat,key in MEASUREMENTS:
         m=re.search(pat,raw_text)
         if not m: continue
         if key in ("_ga_range","_ga_single","_ga_approx","_ga_num"):
-            # _ga_range 优先：22-26 匹配后不再让后续单独匹配22和26
+            # 如果匹配到的位置在"建议"之后，跳过(避免把建议中的孕周当测量值)
+            rec_pos = raw_text.find("建议")
+            if rec_pos >= 0 and m.start() >= rec_pos:
+                continue
+            # 优先用显式GA，跳过模糊匹配
+            if ga_explicit_val:
+                continue
             g1=m.group(1); g2=m.group(2) if m.lastindex and m.lastindex>=2 else None
             if g2: ga_val=f"{g1}-{g2}"
             elif not ga_val: ga_val=f"{g1}"
@@ -116,18 +136,66 @@ def fill_fetal_template(raw_text:str)->dict:
         for k in ("_bpd","_hc","_ac","_fl","_hl","_afi","_afv","_lvw","_cm"):
             if k not in vals: vals[k]=d; break
 
+    # === 逐测量项提取"相当于 XX 周" ===
+    # 策略：对每个测量项独立提取它后面最近的"相当于"值
+    # 避免全局ga_val被最后一个"相当于"覆盖，导致前面的项丢失
+    GA_PATTERNS = [
+        (r"双顶径.*?相当于?\s*(\d{2})\s*[-~～到至为]\s*(\d{2})", "_bpd_ga_range"),
+        (r"双顶径.*?相当于?\s*(\d{2})\s*[周Ww]", "_bpd_ga"),
+        (r"BPD.*?相当于?\s*(\d{2})\s*[-~～到至为]\s*(\d{2})", "_bpd_ga_range"),
+        (r"BPD.*?相当于?\s*(\d{2})\s*[周Ww]", "_bpd_ga"),
+        (r"股骨长.*?相当于?\s*(\d{2})\s*[-~～到至为]\s*(\d{2})", "_fl_ga_range"),
+        (r"股骨长.*?相当于?\s*(\d{2})\s*[周Ww]?", "_fl_ga"),
+        (r"FL.*?相当于?\s*(\d{2})\s*[-~～到至为]\s*(\d{2})", "_fl_ga_range"),
+        (r"FL.*?相当于?\s*(\d{2})\s*[周Ww]?", "_fl_ga"),
+        (r"肱骨长.*?相当于?\s*(\d{2})\s*[-~～到至为]\s*(\d{2})", "_hl_ga_range"),
+        (r"肱骨长.*?相当于?\s*(\d{2})\s*[周Ww]?", "_hl_ga"),
+        (r"HL.*?相当于?\s*(\d{2})\s*[-~～到至为]\s*(\d{2})", "_hl_ga_range"),
+        (r"HL.*?相当于?\s*(\d{2})\s*[周Ww]?", "_hl_ga"),
+        (r"头围.*?相当于?\s*(\d{2})\s*[-~～到至为]\s*(\d{2})", "_hc_ga_range"),
+        (r"头围.*?相当于?\s*(\d{2})\s*[周Ww]?", "_hc_ga"),
+        (r"腹围.*?相当于?\s*(\d{2})\s*[-~～到至为]\s*(\d{2})", "_ac_ga_range"),
+        (r"腹围.*?相当于?\s*(\d{2})\s*[周Ww]?", "_ac_ga"),
+    ]
+
+    for pat, key in GA_PATTERNS:
+        m = re.search(pat, raw_text)
+        if not m:
+            continue
+        if key.endswith("_range"):
+            base_key = key[:-len("_range")]
+            vals[base_key] = f"{m.group(1)}-{m.group(2)}"
+        else:
+            if key not in vals:  # 优先保留 range 结果
+                vals[key] = m.group(1)
+
+    # 全局 GA 兜底（优先用显式提取的ga_explicit_val，覆盖模糊匹配的ga_val）
+    if ga_explicit_val:
+        ga_val = ga_explicit_val
     if ga_val:
-        vals["_bpd_ga"]=ga_val
+        if "_bpd_ga" not in vals:
+            vals["_bpd_ga"] = ga_val
+        if "_fl_ga" not in vals:
+            vals["_fl_ga"] = ga_val
+        if "_hl_ga" not in vals:
+            vals["_hl_ga"] = ga_val
 
     for pat,key in OPTIONS:
         if re.search(pat,raw_text):
             for rk in OPT_RESET.get(key,(key,)): opts[rk]=False
-            opts[key]=True  # 用户说了 → True（绿色），未说但默认的保持"selected"（黑色）
+            opts[key]=True
 
-    # BPD/FL fallback if no GA spoken
-    if not ga_val:
-        if "_bpd" in vals: vals["_bpd_ga"]=str(round(float(vals["_bpd"])*4+2))
-        if "_fl" in vals: vals["_fl_ga"]=str(round(float(vals["_fl"])*6.5+3))
+    # GA 缺失时按公式推算（兜底）
+    if "_bpd_ga" not in vals and "_bpd" in vals:
+        vals["_bpd_ga"] = str(round(float(vals["_bpd"]) * 4 + 2))
+    if "_fl_ga" not in vals and "_fl" in vals:
+        vals["_fl_ga"] = str(round(float(vals["_fl"]) * 6.5 + 3))
+    if "_hl_ga" not in vals and "_hl" in vals:
+        vals["_hl_ga"] = str(round(float(vals["_hl"]) * 6.5 + 3))
+    if "_hc_ga" not in vals and "_hc" in vals:
+        vals["_hc_ga"] = str(round(float(vals["_hc"]) * 4 + 2))
+    if "_ac_ga" not in vals and "_ac" in vals:
+        vals["_ac_ga"] = str(round(float(vals["_ac"]) * 4 + 2))
 
     # === 构建HTML ===
     see=FETAL_SEE
@@ -169,9 +237,37 @@ def fill_fetal_template(raw_text:str)->dict:
     hint=f"宫内妊娠，单活胎，{pos}。"
     if ga_val: hint+=f" 超声孕周{ga_val}。"
 
+    # 从原文提取建议文本 (匹配"建议："后面的内容)
+    import re as _re2
+    rec_text = "建议定期产检。"
+    rec_matches = _re2.findall(r'建议[：:]\s*(.+?)(?:[。；;]|$)', raw_text)
+    if rec_matches:
+        rec_text = "建议" + "；".join(rec_matches) + "。"
+
+    # 从原文提取孕周信息, 避免把"30-34周行检查"误解析为孕周
+    # 方法: 优先使用"四维"、"中孕"、"早孕"、"晚孕"明确标记的孕周
+    ga_val_explicit = None
+    ga_explicit_patterns = [
+        r"四维\s*(\d{2})\s*[-~～到至为]\s*(\d{2})",
+        r"中[晚]?孕\s*\D{0,4}(\d{2})\s*[-~～到至为]\s*(\d{2})",
+        r"早孕\s*\D{0,4}(\d{2})\s*[-~～到至为]\s*(\d{2})",
+    ]
+    for pat in ga_explicit_patterns:
+        m = _re2.search(pat, raw_text)
+        if m:
+            g1, g2 = m.group(1), m.group(2)
+            # 只取合理的孕周范围(14-42周)
+            if 14 <= int(g1) <= 42 and 14 <= int(g2) <= 42:
+                ga_val_explicit = f"{g1}-{g2}"
+                break
+
+    # reset GA to explicit value from exam context, not from recommendation text
+    if ga_val_explicit:
+        ga_val = ga_val_explicit
+
     return {"patient_info":{"name":None,"gender":None,"age":None,"exam_id":None},
      "exam_info":{"modality":"产科超声","device":None,"exam_date":None},
      "study_see":'<div class="rpt-html">'+see+'</div>',
      "study_hint":[{"rank":1,"diagnosis":hint,"icd10":""}],
-     "recommendation":"建议定期产检。",
+     "recommendation":rec_text,
      "_template_matched":"胎儿超声标准模板","_method":"fetal_template"}

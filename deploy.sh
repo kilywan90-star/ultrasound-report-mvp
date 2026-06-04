@@ -23,11 +23,18 @@ cd ultrasound-report-mvp
 echo "[3/5] 安装 Python 依赖..."
 pip3 install --break-system-packages -r backend/requirements.txt 2>/dev/null || pip3 install -r backend/requirements.txt
 
-# 4. 写入环境变量
+# 4. 写入环境变量模板（请填写实际密钥）
 echo "[4/5] 配置 API 密钥..."
-cat > .env << 'EOF'
-DASHSCOPE_API_KEY=sk-8d3e69bd0fd842ddb996ca263328d1a2
-DEEPSEEK_API_KEY=sk-707a90a4206b45e9962d606d7a6434f3
+if [ -z "$DASHSCOPE_API_KEY" ] || [ -z "$DEEPSEEK_API_KEY" ]; then
+    echo "请先设置环境变量:"
+    echo "  export DASHSCOPE_API_KEY=sk-xxx"
+    echo "  export DEEPSEEK_API_KEY=sk-xxx"
+    echo "然后重新运行此脚本"
+    exit 1
+fi
+cat > .env << EOF
+DASHSCOPE_API_KEY=$DASHSCOPE_API_KEY
+DEEPSEEK_API_KEY=$DEEPSEEK_API_KEY
 EOF
 
 # 5. 配置 systemd 服务

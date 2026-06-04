@@ -1,8 +1,10 @@
-"""DeepSeek 结构化提取 — 所见/提示双层输出 + 正式模板匹配锚定"""
+"""DeepSeek 结构化提取 — v3 ABCDEF流水线 + 长沙医院模板"""
 
 import json
 import os
 import re
+import time
+import logging
 from openai import OpenAI
 from openai import APIError, APITimeoutError
 
@@ -14,10 +16,21 @@ from template_loader import (
     load_templates,
 )
 
+from knowledge.loader import get_kb
+
 MAX_RETRIES = 2
 
-# ICD-10 编码表
-ICD10_MAP = {
+# ICD-10 编码表：优先从知识库加载，回退到硬编码
+def _load_icd10_map() -> dict:
+    try:
+        kb = get_kb()
+        if hasattr(kb, 'normal_ranges') and kb.normal_ranges:
+            icd10_section = kb.normal_ranges.get('icd10_codes', {})
+            if icd10_section:
+                return icd10_section
+    except Exception:
+        pass
+    return {
     "K76.0": "脂肪肝", "K74.6": "肝硬化", "K80.0": "胆囊结石伴急性胆囊炎",
     "K80.1": "胆囊结石伴慢性胆囊炎", "K80.2": "胆囊结石", "K80.3": "胆管结石",
     "K80.5": "胆总管结石", "K81.0": "急性胆囊炎", "K81.1": "慢性胆囊炎",
@@ -50,6 +63,8 @@ ICD10_MAP = {
     "I51.7": "心脏扩大", "I51.8": "其他心脏疾病", "I33.0": "感染性心内膜炎",
     "I30.1": "缩窄性心包炎", "I81": "门静脉血栓", "I83.9": "下肢静脉曲张",
 }
+
+ICD10_MAP = _load_icd10_map()
 
 # 确保模板已加载
 load_templates()
@@ -199,3 +214,170 @@ def structure_report(raw_text: str, exam_type: str = "腹部超声") -> dict:
             raise RuntimeError(f"结构化输出解析失败: {e}") from e
 
     raise RuntimeError(f"结构化失败: {last_error}")
+
+
+def _extract_plain_text(html_or_text: str) -> str:
+    text = re.sub(r'<[^>]+>', '', html_or_text or "")
+    text = re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+
+_log = logging.getLogger(__name__)
+
+
+def generate_free_report(asr_text: str, exam_type: str = "腹部超声") -> dict:
+    client = _get_client()
+    system = f"""一位资深超声科主任医师，将口语化口述转为规范化超声报告。
+检查类型: {exam_type}
+规则: 缺失值填___mm占位，口语转术语，按脏器分段，只输出JSON。
+输出格式: {{"study_see": "...", "study_hint": [...], "recommendation": "..."}}"""
+
+    for attempt in range(2):
+        try:
+            response = client.chat.completions.create(
+                model="deepseek-chat", messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": f"请将以下口述转为规范化报告:\n\n{asr_text}"},
+                ], temperature=0.1, max_tokens=4096)
+            content = response.choices[0].message.content
+            if not content: raise RuntimeError("empty")
+            r = _parse_json(content)
+            r["_method"] = "b_free_gen"
+            return r
+        except Exception as e:
+            if attempt < 1: time.sleep(1.0); continue
+            _log.warning(f"B fail: {e}")
+    return {"study_see": f"<div class='rpt-html'>{asr_text}</div>", "study_hint": [], "recommendation": "", "_method": "b_fallback"}
+
+
+def select_and_fill_template(asr_text: str, b_result: dict | None, c_result: dict | None,
+                              d_result: dict | None, exam_type: str, candidates: list[dict]) -> dict:
+    from template_loader import get_template_by_name
+    client = _get_client()
+
+    cand_parts = []
+    for c in candidates[:8]:
+        tpl = get_template_by_name(c["name"])
+        if tpl: cand_parts.append(f"### {c['name']} (模块:{c.get('module','')})\n{tpl.get('info1','')[:500]}")
+    cand_text = "\n\n".join(cand_parts)
+
+    b_see = _extract_plain_text(b_result.get("study_see", ""))[:500] if b_result else "(无)"
+    b_hint = json.dumps(b_result.get("study_hint", []), ensure_ascii=False)[:300] if b_result else "[]"
+    c_see = _extract_plain_text(c_result.get("study_see", ""))[:500] if c_result else "(无)"
+    c_hint = json.dumps(c_result.get("study_hint", []), ensure_ascii=False)[:300] if c_result else "[]"
+    d_see = _extract_plain_text(d_result.get("study_see", ""))[:500] if d_result else "(无)"
+    d_hint = json.dumps(d_result.get("study_hint", []), ensure_ascii=False)[:300] if d_result else "[]"
+
+    system = f"""资深超声科主任医师。检查类型: {exam_type}。从候选模板中选最优，填入测量值。
+- 模板中 "mm" 替换为实际值(如"5.2mm")
+- "[选项A;选项B]" 选一个
+- 缺失值保留 "___mm"
+- 用 <b class="voice">值</b> 标记AI填充
+- 只输出JSON: {{"template_name":"...", "filled_study_see_html":"...", "study_hint":[...], "recommendation":"...", "confidence":0.85}}"""
+
+    user_msg = f"""## ASR(A路)\n{asr_text[:600]}\n## B路\nstudy_see: {b_see}\nstudy_hint: {b_hint}\n## C路\nstudy_see: {c_see}\nstudy_hint: {c_hint}\n## D路\nstudy_see: {d_see}\nstudy_hint: {d_hint}\n## 候选模板\n{cand_text}"""
+
+    for attempt in range(2):
+        try:
+            response = client.chat.completions.create(
+                model="deepseek-chat", messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user_msg},
+                ], temperature=0.1, max_tokens=4096)
+            content = response.choices[0].message.content
+            if not content: raise RuntimeError("empty")
+            r = _parse_json(content)
+            r["_method"] = "e_template_select"
+            return r
+        except Exception as e:
+            if attempt < 1: time.sleep(1.0); continue
+            _log.warning(f"E fail: {e}")
+
+    if candidates:
+        tpl = get_template_by_name(candidates[0]["name"])
+        return {"template_name": candidates[0]["name"],
+                "filled_study_see_html": tpl.get("info1","") if tpl else (c_result.get("study_see","") if c_result else ""),
+                "study_hint": c_result.get("study_hint",[]) if c_result else [],
+                "recommendation": "", "confidence": 0.3, "_method": "e_fallback"}
+    return {"template_name": "未知", "filled_study_see_html": c_result.get("study_see","") if c_result else "",
+            "study_hint": [], "recommendation": "", "confidence": 0.1, "_method": "e_fallback"}
+
+
+# ── EF合并: v4-flash 一次完成模板选择+填充+交叉验证 ──
+
+def _ef_combined_system_prompt(exam_type: str) -> str:
+    return f"""资深超声科主任医师，完成超声报告的模板选择、变量填充和最终审核。检查类型: {exam_type}
+
+## 你的4项任务 (按顺序)
+
+### 1. 选模板
+从候选模板列表中选出最匹配ASR原文的一条
+
+### 2. 填变量 (关键: 尽可能填充所有mm占位符!)
+- 模板中每一个 "mm" 处都必须填入实际数值，即便是从上下文中推断的大约值
+- "[选项A;选项B;选项C]" → 只保留一个正确选项
+- 实在缺失的填 "未测" 或保留 "__mm" (尽量少用)
+- 用 <b class="voice">值</b> 标记AI填充值
+
+### 3. 交叉验证
+对比所有来源(B自由生成/C规则引擎/D规则增强)，标记冲突并选择最可靠的值
+
+### 4. 不改变模板结构
+段落、标题、标点、顺序一律不动
+
+## 输出JSON
+{{"template_name":"...", "filled_study_see_html":"...", "study_hint":[...], "recommendation":"...", "confidence":0.9, "conflicts":[{{"field":"...", "sources":{{}}, "resolution":"..."}}], "reasoning":"..."}}"""
+
+
+def select_fill_and_validate(
+    asr_text: str, b_result: dict | None, c_result: dict | None,
+    d_result: dict | None, exam_type: str, candidates: list[dict],
+) -> dict:
+    """EF合并: 一次v4-flash调用完成模板选择+填充+交叉验证"""
+    from template_loader import get_template_by_name
+    client = _get_client()
+
+    cand_parts = []
+    for c in candidates[:8]:
+        tpl = get_template_by_name(c["name"])
+        if tpl:
+            cand_parts.append(f"### {c['name']} (模块:{c.get('module','')})\n{tpl.get('info1','')[:500]}")
+    cand_text = "\n\n".join(cand_parts)
+
+    b_see = _extract_plain_text(b_result.get("study_see", ""))[:400] if b_result else "(无)"
+    b_hint = json.dumps(b_result.get("study_hint", []), ensure_ascii=False)[:200] if b_result else "[]"
+    c_see = _extract_plain_text(c_result.get("study_see", ""))[:400] if c_result else "(无)"
+    c_hint = json.dumps(c_result.get("study_hint", []), ensure_ascii=False)[:200] if c_result else "[]"
+    d_see = _extract_plain_text(d_result.get("study_see", ""))[:400] if d_result else "(无)"
+    d_hint = json.dumps(d_result.get("study_hint", []), ensure_ascii=False)[:200] if d_result else "[]"
+
+    user_msg = f"""## ASR(A路)\n{asr_text[:500]}\n## B路(自由生成)\nsee: {b_see}\nhint: {b_hint}\n## C路(规则引擎)\nsee: {c_see}\nhint: {c_hint}\n## D路(规则增强)\nsee: {d_see}\nhint: {d_hint}\n## 候选模板\n{cand_text}"""
+
+    for attempt in range(2):
+        try:
+            response = client.chat.completions.create(
+                model="deepseek-chat", messages=[
+                    {"role": "system", "content": _ef_combined_system_prompt(exam_type)},
+                    {"role": "user", "content": user_msg},
+                ], temperature=0.1, max_tokens=4096)
+            content = response.choices[0].message.content
+            if not content: raise RuntimeError("empty")
+            r = _parse_json(content)
+            r["_method"] = "ef_combined"
+            return r
+        except Exception as e:
+            if attempt < 1: time.sleep(1.0); continue
+            _log.warning(f"EF combined fail: {e}")
+
+    # Fallback to C result
+    return {
+        "template_name": candidates[0]["name"] if candidates else "未知",
+        "filled_study_see_html": c_result.get("study_see", "") if c_result else f"<div class='rpt-html'>{asr_text}</div>",
+        "study_hint": c_result.get("study_hint", []) if c_result else [],
+        "recommendation": "", "confidence": 0.3, "conflicts": [],
+        "reasoning": "EF回退到规则引擎", "_method": "ef_fallback",
+    }
+
+
+def arbitrate_report(asr_text, rule_result, llm_result, exam_type="腹部超声"):
+    return select_and_fill_template(asr_text, llm_result, rule_result, None, exam_type, [])

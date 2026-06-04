@@ -11,6 +11,7 @@ load_dotenv(_env)
 
 import os
 import uuid
+import asyncio
 import logging
 from datetime import datetime
 
@@ -24,17 +25,20 @@ try:
     ASR_AVAILABLE = True
 except (ImportError, ModuleNotFoundError):
     ASR_AVAILABLE = False
-    async def transcribe_audio(*a, **kw): raise RuntimeError("ASR不可用")
+    def _asr_unavailable(*a, **kw): raise RuntimeError("ASR不可用")
+    transcribe_audio = _asr_unavailable
 
 from llm_client import structure_report as llm_structure
 from templates import match_template, TEMPLATES
 from template_filler import match_and_fill
+from template_engine_v2 import match_and_fill_optimized, search_optimized as template_search_v2
+from fixed_template_engine import process_with_fixed_template, TEMPLATE_TAGS, DEFAULT_TEMPLATES
 from asr_correction import correct_ASR_text
 from template_fetal import fill_fetal_template
 from knowledge.loader import get_kb
 import db
 
-app = FastAPI(title="超声报告语音结构化")
+app = FastAPI(title="超声报告语音结构化", version="3.0.0.ABCDEF")
 
 # CORS: 允许常见来源但不回显任意Origin（避免creds问题）
 app.add_middleware(
@@ -77,6 +81,10 @@ class PatientAddRequest(BaseModel):
     age: int = Field(..., ge=0, le=150)
     exam_type: str = Field(..., min_length=1, max_length=50)
     exam_part: str = None
+    inpatient_id: str | None = None      # 住院号
+    outpatient_id: str | None = None     # 门诊号
+    department: str | None = None        # 申请科室
+    clinical_diag: str | None = None     # 开单临床诊断
 
 @app.post("/api/patients/quick-add")
 async def patient_quick_add(req: PatientAddRequest):
@@ -125,6 +133,19 @@ async def audio_playback(audio_id: str):
     if not matches: raise HTTPException(404, "音频文件不存在")
     return FileResponse(matches[0])
 
+@app.get("/api/audio/{audio_id}/download")
+async def audio_download(audio_id: str):
+    """下载原始录音到本机"""
+    matches = list(AUDIO_DIR.glob(f"{audio_id}.*"))
+    if not matches: raise HTTPException(404, "音频文件不存在")
+    fpath = matches[0]
+    return FileResponse(
+        fpath,
+        media_type="application/octet-stream",
+        filename=fpath.name,
+        headers={"Content-Disposition": f"attachment; filename={fpath.name}"}
+    )
+
 # ==================== 语音转写 ====================
 
 @app.post("/api/transcribe")
@@ -135,11 +156,21 @@ async def transcribe(file: UploadFile = File(...)):
     if len(audio_bytes) < 1024: raise HTTPException(400, "音频文件过小")
     if len(audio_bytes) > 50 * 1024 * 1024: raise HTTPException(400, "音频文件过大")
 
-    # 备份
+    # 备份: 文件名格式 YYYYMMDDHH0001 (.webm/.wav)
     suffix = Path(file.filename).suffix or ".wav"
-    backup_name = f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{uuid.uuid4().hex[:8]}{suffix}"
-    backup_path = AUDIO_DIR / backup_name
-    audio_id = backup_name.rsplit(".", 1)[0]
+    now = datetime.now()
+    prefix = now.strftime("%Y%m%d%H")
+    # 自动递增序号: 查找当天该小时已有的文件数, 补4位序号
+    existing = sorted(AUDIO_DIR.glob(f"{prefix}*{suffix}"))
+    seq = len(existing) + 1
+    fname = f"{prefix}{seq:04d}{suffix}"
+    backup_path = AUDIO_DIR / fname
+    # 处理同序号冲突 (极罕见但保险)
+    while backup_path.exists():
+        seq += 1
+        fname = f"{prefix}{seq:04d}{suffix}"
+        backup_path = AUDIO_DIR / fname
+    audio_id = fname.rsplit(".", 1)[0]
     try:
         with open(backup_path, "wb") as f: f.write(audio_bytes)
     except OSError:
@@ -160,13 +191,25 @@ class StructureRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=10000)
     exam_type: str = Field(default="腹部超声", max_length=50)
     patient_id: str | None = None
+    # 意图预识别字段
+    patient_name: str | None = None
+    patient_gender: str | None = None
+    patient_age: int | None = None
+    clinical_diag: str | None = None
+    department: str | None = None
 
 def _wrap_hints_with_toggle(report: dict) -> dict:
-    """给 study_hint 每条包裹 checked + id"""
+    """给 study_hint 每条包裹 checked + id，并过滤非dict条目"""
     hints = report.get("study_hint", [])
+    clean = []
     for i, h in enumerate(hints):
-        h["id"] = f"h{i}"
-        h["checked"] = True
+        if isinstance(h, str):
+            clean.append({"rank": i+1, "diagnosis": h, "icd10": "", "id": f"h{i}", "checked": True})
+        elif isinstance(h, dict):
+            h["id"] = f"h{i}"
+            h["checked"] = True
+            clean.append(h)
+    report["study_hint"] = clean
     return report
 
 def _filter_checked(report: dict) -> dict:
@@ -196,14 +239,23 @@ def _confidence_score(report: dict) -> float:
     return fill_ratio * 0.5 + critical_ratio * 0.4 + hint_score * 0.1
 
 def _sanitize_pii(text: str, patient_id: str | None = None) -> str:
-    """数据脱敏：移除姓名等PII后传给LLM"""
+    """数据脱敏：移除姓名、住院号、门诊号等PII后传给LLM"""
     if not patient_id:
         return text
     try:
+        import re
         pid = int(patient_id)
         p = db.patient_get(pid)
-        if p and p.get("name"):
-            text = text.replace(p["name"], "[患者]")
+        if p:
+            if p.get("name"):
+                text = text.replace(p["name"], "[患者]")
+            if p.get("inpatient_id"):
+                text = text.replace(p["inpatient_id"], "[住院号]")
+            if p.get("outpatient_id"):
+                text = text.replace(p["outpatient_id"], "[门诊号]")
+        # 通用手机号/身份证号正则脱敏（不计入patient表字段）
+        text = re.sub(r'1[3-9]\d{9}', '[手机号]', text)
+        text = re.sub(r'\d{6}(19|20)\d{2}(0[1-9]|1[0-2])(0[1-9]|[12]\d|3[01])\d{3}[\dXx]', '[身份证号]', text)
     except (ValueError, Exception):
         pass
     return text
@@ -258,15 +310,34 @@ def _rule_fallback(raw_text: str, exam_type: str, patient_id: str | None) -> dic
 
 @app.post("/api/structure")
 async def structure(req: StructureRequest):
-    """结构化：优先固定模板填充，降级到LLM自由生成"""
+    """ABCDEF流水线: A(ASR)→B(free LLM)∥C(regex)→D(B+regex)→E(template)→F(cross-validate)"""
     if not req.text or not req.text.strip(): raise HTTPException(400, "文本为空")
     if len(req.text) > 10000: raise HTTPException(400, "文本过长")
 
+    # 规则引擎加载 (函数级导入避免循环依赖)
+    from rule_engine import get_rule
+
+    # 胎儿路径关键词 + 正常报告检测 (提前加载，避免 UnboundLocalError)
+    fetal_kw = get_rule("pipeline.fetal_path.keywords", ["产科","胎儿","四维","排畸","孕","BPD","双顶径","股骨长","胎心"])
+
     sanitized_text = _sanitize_pii(req.text, req.patient_id)
+    corrected_text = correct_ASR_text(req.text)
+    A = corrected_text  # A路 = ASR纠错后原文
+    warnings = []
 
-    # 策略0: 胎儿/产科超声 → 专用固定模板
-    if any(kw in (req.exam_type + (req.text or "")[:80]) for kw in ["产科","胎儿","四维","排畸","孕","BPD","双顶径","股骨长","胎心"]):
-        report = fill_fetal_template(correct_ASR_text(req.text))
+    # 性别/妊娠冲突检测
+    sex_conflict = detect_sex_conflict(A, req.patient_gender)
+    if sex_conflict:
+        warnings.append(sex_conflict)
+        A = mask_conflict_organs(A, req.patient_gender)
+    pregnancy_conflict = detect_pregnancy_conflict(A, req.exam_type, req.patient_gender)
+    if pregnancy_conflict:
+        warnings.append(pregnancy_conflict)
+
+    # 胎儿快速通道 (使用上面已加载的 fetal_kw)
+    is_fetal_text = any(kw in (req.exam_type + (A or "")[:80]) for kw in fetal_kw)
+    if is_fetal_text and req.patient_gender != "男":
+        report = fill_fetal_template(A)
         report = _wrap_hints_with_toggle(report)
         report_id = None
         if req.patient_id and req.patient_id.strip():
@@ -276,16 +347,39 @@ async def structure(req: StructureRequest):
                 report_id = r["id"]
             except (ValueError, Exception):
                 pass
-        conf = _confidence_score(report)
-        db.audit_log("rule_extract", patient_id=report_id, input_text=req.text[:200],
-                      output_text=str(report.get("study_see",""))[:200], detail={"method":"fetal_template", "confidence": conf})
-        return {"success": True, "report": report, "report_id": report_id, "method": "fetal_template"}
+        return {"success": True, "report": report, "report_id": report_id, "method": "fetal_template",
+                "warnings": warnings, "template_used": "胎儿超声标准模板", "confidence": 0.9,
+                "conflicts": [], "sources": {"A_asr": A[:500], "B_free_llm": None, "C_regex": None,
+                "D_enhanced": None, "E_template": None}}
 
-    # 策略1: 固定模板 + 数值填充
-    report = match_and_fill(correct_ASR_text(req.text), req.exam_type)
-    if report and report.get("_template_matched"):
-        report = _wrap_hints_with_toggle(report)
-        report_id = None
+    # ===== ABCDEF 流水线 (v3优化: 正常报告快速通道 + EF合并) =====
+    import asyncio
+    from llm_client import generate_free_report, select_fill_and_validate
+    from template_loader import search_candidates, get_template_by_name
+
+    # 正常报告快速检测 + 胎儿路径 (规则引擎配置)
+    norm_cfg = get_rule("validation.normal_report_detection", {})
+    NORMAL_KW = norm_cfg.get("normal_kw", [])
+    ABNORMAL_KW = norm_cfg.get("abnormal_kw", [])
+    fast_path_types = get_rule("pipeline.fast_path.exam_types", ["腹部超声", "甲状腺超声", "乳腺超声"])
+
+    def _is_normal_report(text: str) -> bool:
+        has_abnormal = any(kw in text for kw in ABNORMAL_KW)
+        has_normal = any(kw in text for kw in NORMAL_KW)
+        return has_normal and not has_abnormal
+
+    if _is_normal_report(A) and req.exam_type in fast_path_types:
+        # 快速通道: 规则引擎直出，跳过全部LLM调用
+        C = match_and_fill_optimized(A, req.exam_type,
+            patient_sex=req.patient_gender or '', patient_age=req.patient_age or 0,
+            clinical_diag=req.clinical_diag or '') if (req.patient_gender or req.patient_age) else match_and_fill(A, req.exam_type)
+        if not C or not C.get("_template_matched"):
+            fixed = process_with_fixed_template(A, "")
+            C = {"study_see": fixed.get("filled_template", A), "study_hint": fixed.get("study_hint", []),
+                 "_template_matched": fixed.get("template_used", "正常"), "_method": "fast_normal"}
+
+        report = _wrap_hints_with_toggle(C)
+        report_id = None; pid = None
         if req.patient_id and req.patient_id.strip():
             try:
                 pid = int(req.patient_id)
@@ -293,34 +387,129 @@ async def structure(req: StructureRequest):
                 report_id = r["id"]
             except (ValueError, Exception):
                 pass
-        conf = _confidence_score(report)
-        db.audit_log("rule_extract", patient_id=report_id, input_text=req.text[:200],
-                      output_text=str(report.get("study_see",""))[:200], detail={"method":"regex_fill", "confidence": conf})
-        return {"success": True, "report": report, "report_id": report_id, "method": "regex_fill"}
+        db.audit_log("fast_normal", patient_id=pid, input_text=req.text[:200],
+                      output_text=str(report.get("study_see",""))[:200],
+                      detail={"method": C.get("_method", "fast_normal")})
+        return {"success": True, "report": report, "report_id": report_id, "method": "fast_normal",
+                "warnings": warnings, "template_used": C.get("_template_matched", "正常"), "confidence": 0.95,
+                "conflicts": [], "sources": {"A_asr": A[:300], "C_regex": {"study_see": C.get("study_see","")[:300] if C else ""}}}
 
-    # 策略2: LLM 自由生成 + 异常兜底
-    rule_report = None
-    try:
-        rule_report = _rule_fallback(correct_ASR_text(req.text), req.exam_type, req.patient_id)
-    except Exception:
-        pass
+    # B和C并行
+    async def _route_b():
+        try:
+            return await asyncio.to_thread(generate_free_report, A, req.exam_type)
+        except Exception as e:
+            logging.warning(f"B exception: {e}")
+            return None
 
-    try:
-        report = llm_structure(sanitized_text, req.exam_type)
-        # 交叉校验
-        if rule_report:
-            report = _cross_validate(rule_report, report, req.text)
-        db.audit_log("llm_structure", patient_id=None, input_text=sanitized_text[:200],
-                      output_text=str(report.get("study_see",""))[:200], detail={"method":"llm_free"})
-    except Exception:
-        # LLM异常 → 规则库兜底
-        report = rule_report or _rule_fallback(correct_ASR_text(req.text), req.exam_type, req.patient_id)
-        db.audit_log("rule_fallback", patient_id=None, input_text=req.text[:200],
-                      output_text=str(report.get("study_see",""))[:200], detail={"error":"llm_exception"})
-        logging.warning("LLM调用失败，使用规则库兜底")
+    async def _route_c():
+        r = match_and_fill_optimized(A, req.exam_type,
+            patient_sex=req.patient_gender or '', patient_age=req.patient_age or 0,
+            clinical_diag=req.clinical_diag or '') if (req.patient_gender or req.patient_age) else match_and_fill(A, req.exam_type)
+        fixed = process_with_fixed_template(A, "")
+        if r and r.get("_template_matched"):
+            return r
+        return {"study_see": fixed.get("filled_template", A), "study_hint": fixed.get("study_hint", []),
+                "_template_matched": fixed.get("template_used", "rule_fallback"), "_method": "c_regex"}
 
+    B, C = await asyncio.gather(_route_b(), _route_c())
+
+    # D路: B结果 → 规则引擎再分析
+    async def _route_d():
+        if not B or not B.get("study_see"): return None
+        B_text = _extract_plain_text(B.get("study_see", ""))
+        if not B_text or len(B_text) < 5: return None
+        r = match_and_fill_optimized(B_text, req.exam_type,
+            patient_sex=req.patient_gender or '', patient_age=req.patient_age or 0,
+            clinical_diag=req.clinical_diag or '') if (req.patient_gender or req.patient_age) else match_and_fill(B_text, req.exam_type)
+        if r and r.get("_template_matched"):
+            return r
+        fixed = process_with_fixed_template(B_text, "")
+        return {"study_see": fixed.get("filled_template", B_text), "study_hint": fixed.get("study_hint", []),
+                "_template_matched": fixed.get("template_used", ""), "_method": "d_enhanced"}
+
+    D = await _route_d()
+
+    # EF合并: ABCD → 一次v4-flash完成模板选择+填充+交叉验证
+    candidates = search_candidates(A, req.exam_type, limit=8)
+    EF = await asyncio.to_thread(select_fill_and_validate, A, B, C, D, req.exam_type, candidates)
+    EF["_method"] = "abcdef_v3"
+
+    # === 验证层: 固定文本完整性 + 内容溯源 + 医疗合规 ===
+    import re as _re
+    template_name = EF.get("template_name", "")
+    filled_html = EF.get("filled_study_see_html", "")
+    validation_issues = []
+
+    # L2: 固定文本完整性
+    if template_name:
+        tpl = get_template_by_name(template_name)
+        if tpl and tpl.get("info1"):
+            from llm_client import _extract_plain_text as _ept
+            tpl_clean = _ept(tpl["info1"])
+            tpl_fixed = _re.sub(r'\[[^\]]+\]', '', tpl_clean)
+            tpl_fixed = _re.sub(r'\b\d+\.?\d*\s*(?:mm|cm)?', '', tpl_fixed)
+            tpl_fixed = _re.sub(r'___+', '', tpl_fixed)
+            tpl_fixed = _re.sub(r'\s{2,}', ' ', tpl_fixed).strip()
+
+            filled_noval = _re.sub(r'<[^>]+>', '', filled_html)
+            filled_noval = _re.sub(r'\[[^\]]+\]', '', filled_noval)
+            filled_noval = _re.sub(r'\b\d+\.?\d*\s*(?:mm|cm)?', '', filled_noval)
+            filled_noval = _re.sub(r'___+', '', filled_noval)
+            filled_noval = _re.sub(r'\s{2,}', ' ', filled_noval).strip()
+
+            struct_words = _re.findall(r'[一-鿿]{3,}', tpl_fixed)
+            missing = [w for w in struct_words[:20] if w not in filled_noval]
+            if len(missing) > len(struct_words) * 0.3 and struct_words:
+                validation_issues.append(f"L2: 模板固定文本缺失{len(missing)}/{len(struct_words)}个关键词")
+                logging.warning(f"L2 fail: tpl={template_name} missing={missing[:5]}")
+
+    # L4: 内容溯源
+    if C and C.get("study_see") and filled_html:
+        c_nums = set(_re.findall(r'\b(\d+\.?\d*)\s*(?:mm|cm)?', _extract_plain_text(C.get("study_see", ""))))
+        filled_clean_val = _extract_plain_text(filled_html)
+        f_nums = set(_re.findall(r'\b(\d+\.?\d*)\s*(?:mm|cm)?', filled_clean_val))
+        if c_nums and f_nums:
+            extra = f_nums - c_nums
+            if len(extra) > 3:
+                validation_issues.append(f"L4: 引入{len(extra)}个规则引擎未提取的数值")
+            missing_nums = c_nums - f_nums
+            if len(missing_nums) > 3:
+                validation_issues.append(f"L4: 遗漏{len(missing_nums)}个规则引擎数值")
+
+    # L5: 医疗合规 — 矛盾描述 (从规则引擎加载)
+    contradictions = [(c["negative"], c["positive"]) for c in get_rule("validation.contradictions", [])]
+    filled_clean_all = _extract_plain_text(filled_html)
+    for neg_list, pos_list in contradictions:
+        has_neg = any(kw in filled_clean_all for kw in neg_list)
+        has_pos = any(kw in filled_clean_all for kw in pos_list)
+        if has_neg and has_pos:
+            validation_issues.append(f"L5: 矛盾描述 '{neg_list[0]}'+'{pos_list[0]}'")
+
+    if validation_issues:
+        logging.warning(f"验证问题: {validation_issues}")
+        if any("L2" in v for v in validation_issues) and C and C.get("study_see"):
+            EF["filled_study_see_html"] = C.get("study_see", filled_html)
+            EF["study_hint"] = C.get("study_hint", EF.get("study_hint", []))
+            EF["confidence"] = min(EF.get("confidence", 0.8), 0.6)
+            EF["_method"] = "abcdef_v3_degraded_L2"
+
+    # 构建最终report
+    template_name = EF.get("template_name", "")
+    report = {
+        "study_see": EF.get("filled_study_see_html", ""),
+        "study_hint": EF.get("study_hint", []),
+        "recommendation": EF.get("recommendation", ""),
+        "_template_matched": template_name,
+        "_method": "abcdef_v3",
+        "_confidence": EF.get("confidence", 0),
+        "_conflicts": EF.get("conflicts", []),
+        "_reasoning": EF.get("reasoning", ""),
+    }
     report = _wrap_hints_with_toggle(report)
-    report_id = None
+
+    # 保存
+    report_id = None; pid = None
     if req.patient_id and req.patient_id.strip():
         try:
             pid = int(req.patient_id)
@@ -329,7 +518,80 @@ async def structure(req: StructureRequest):
         except (ValueError, Exception):
             pass
 
-    return {"success": True, "report": report, "report_id": report_id, "method": report.get("_method", "llm_free")}
+    db.audit_log("abcdef_v3", patient_id=pid, input_text=req.text[:200],
+                  output_text=str(report.get("study_see",""))[:200],
+                  detail={"template": template_name, "confidence": EF.get("confidence", 0)})
+
+    import re as _re
+    def _strip_html(s):
+        return _re.sub(r'<[^>]+>', '', s or "").strip()
+
+    return {
+        "success": True, "report": report, "report_id": report_id,
+        "method": "abcdef_v3", "warnings": warnings,
+        "template_used": template_name,
+        "confidence": EF.get("confidence", 0),
+        "conflicts": EF.get("conflicts", []),
+        "reasoning": EF.get("reasoning", ""),
+        "sources": {
+            "A_asr": A[:500],
+            "B_free_llm": {"study_see": _strip_html(B.get("study_see",""))[:500], "study_hint": B.get("study_hint",[])} if B else None,
+            "C_regex": {"study_see": _strip_html(C.get("study_see",""))[:500], "study_hint": C.get("study_hint",[])} if C else None,
+            "D_enhanced": {"study_see": _strip_html(D.get("study_see",""))[:500], "study_hint": D.get("study_hint",[])} if D else None,
+            "EF_combined": {"template_name": template_name, "filled": _strip_html(EF.get("filled_study_see_html",""))[:500]},
+        },
+    }
+
+
+def _extract_plain_text(html_or_text: str) -> str:
+    import re as _re
+    text = _re.sub(r'<[^>]+>', '', html_or_text or "")
+    text = _re.sub(r'\s+', ' ', text)
+    return text.strip()
+
+
+# ==================== 性别冲突检测 + 妊娠冲突检测 ====================
+from rule_engine import get_rule
+
+FEMALE_ONLY_ORGANS = set(get_rule("validation.sex_guard.female_only", []))
+MALE_ONLY_ORGANS = set(get_rule("validation.sex_guard.male_only", []))
+PREG_KW = get_rule("validation.contradictions", [])  # used in pregnancy detection below
+
+def detect_sex_conflict(text: str, patient_gender: str | None) -> str | None:
+    """检测性别冲突, 返回警告文本"""
+    if not patient_gender: return None
+    if patient_gender == "男":
+        conflicts = [o for o in FEMALE_ONLY_ORGANS if o in text]
+        if conflicts:
+            return "性别冲突: 患者为男性, 但文本包含女性器官: " + "、".join(conflicts)
+    elif patient_gender == "女":
+        conflicts = [o for o in MALE_ONLY_ORGANS if o in text]
+        if conflicts:
+            return "性别冲突: 患者为女性, 但文本包含男性器官: " + "、".join(conflicts)
+    return None
+
+def mask_conflict_organs(text: str, patient_gender: str | None) -> str:
+    """将冲突器官词替换为 [待确认]"""
+    if not patient_gender: return text
+    if patient_gender == "男":
+        for o in FEMALE_ONLY_ORGANS:
+            text = text.replace(o, "[待确认]")
+    elif patient_gender == "女":
+        for o in MALE_ONLY_ORGANS:
+            text = text.replace(o, "[待确认]")
+    return text
+
+def detect_pregnancy_conflict(text: str, exam_type: str, patient_gender: str | None) -> str | None:
+    """检测妊娠词汇与患者上下文的冲突"""
+    preg_cfg = get_rule("validation", {}).get("pregnancy_guard", {})
+    pregnancy_kw = set(preg_cfg.get("pregnancy_kw", ["孕囊","胎心","胎盘","羊水","脐带","早孕","中孕"]))
+    found = [kw for kw in pregnancy_kw if kw in text]
+    if not found: return None
+    if patient_gender == "男":
+        return "严重冲突: 男性患者文本含妊娠相关词汇: " + "、".join(found)
+    if exam_type and "产" not in exam_type and "妇" not in exam_type and "孕" not in exam_type:
+        return "注意: 非妇产检查中出现妊娠词汇: " + "、".join(found)
+    return None
 
 # ==================== 报告管理 ====================
 
@@ -356,7 +618,7 @@ async def save_report(report_id: int, report: dict = None):
     inner = report.get("report") if isinstance(report.get("report"), dict) else None
     data = inner if inner else report
     cleaned = _filter_checked(data)
-    r = db.report_update(report_id, edited=cleaned, structured=cleaned)
+    r = db.report_update(report_id, edited=cleaned)
     if not r: raise HTTPException(404, "报告不存在")
     db.audit_log("doctor_save", patient_id=r.get("patient_id"), input_text=str(data)[:200],
                   output_text="saved", detail={"report_id": report_id})
@@ -381,42 +643,39 @@ async def confirm_report(report_id: int, edited: dict = None):
     if not r: raise HTTPException(404, "报告不存在")
     return {"success": True, "report": r}
 
-@app.post("/api/reports/{report_id}/save")
-async def save_report(report_id: int, report: dict = None):
-    """保存报告（只保存 checked=true 的内容）"""
-    if not report: raise HTTPException(400, "报告数据为空")
+# ==================== 固定模板 + 意图识别 ====================
 
-    # 解包可能的嵌套结构（兼容结构返回时的 {"report": {...}} 包装）
-    inner = report.get("report") if isinstance(report.get("report"), dict) else None
-    data = inner if inner else report
-    cleaned = _filter_checked(data)
+class FixedTemplateRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=10000)
+    fixed_template: str = Field(default="", max_length=5000)
 
-    r = db.report_update(report_id, edited=cleaned, structured=cleaned)
-    if not r: raise HTTPException(404, "报告不存在")
-    return {"success": True, "report": r, "message": "报告已保存"}
+@app.post("/api/fixed-template/structure")
+async def fixed_template_structure(req: FixedTemplateRequest):
+    """
+    一键意图识别 + 字段抽取 + 填入固定模板
+    - 输入: ASR文本 + 可选固定模板
+    - 输出: 填充后的模板 + 意图类别 + 标签列表
+    """
+    if not req.text or not req.text.strip():
+        raise HTTPException(400, "文本为空")
+    if len(req.text) > 10000:
+        raise HTTPException(400, "文本过长")
 
-@app.post("/api/reports/{report_id}/send")
-async def send_report(report_id: int, report: dict = None):
-    """发送报告到 PACS 超声报告数据库（当前为 mock）"""
-    inner = report.get("report") if isinstance(report, dict) and isinstance(report.get("report"), dict) else None
-    data = inner if inner else report
-    cleaned = _filter_checked(data) if data else None
-    # 1. 保存最终版
-    r = db.report_confirm(report_id, cleaned or {})
-    if not r: raise HTTPException(404, "报告不存在")
+    result = process_with_fixed_template(
+        correct_ASR_text(req.text),
+        req.fixed_template
+    )
+    return {"success": True, **result}
 
-    # 2. 模拟 PACS 发送
-    logging.info(f"[PACS] 发送报告 report_id={report_id} patient_id={r['patient_id']}")
-    # TODO: 对接真实 PACS HL7/FHIR 接口
-    # httpx.post(PACS_URL, json=hl7_message, headers=...)
+@app.get("/api/fixed-template/tags")
+async def get_template_tags():
+    """获取全部模板分类标签"""
+    return {"success": True, "tags": TEMPLATE_TAGS}
 
-    return {"success": True, "message": "报告已保存并发送至 PACS（Mock）", "report_id": report_id}
-
-@app.post("/api/reports/{report_id}/confirm")
-async def confirm_report(report_id: int, edited: dict = None):
-    r = db.report_confirm(report_id, edited or {})
-    if not r: raise HTTPException(404, "报告不存在")
-    return {"success": True, "report": r}
+@app.get("/api/fixed-template/defaults")
+async def get_default_templates():
+    """获取各类别的默认固定模板"""
+    return {"success": True, "templates": DEFAULT_TEMPLATES}
 
 # ==================== 静态文件 ====================
 

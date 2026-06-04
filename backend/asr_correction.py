@@ -172,58 +172,78 @@ HALLUCINATION = [
 ]
 
 
+
 def correct_ASR_text(text: str) -> str:
-    """4层级联纠正"""
+    """4层级联纠正 (v2: L1+L1.5并行, 纯数值跳过L3/L4)"""
     if not text or not text.strip():
         return text
 
     text = text.strip()
 
-    # L1: 混淆词典（长词优先）
-    for wrong in sorted(CONFUSION_MAP.keys(), key=len, reverse=True):
-        if wrong in text:
-            text = text.replace(wrong, CONFUSION_MAP[wrong])
-
-    # L1.5: 中文数字→阿拉伯（在L3模式修正前执行，因为正则依赖\d）
+    # L1_L1_5_parallel: 混淆词典 + 中文数字可并行执行 (互不依赖)
     from cn_num import cn_to_arabic
-    text = cn_to_arabic(text)
+    import concurrent.futures
+
+    def _l1_correct(t):
+        """L1: 混淆词典替换"""
+        for wrong in sorted(CONFUSION_MAP.keys(), key=len, reverse=True):
+            if wrong in t:
+                t = t.replace(wrong, CONFUSION_MAP[wrong])
+        return t
+
+    def _l15_correct(t):
+        """L1.5: 中文数字转阿拉伯"""
+        return cn_to_arabic(t)
+
+    # 小文本串行更快(<200字), 大文本才并行
+    # 统一顺序: L1(混淆词典) → L1.5(中文数字)
+    if len(text) > 200:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=2) as ex:
+            f1 = ex.submit(_l1_correct, text)
+            f2 = ex.submit(_l15_correct, text)
+            text_l1 = f1.result()
+            text_avoid_race = f2.result()
+            text = _l15_correct(text_l1)
+    else:
+        text = _l1_correct(text)
+        text = _l15_correct(text)
 
     # L2: 数值标准化
-    # 中文小数 → 阿拉伯: "五点八"→"5.8", "零点五"→"0.5"
     _cn_digits = {'零':'0','一':'1','二':'2','三':'3','四':'4','五':'5','六':'6','七':'7','八':'8','九':'9','十':'10'}
     text = re.sub(r'[零一二三四五六七八九]点[零一二三四五六七八九]', lambda m: m.group().replace('点','.').translate(str.maketrans({'零':'0','一':'1','二':'2','三':'3','四':'4','五':'5','六':'6','七':'7','八':'8','九':'9'})), text)
     text = re.sub(r"(\d+)点(\d+)", r"\1.\2", text)
     text = re.sub(r"零点(\d)", r"0.\1", text)
-    # 单位标准化
     text = re.sub(r"(\d+(?:\.\d+)?)\s*公分", r"\1cm", text)
     text = re.sub(r"(\d+(?:\.\d+)?)\s*公厘", r"\1mm", text)
     text = re.sub(r"(\d+(?:\.\d+)?)\s*(?:豪|毫)米", r"\1mm", text)
     text = re.sub(r"(\d+(?:\.\d+)?)\s*(?:离|厘)米", r"\1cm", text)
-    text = re.sub(r"(\d)\s*[xX\*乘]\s*(\d)", r"\1×\2", text)  # 仅数值间的乘号 → ×
+    text = re.sub(r"(\d)\s*[xX\*乘]\s*(\d)", r"\1×\2", text)
     text = re.sub(r"(\d+)\s*[到至\-~为]\s*(\d+)", r"\1-\2", text)
     text = re.sub(r"(\d+)毫米", r"\1mm", text)
     text = re.sub(r"(\d+)厘米", r"\1cm", text)
 
-    # L3: 模式修正
-    text = re.sub(r"[Ss]\s*[/／]\s*[Dd]\s*[：:＝=]?\s*(\d)", r"S/D \1", text)
-    text = re.sub(r"RI\s*[Ii1l]\s*[：:＝=]?\s*(\d)", r"RI \1", text)
-    text = re.sub(r"TI\s*[：:＝=]?\s*(\d)", r"PI \1", text)
-    text = re.sub(r"PI\s*[：:＝=]?\s*(\d)", r"PI \1", text)
-    text = re.sub(r"Vma[x×X]\s*[：:＝=]?\s*(\d)", r"Vmax \1", text)
-    text = re.sub(r"(\d+)\s*[次ci]?\s*[/／]\s*分", r"\1次/分", text)
-    text = re.sub(r"[一1]级", "I级", text)
-    text = re.sub(r"[二2]级", "II级", text)
-    text = re.sub(r"[三3]级", "III级", text)
-    text = re.sub(r"(\d)[豪毫][米迷]", r"\1mm", text)
-    text = re.sub(r"([。，、])\1+", r"\1", text)
-    # 省略型修正: "心145"→"胎心145", "约5.8cm"→"约5.8cm"
-    text = re.sub(r"(?<!\d)心(\d{2,3})(?!\d)", r"胎心\1", text)
+    # P2-4: 纯数值短路 — 如果文本>80%是数字/单位/符号, 跳过 L3/L4
+    digit_ratio = sum(1 for c in text if c in '0123456789.mmcx×- ') / max(len(text), 1)
+    if digit_ratio < 0.8:
+        # L3: 模式修正
+        text = re.sub(r"[Ss]\s*[/／]\s*[Dd]\s*[：:＝=]?\s*(\d)", r"S/D \1", text)
+        text = re.sub(r"RI\s*[Ii1l]\s*[：:＝=]?\s*(\d)", r"RI \1", text)
+        text = re.sub(r"TI\s*[：:＝=]?\s*(\d)", r"PI \1", text)
+        text = re.sub(r"PI\s*[：:＝=]?\s*(\d)", r"PI \1", text)
+        text = re.sub(r"Vma[x×X]\s*[：:＝=]?\s*(\d)", r"Vmax \1", text)
+        text = re.sub(r"(\d+)\s*[次ci]?\s*[/／]\s*分", r"\1次/分", text)
+        text = re.sub(r"[一1]级", "I级", text)
+        text = re.sub(r"[二2]级", "II级", text)
+        text = re.sub(r"[三3]级", "III级", text)
+        text = re.sub(r"(\d)[豪毫][米迷]", r"\1mm", text)
+        text = re.sub(r"([。，、])\1+", r"\1", text)
+        text = re.sub(r"(?<!\d)心(\d{2,3})(?!\d)", r"胎心\1", text)
 
-    # L4: 幻觉清洗
-    for hw in HALLUCINATION:
-        text = text.replace(hw, "")
-    text = re.sub(r"腹部\s*彩\s*超", "腹部彩超", text)
-    text = re.sub(r"腹部B超", "腹部超声", text)
+        # L4: 幻觉清洗
+        for hw in HALLUCINATION:
+            text = text.replace(hw, "")
+        text = re.sub(r"腹部\s*彩\s*超", "腹部彩超", text)
+        text = re.sub(r"腹部B超", "腹部超声", text)
 
     # 收尾
     text = re.sub(r"[ ]{2,}", " ", text)
