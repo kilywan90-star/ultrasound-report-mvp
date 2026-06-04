@@ -82,7 +82,6 @@ textarea.txt:focus{outline:none;border-color:#2563eb}
   <!-- 左列: 语音录入 + 识别文本 -->
   <div class="pn" id="pn1" style="flex:1.5;min-width:360px">
     <h4 onclick="toggleP('pn1')">1 语音录入与识别 <span class="tag idle" id="st">就绪</span></h4>
-}
     <div class="b" style="display:flex;flex-direction:column">
       <div class="rec-row"><button class="rec-btn" id="rb" onclick="toggleRec()"><div class="dot"></div></button><span style="font-size:11px;color:#64748b">点击录音，口述超声所见</span><span id="tm" style="font-size:16px;font-weight:500">00:00</span><button class="btn" id="playb" onclick="playAudio()" style="display:none;font-size:14px;padding:4px 10px" title="播放回听">&#9654;</button><button class="btn" id="dlb" onclick="downloadAudio()" style="display:none;font-size:12px;padding:3px 8px" title="下载录音">Download</button></div>
       <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px">
