@@ -1,0 +1,2966 @@
+{
+  "_description": "模板标签三级分类 v2 — 363个模板完整标签库",
+  "_total": 363,
+  "categories": [
+    {
+      "level1": "腹部(肝胆胰脾肾等)",
+      "level2": "腹部",
+      "templates": [
+        {
+          "name": "华枝睾吸虫病",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "其他",
+          "template_id": "temp_0294",
+          "fields_count": 5
+        },
+        {
+          "name": "正常各器官",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "其他",
+          "template_id": "temp_0052",
+          "fields_count": 0
+        },
+        {
+          "name": "酒精注射硬化",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "其他",
+          "template_id": "temp_0231",
+          "fields_count": 11
+        },
+        {
+          "name": "*单纯性肝囊肿",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "肝脏",
+          "template_id": "temp_0233",
+          "fields_count": 6
+        },
+        {
+          "name": "*非均匀性脂肪肝",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "肝脏",
+          "template_id": "temp_0235",
+          "fields_count": 5
+        },
+        {
+          "name": "肝弥漫性病变活检",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "肝脏",
+          "template_id": "temp_0229",
+          "fields_count": 0
+        },
+        {
+          "name": "肝液病变穿刺",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "肝脏",
+          "template_id": "temp_0232",
+          "fields_count": 11
+        },
+        {
+          "name": "肝癌",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "肝脏",
+          "template_id": "temp_0055",
+          "fields_count": 6
+        },
+        {
+          "name": "肝管结石",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "肝脏",
+          "template_id": "temp_0286",
+          "fields_count": 2
+        },
+        {
+          "name": "肝肿块活检",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "肝脏",
+          "template_id": "temp_0230",
+          "fields_count": 12
+        },
+        {
+          "name": "*肾囊肿",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "肾脏",
+          "template_id": "temp_0029",
+          "fields_count": 7
+        },
+        {
+          "name": "独肾",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "肾脏",
+          "template_id": "temp_0073",
+          "fields_count": 1
+        },
+        {
+          "name": "胃肠穿孔",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胃肠道",
+          "template_id": "temp_0093",
+          "fields_count": 2
+        },
+        {
+          "name": "腹腔脓肿",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胃肠道",
+          "template_id": "temp_0067",
+          "fields_count": 7
+        },
+        {
+          "name": "腹腔脓肿穿刺",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胃肠道",
+          "template_id": "temp_0070",
+          "fields_count": 6
+        },
+        {
+          "name": "腹膜转移癌",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胃肠道",
+          "template_id": "temp_0064",
+          "fields_count": 5
+        },
+        {
+          "name": "腹部体检",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胃肠道",
+          "template_id": "temp_0295",
+          "fields_count": 0
+        },
+        {
+          "name": "阑尾炎",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胃肠道",
+          "template_id": "temp_0101",
+          "fields_count": 2
+        },
+        {
+          "name": "*胆囊息肉",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0234",
+          "fields_count": 8
+        },
+        {
+          "name": "先天性胆管扩张症",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0291",
+          "fields_count": 9
+        },
+        {
+          "name": "先天性胆道闭锁",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0290",
+          "fields_count": 9
+        },
+        {
+          "name": "分隔胆囊",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0288",
+          "fields_count": 6
+        },
+        {
+          "name": "慢性胆管炎",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0021",
+          "fields_count": 0
+        },
+        {
+          "name": "正常胆系",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0018",
+          "fields_count": 0
+        },
+        {
+          "name": "胆囊癌",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0292",
+          "fields_count": 11
+        },
+        {
+          "name": "胆囊结石",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0285",
+          "fields_count": 4
+        },
+        {
+          "name": "胆总管结石",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0287",
+          "fields_count": 7
+        },
+        {
+          "name": "胆石症",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0284",
+          "fields_count": 4
+        },
+        {
+          "name": "胆管癌",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0293",
+          "fields_count": 10
+        },
+        {
+          "name": "胆系炎症",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0019",
+          "fields_count": 5
+        },
+        {
+          "name": "胆道扩张",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0289",
+          "fields_count": 10
+        },
+        {
+          "name": "胆道蛔虫",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胆囊/胆道",
+          "template_id": "temp_0020",
+          "fields_count": 5
+        },
+        {
+          "name": "正常胰腺",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胰腺",
+          "template_id": "temp_0188",
+          "fields_count": 3
+        },
+        {
+          "name": "胰腺囊肿",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胰腺",
+          "template_id": "temp_0190",
+          "fields_count": 4
+        },
+        {
+          "name": "胰腺实性肿瘤",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胰腺",
+          "template_id": "temp_0192",
+          "fields_count": 10
+        },
+        {
+          "name": "胰腺炎",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胰腺",
+          "template_id": "temp_0189",
+          "fields_count": 8
+        },
+        {
+          "name": "胰转移癌",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "胰腺",
+          "template_id": "temp_0193",
+          "fields_count": 6
+        },
+        {
+          "name": "脾液病变穿刺",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "脾脏",
+          "template_id": "temp_0283",
+          "fields_count": 11
+        },
+        {
+          "name": "脾脏测值",
+          "level1": "腹部(肝胆胰脾肾等)",
+          "level2": "腹部",
+          "level3": "脾脏",
+          "template_id": "temp_0271",
+          "fields_count": 5
+        }
+      ],
+      "count": 39
+    },
+    {
+      "level1": "心脏(瓣膜/心腔/心包)",
+      "level2": "心脏",
+      "templates": [
+        {
+          "name": "各种穿刺抽液",
+          "level1": "心脏(瓣膜/心腔/心包)",
+          "level2": "心脏",
+          "level3": "其他",
+          "template_id": "temp_0358",
+          "fields_count": 5
+        },
+        {
+          "name": "心包积液",
+          "level1": "心脏(瓣膜/心腔/心包)",
+          "level2": "心脏",
+          "level3": "心包",
+          "template_id": "temp_0136",
+          "fields_count": 20
+        },
+        {
+          "name": "缩窄心包炎",
+          "level1": "心脏(瓣膜/心腔/心包)",
+          "level2": "心脏",
+          "level3": "心包",
+          "template_id": "temp_0135",
+          "fields_count": 14
+        }
+      ],
+      "count": 3
+    },
+    {
+      "level1": "通用",
+      "level2": "通用",
+      "templates": [
+        {
+          "name": "脐带异常",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "产科",
+          "template_id": "temp_0329",
+          "fields_count": 0
+        },
+        {
+          "name": "CDI",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0164",
+          "fields_count": 4
+        },
+        {
+          "name": "内脏外翻",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0324",
+          "fields_count": 2
+        },
+        {
+          "name": "副韧带损伤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0044",
+          "fields_count": 6
+        },
+        {
+          "name": "唇裂",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0322",
+          "fields_count": 2
+        },
+        {
+          "name": "囊肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0167",
+          "fields_count": 1
+        },
+        {
+          "name": "外伤性低眼压",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0158",
+          "fields_count": 5
+        },
+        {
+          "name": "帕查氏综合征",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0060",
+          "fields_count": 5
+        },
+        {
+          "name": "恶性肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0165",
+          "fields_count": 1
+        },
+        {
+          "name": "晶体异物",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0150",
+          "fields_count": 5
+        },
+        {
+          "name": "晶体脱位",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0149",
+          "fields_count": 5
+        },
+        {
+          "name": "椎旁冷脓肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0066",
+          "fields_count": 5
+        },
+        {
+          "name": "正常眼球",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0147",
+          "fields_count": 5
+        },
+        {
+          "name": "正常胸腔",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0137",
+          "fields_count": 0
+        },
+        {
+          "name": "正常食道",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0094",
+          "fields_count": 3
+        },
+        {
+          "name": "泌尿系畸形",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0325",
+          "fields_count": 2
+        },
+        {
+          "name": "消化道畸形",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0326",
+          "fields_count": 2
+        },
+        {
+          "name": "渗出性视网膜炎",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0361",
+          "fields_count": 2
+        },
+        {
+          "name": "玻璃体出血",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0151",
+          "fields_count": 5
+        },
+        {
+          "name": "玻璃体后剥离",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0156",
+          "fields_count": 5
+        },
+        {
+          "name": "玻璃体增生症",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0157",
+          "fields_count": 5
+        },
+        {
+          "name": "白内障",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0148",
+          "fields_count": 5
+        },
+        {
+          "name": "皮下脂肪瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0108",
+          "fields_count": 5
+        },
+        {
+          "name": "盘状半月板",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0039",
+          "fields_count": 3
+        },
+        {
+          "name": "眶内肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0186",
+          "fields_count": 5
+        },
+        {
+          "name": "眼内异物",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0154",
+          "fields_count": 5
+        },
+        {
+          "name": "眼球测值",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0146",
+          "fields_count": 5
+        },
+        {
+          "name": "神经纤维瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0114",
+          "fields_count": 9
+        },
+        {
+          "name": "神经纤维瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0257",
+          "fields_count": 5
+        },
+        {
+          "name": "神经鞘瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0115",
+          "fields_count": 9
+        },
+        {
+          "name": "纵膈肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0143",
+          "fields_count": 7
+        },
+        {
+          "name": "肢体外伤性肿块",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0110",
+          "fields_count": 8
+        },
+        {
+          "name": "肢体液病变穿刺",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0121",
+          "fields_count": 10
+        },
+        {
+          "name": "肢体淋巴管瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0113",
+          "fields_count": 10
+        },
+        {
+          "name": "肢体灶性炎症",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0109",
+          "fields_count": 8
+        },
+        {
+          "name": "肢体肿块活检",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0120",
+          "fields_count": 11
+        },
+        {
+          "name": "肢体肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0111",
+          "fields_count": 8
+        },
+        {
+          "name": "肺肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0142",
+          "fields_count": 7
+        },
+        {
+          "name": "肺脓肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0141",
+          "fields_count": 6
+        },
+        {
+          "name": "胸水穿刺",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0139",
+          "fields_count": 5
+        },
+        {
+          "name": "胸膜增厚",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0145",
+          "fields_count": 12
+        },
+        {
+          "name": "胸膜间皮瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0144",
+          "fields_count": 12
+        },
+        {
+          "name": "脉络膜脱离",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0155",
+          "fields_count": 5
+        },
+        {
+          "name": "脉络膜黑色素瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0183",
+          "fields_count": 5
+        },
+        {
+          "name": "脐膨出",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0323",
+          "fields_count": 2
+        },
+        {
+          "name": "腘窝囊肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0104",
+          "fields_count": 3
+        },
+        {
+          "name": "膈下脓肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0068",
+          "fields_count": 2
+        },
+        {
+          "name": "膈疝",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0224",
+          "fields_count": 7
+        },
+        {
+          "name": "良性肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0166",
+          "fields_count": 1
+        },
+        {
+          "name": "视网膜母细胞瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0185",
+          "fields_count": 12
+        },
+        {
+          "name": "视网膜母细胞瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0362",
+          "fields_count": 12
+        },
+        {
+          "name": "视网膜炎",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0152",
+          "fields_count": 5
+        },
+        {
+          "name": "视网膜脱离",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0153",
+          "fields_count": 6
+        },
+        {
+          "name": "视网膜脱离",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0360",
+          "fields_count": 6
+        },
+        {
+          "name": "颌下腺混合瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0253",
+          "fields_count": 2
+        },
+        {
+          "name": "颌下腺疾病",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0255",
+          "fields_count": 5
+        },
+        {
+          "name": "食道上段炎",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0095",
+          "fields_count": 3
+        },
+        {
+          "name": "食道上段癌",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0096",
+          "fields_count": 8
+        },
+        {
+          "name": "食道裂孔疝",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0223",
+          "fields_count": 7
+        },
+        {
+          "name": "髌韧带损伤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "其他",
+          "template_id": "temp_0040",
+          "fields_count": 5
+        },
+        {
+          "name": "肢体血管瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "动脉/血管",
+          "template_id": "temp_0112",
+          "fields_count": 14
+        },
+        {
+          "name": "脉络膜血管瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "动脉/血管",
+          "template_id": "temp_0184",
+          "fields_count": 5
+        },
+        {
+          "name": "包裹性胸腔积液",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "心包",
+          "template_id": "temp_0140",
+          "fields_count": 10
+        },
+        {
+          "name": "胸腔积液",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "心包",
+          "template_id": "temp_0138",
+          "fields_count": 12
+        },
+        {
+          "name": "精索囊肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "男性浅表",
+          "template_id": "temp_0270",
+          "fields_count": 3
+        },
+        {
+          "name": "结石",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "结石类",
+          "template_id": "temp_0168",
+          "fields_count": 1
+        },
+        {
+          "name": "肝内钙化灶",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肝脏",
+          "template_id": "temp_0059",
+          "fields_count": 5
+        },
+        {
+          "name": "肝叶萎缩",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肝脏",
+          "template_id": "temp_0062",
+          "fields_count": 5
+        },
+        {
+          "name": "肝外伤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肝脏",
+          "template_id": "temp_0061",
+          "fields_count": 5
+        },
+        {
+          "name": "肝结核",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肝脏",
+          "template_id": "temp_0228",
+          "fields_count": 5
+        },
+        {
+          "name": "肝缺血性坏死",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肝脏",
+          "template_id": "temp_0119",
+          "fields_count": 5
+        },
+        {
+          "name": "肝良性结节",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肝脏",
+          "template_id": "temp_0058",
+          "fields_count": 5
+        },
+        {
+          "name": "肝血吸虫病",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肝脏",
+          "template_id": "temp_0227",
+          "fields_count": 5
+        },
+        {
+          "name": "肝错构瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肝脏",
+          "template_id": "temp_0057",
+          "fields_count": 5
+        },
+        {
+          "name": "*肾盂旁囊肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肾脏",
+          "template_id": "temp_0032",
+          "fields_count": 3
+        },
+        {
+          "name": "*肾结石",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肾脏",
+          "template_id": "temp_0028",
+          "fields_count": 6
+        },
+        {
+          "name": "正常肾上腺",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肾脏",
+          "template_id": "temp_0171",
+          "fields_count": 1
+        },
+        {
+          "name": "肾上腺肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肾脏",
+          "template_id": "temp_0172",
+          "fields_count": 4
+        },
+        {
+          "name": "肾上腺髓样脂肪瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肾脏",
+          "template_id": "temp_0173",
+          "fields_count": 4
+        },
+        {
+          "name": "肾囊肿并结石",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肾脏",
+          "template_id": "temp_0072",
+          "fields_count": 2
+        },
+        {
+          "name": "肾液病变穿刺",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肾脏",
+          "template_id": "temp_0026",
+          "fields_count": 14
+        },
+        {
+          "name": "肾结石",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肾脏",
+          "template_id": "temp_0071",
+          "fields_count": 2
+        },
+        {
+          "name": "肾肿块活检",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "肾脏",
+          "template_id": "temp_0025",
+          "fields_count": 12
+        },
+        {
+          "name": "小肠结石",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "胃肠道",
+          "template_id": "temp_0100",
+          "fields_count": 3
+        },
+        {
+          "name": "结肠肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "胃肠道",
+          "template_id": "temp_0222",
+          "fields_count": 5
+        },
+        {
+          "name": "肠套叠",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "胃肠道",
+          "template_id": "temp_0098",
+          "fields_count": 5
+        },
+        {
+          "name": "肠梗阻",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "胃肠道",
+          "template_id": "temp_0097",
+          "fields_count": 5
+        },
+        {
+          "name": "肠管胀气",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "胃肠道",
+          "template_id": "temp_0099",
+          "fields_count": 6
+        },
+        {
+          "name": "肠系膜肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "胃肠道",
+          "template_id": "temp_0102",
+          "fields_count": 5
+        },
+        {
+          "name": "腹壁疝",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "胃肠道",
+          "template_id": "temp_0225",
+          "fields_count": 12
+        },
+        {
+          "name": "胰头肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "胰腺",
+          "template_id": "temp_0191",
+          "fields_count": 4
+        },
+        {
+          "name": "*脾包虫病",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0307",
+          "fields_count": 3
+        },
+        {
+          "name": "副脾",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0273",
+          "fields_count": 3
+        },
+        {
+          "name": "多囊脾",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0276",
+          "fields_count": 1
+        },
+        {
+          "name": "普通异常脾",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0281",
+          "fields_count": 3
+        },
+        {
+          "name": "脾囊肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0275",
+          "fields_count": 1
+        },
+        {
+          "name": "脾外伤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0272",
+          "fields_count": 2
+        },
+        {
+          "name": "脾实性肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0274",
+          "fields_count": 1
+        },
+        {
+          "name": "脾梗塞",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0278",
+          "fields_count": 1
+        },
+        {
+          "name": "脾结核",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0279",
+          "fields_count": 1
+        },
+        {
+          "name": "脾肿大",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0282",
+          "fields_count": 8
+        },
+        {
+          "name": "脾脓肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0277",
+          "fields_count": 1
+        },
+        {
+          "name": "脾错构瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "脾脏",
+          "template_id": "temp_0280",
+          "fields_count": 1
+        },
+        {
+          "name": "颈肿块活检",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "颈动脉/颅外",
+          "template_id": "temp_0259",
+          "fields_count": 9
+        },
+        {
+          "name": "坐骨结节囊肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0105",
+          "fields_count": 3
+        },
+        {
+          "name": "孤立性骨囊肿",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0106",
+          "fields_count": 2
+        },
+        {
+          "name": "巨大骨肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0116",
+          "fields_count": 5
+        },
+        {
+          "name": "正常股骨头",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0050",
+          "fields_count": 2
+        },
+        {
+          "name": "股骨头坏死",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0051",
+          "fields_count": 11
+        },
+        {
+          "name": "跟腱断裂伤术后",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0046",
+          "fields_count": 1
+        },
+        {
+          "name": "骨内肿瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0117",
+          "fields_count": 8
+        },
+        {
+          "name": "骨软骨瘤",
+          "level1": "通用",
+          "level2": "通用",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0118",
+          "fields_count": 8
+        }
+      ],
+      "count": 112
+    },
+    {
+      "level1": "骨骼肌肉(关节/肌腱)",
+      "level2": "骨骼肌肉",
+      "templates": [
+        {
+          "name": "交叉韧带损伤",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "其他",
+          "template_id": "temp_0042",
+          "fields_count": 6
+        },
+        {
+          "name": "交叉韧带松驰",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "其他",
+          "template_id": "temp_0041",
+          "fields_count": 3
+        },
+        {
+          "name": "半月板损伤",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "其他",
+          "template_id": "temp_0038",
+          "fields_count": 3
+        },
+        {
+          "name": "踝关节炎",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "小关节",
+          "template_id": "temp_0048",
+          "fields_count": 1
+        },
+        {
+          "name": "膝关节滑膜炎",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "膝关节",
+          "template_id": "temp_0036",
+          "fields_count": 4
+        },
+        {
+          "name": "膝关节退行性变",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "膝关节",
+          "template_id": "temp_0037",
+          "fields_count": 4
+        },
+        {
+          "name": "指肌腱断裂伤术后",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0049",
+          "fields_count": 1
+        },
+        {
+          "name": "正常跟腱",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0045",
+          "fields_count": 1
+        },
+        {
+          "name": "肌肉撕裂伤",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0107",
+          "fields_count": 7
+        },
+        {
+          "name": "肌腱囊肿",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0103",
+          "fields_count": 5
+        },
+        {
+          "name": "股四头肌腱损伤",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0043",
+          "fields_count": 7
+        },
+        {
+          "name": "肱二头肌腱鞘炎",
+          "level1": "骨骼肌肉(关节/肌腱)",
+          "level2": "骨骼肌肉",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0047",
+          "fields_count": 3
+        }
+      ],
+      "count": 12
+    },
+    {
+      "level1": "妇产(子宫/卵巢/胎儿)",
+      "level2": "妇产",
+      "templates": [
+        {
+          "name": "下肢V回流受阻",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "下肢血管",
+          "template_id": "temp_0088",
+          "fields_count": 3
+        },
+        {
+          "name": "下肢动脉受压",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "下肢血管",
+          "template_id": "temp_0083",
+          "fields_count": 6
+        },
+        {
+          "name": "下肢动脉硬化",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "下肢血管",
+          "template_id": "temp_0084",
+          "fields_count": 8
+        },
+        {
+          "name": "下肢血管损伤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "下肢血管",
+          "template_id": "temp_0079",
+          "fields_count": 2
+        },
+        {
+          "name": "下肢静脉炎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "下肢血管",
+          "template_id": "temp_0086",
+          "fields_count": 9
+        },
+        {
+          "name": "正常下肢血管",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "下肢血管",
+          "template_id": "temp_0078",
+          "fields_count": 3
+        },
+        {
+          "name": "不完全纵隔并妊娠",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0340",
+          "fields_count": 3
+        },
+        {
+          "name": "中晚孕常规",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0309",
+          "fields_count": 4
+        },
+        {
+          "name": "中晚孕过期流产",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0320",
+          "fields_count": 0
+        },
+        {
+          "name": "中晚孕难免流产",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0319",
+          "fields_count": 2
+        },
+        {
+          "name": "前置胎盘",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0333",
+          "fields_count": 3
+        },
+        {
+          "name": "副胎盘",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0334",
+          "fields_count": 3
+        },
+        {
+          "name": "卵巢囊性畸胎瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0008",
+          "fields_count": 13
+        },
+        {
+          "name": "卵巢畸胎瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0248",
+          "fields_count": 5
+        },
+        {
+          "name": "卵巢畸胎瘤[新]",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0005",
+          "fields_count": 13
+        },
+        {
+          "name": "孕卵枯萎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0314",
+          "fields_count": 11
+        },
+        {
+          "name": "宫外孕穿刺",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0344",
+          "fields_count": 3
+        },
+        {
+          "name": "小胚胎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0353",
+          "fields_count": 6
+        },
+        {
+          "name": "巨大囊性畸胎瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0249",
+          "fields_count": 1
+        },
+        {
+          "name": "巨大胎盘",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0331",
+          "fields_count": 4
+        },
+        {
+          "name": "异位妊娠",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0311",
+          "fields_count": 55
+        },
+        {
+          "name": "恶性葡萄胎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0348",
+          "fields_count": 5
+        },
+        {
+          "name": "早孕先兆流产",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0312",
+          "fields_count": 28
+        },
+        {
+          "name": "早孕双胎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0338",
+          "fields_count": 1
+        },
+        {
+          "name": "早孕难免流产",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0313",
+          "fields_count": 33
+        },
+        {
+          "name": "晚孕双胎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0337",
+          "fields_count": 1
+        },
+        {
+          "name": "正常中晚孕",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0318",
+          "fields_count": 2
+        },
+        {
+          "name": "正常早孕",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0310",
+          "fields_count": 17
+        },
+        {
+          "name": "正常胎盘",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0330",
+          "fields_count": 4
+        },
+        {
+          "name": "残角子宫妊娠",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0346",
+          "fields_count": 6
+        },
+        {
+          "name": "残角子宫并妊娠",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0213",
+          "fields_count": 2
+        },
+        {
+          "name": "残角子宫并妊娠",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0341",
+          "fields_count": 2
+        },
+        {
+          "name": "联体双胎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0339",
+          "fields_count": 11
+        },
+        {
+          "name": "肌瘤合并妊娠",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0317",
+          "fields_count": 2
+        },
+        {
+          "name": "胎盘早剥",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0332",
+          "fields_count": 4
+        },
+        {
+          "name": "胎盘水泡样变",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0336",
+          "fields_count": 1
+        },
+        {
+          "name": "胎盘肿瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0335",
+          "fields_count": 19
+        },
+        {
+          "name": "葡萄胎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "产科",
+          "template_id": "temp_0342",
+          "fields_count": 1
+        },
+        {
+          "name": "不全流产",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0315",
+          "fields_count": 1
+        },
+        {
+          "name": "不全流产[新]",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0345",
+          "fields_count": 10
+        },
+        {
+          "name": "二次监卵",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0238",
+          "fields_count": 2
+        },
+        {
+          "name": "产前超声筛选报告",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0347",
+          "fields_count": 0
+        },
+        {
+          "name": "卵囊穿刺硬化",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0355",
+          "fields_count": 6
+        },
+        {
+          "name": "处女膜闭锁",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0214",
+          "fields_count": 2
+        },
+        {
+          "name": "宫腔内占位",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0202",
+          "fields_count": 2
+        },
+        {
+          "name": "宫腔积血/脓",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0196",
+          "fields_count": 2
+        },
+        {
+          "name": "巧克力囊肿",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0243",
+          "fields_count": 11
+        },
+        {
+          "name": "无脑儿[新]",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0352",
+          "fields_count": 9
+        },
+        {
+          "name": "正常黄体",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0239",
+          "fields_count": 2
+        },
+        {
+          "name": "监卵",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0002",
+          "fields_count": 15
+        },
+        {
+          "name": "绒癌",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0343",
+          "fields_count": 1
+        },
+        {
+          "name": "肌瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0197",
+          "fields_count": 2
+        },
+        {
+          "name": "肿瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0327",
+          "fields_count": 4
+        },
+        {
+          "name": "腺肌症",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0198",
+          "fields_count": 2
+        },
+        {
+          "name": "血栓性脉管炎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0085",
+          "fields_count": 1
+        },
+        {
+          "name": "黄体破裂",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0250",
+          "fields_count": 5
+        },
+        {
+          "name": "黄体血肿",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "其他",
+          "template_id": "temp_0001",
+          "fields_count": 12
+        },
+        {
+          "name": "上肢动脉受压",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "动脉/血管",
+          "template_id": "temp_0082",
+          "fields_count": 6
+        },
+        {
+          "name": "上肢血管损伤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "动脉/血管",
+          "template_id": "temp_0080",
+          "fields_count": 2
+        },
+        {
+          "name": "正常上肢血管",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "动脉/血管",
+          "template_id": "temp_0081",
+          "fields_count": 3
+        },
+        {
+          "name": "卵巢卵泡膜细胞瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "卵巢",
+          "template_id": "temp_0006",
+          "fields_count": 10
+        },
+        {
+          "name": "卵巢囊性占位",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "卵巢",
+          "template_id": "temp_0245",
+          "fields_count": 6
+        },
+        {
+          "name": "卵巢囊肿",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "卵巢",
+          "template_id": "temp_0009",
+          "fields_count": 11
+        },
+        {
+          "name": "卵巢囊腺瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "卵巢",
+          "template_id": "temp_0007",
+          "fields_count": 14
+        },
+        {
+          "name": "卵巢实性占位",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "卵巢",
+          "template_id": "temp_0247",
+          "fields_count": 9
+        },
+        {
+          "name": "卵巢癌",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "卵巢",
+          "template_id": "temp_0246",
+          "fields_count": 8
+        },
+        {
+          "name": "卵巢癌[新]",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "卵巢",
+          "template_id": "temp_0004",
+          "fields_count": 0
+        },
+        {
+          "name": "多囊卵巢",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "卵巢",
+          "template_id": "temp_0000",
+          "fields_count": 12
+        },
+        {
+          "name": "多囊卵巢综合征",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "卵巢",
+          "template_id": "temp_0242",
+          "fields_count": 3
+        },
+        {
+          "name": "产后子宫",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0316",
+          "fields_count": 1
+        },
+        {
+          "name": "内膜增殖症",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0199",
+          "fields_count": 2
+        },
+        {
+          "name": "功能性子宫出血",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0207",
+          "fields_count": 2
+        },
+        {
+          "name": "双子宫",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0210",
+          "fields_count": 2
+        },
+        {
+          "name": "双角子宫",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0211",
+          "fields_count": 2
+        },
+        {
+          "name": "子宫体癌",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0201",
+          "fields_count": 2
+        },
+        {
+          "name": "子宫内膜异位症",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0013",
+          "fields_count": 11
+        },
+        {
+          "name": "子宫内膜息肉",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0218",
+          "fields_count": 5
+        },
+        {
+          "name": "子宫内膜炎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0200",
+          "fields_count": 3
+        },
+        {
+          "name": "子宫切除术后",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0215",
+          "fields_count": 2
+        },
+        {
+          "name": "子宫大小异常",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0209",
+          "fields_count": 2
+        },
+        {
+          "name": "子宫浆膜下肌瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0217",
+          "fields_count": 7
+        },
+        {
+          "name": "子宫炎症",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0195",
+          "fields_count": 2
+        },
+        {
+          "name": "子宫粘膜下肌瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0221",
+          "fields_count": 9
+        },
+        {
+          "name": "子宫腺肌症",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0220",
+          "fields_count": 8
+        },
+        {
+          "name": "子宫轻度肥大",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0219",
+          "fields_count": 3
+        },
+        {
+          "name": "宫颈功能不全",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0321",
+          "fields_count": 1
+        },
+        {
+          "name": "宫颈恶性肿瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0206",
+          "fields_count": 2
+        },
+        {
+          "name": "宫颈机能不全",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0349",
+          "fields_count": 12
+        },
+        {
+          "name": "宫颈肥大",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0203",
+          "fields_count": 2
+        },
+        {
+          "name": "宫颈腺囊型肥大",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0204",
+          "fields_count": 2
+        },
+        {
+          "name": "宫颈良性肿物",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0205",
+          "fields_count": 2
+        },
+        {
+          "name": "正常子宫",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0194",
+          "fields_count": 9
+        },
+        {
+          "name": "纵隔子宫",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0212",
+          "fields_count": 2
+        },
+        {
+          "name": "老年子宫",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0208",
+          "fields_count": 2
+        },
+        {
+          "name": "节育器下移",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0350",
+          "fields_count": 9
+        },
+        {
+          "name": "节育器探查",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0003",
+          "fields_count": 8
+        },
+        {
+          "name": "节育器正常",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "子宫",
+          "template_id": "temp_0351",
+          "fields_count": 7
+        },
+        {
+          "name": "包裹性积液",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "心包",
+          "template_id": "temp_0244",
+          "fields_count": 2
+        },
+        {
+          "name": "精索炎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "男性浅表",
+          "template_id": "temp_0269",
+          "fields_count": 11
+        },
+        {
+          "name": "肾动脉狭窄",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "肾脏",
+          "template_id": "temp_0024",
+          "fields_count": 6
+        },
+        {
+          "name": "肾动脉狭窄",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "肾脏",
+          "template_id": "temp_0089",
+          "fields_count": 5
+        },
+        {
+          "name": "*腹膜后肿瘤",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "胃肠道",
+          "template_id": "temp_0306",
+          "fields_count": 5
+        },
+        {
+          "name": "正常腹腔血管",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "胃肠道",
+          "template_id": "temp_0181",
+          "fields_count": 2
+        },
+        {
+          "name": "腹主动脉硬化",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "胃肠道",
+          "template_id": "temp_0179",
+          "fields_count": 8
+        },
+        {
+          "name": "腹水",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "胃肠道",
+          "template_id": "temp_0296",
+          "fields_count": 6
+        },
+        {
+          "name": "腹膜炎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "胃肠道",
+          "template_id": "temp_0297",
+          "fields_count": 6
+        },
+        {
+          "name": "腹部包块",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "胃肠道",
+          "template_id": "temp_0065",
+          "fields_count": 7
+        },
+        {
+          "name": "腹部肿块活检",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "胃肠道",
+          "template_id": "temp_0069",
+          "fields_count": 8
+        },
+        {
+          "name": "正常椎动脉",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "脑血管/TCD",
+          "template_id": "temp_0177",
+          "fields_count": 3
+        },
+        {
+          "name": "双侧输卵管积液",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "附件/盆腔",
+          "template_id": "temp_0012",
+          "fields_count": 11
+        },
+        {
+          "name": "盆腔炎",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "附件/盆腔",
+          "template_id": "temp_0240",
+          "fields_count": 2
+        },
+        {
+          "name": "盆腔肿块活检",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "附件/盆腔",
+          "template_id": "temp_0354",
+          "fields_count": 5
+        },
+        {
+          "name": "盆腔轻度淤血",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "附件/盆腔",
+          "template_id": "temp_0010",
+          "fields_count": 7
+        },
+        {
+          "name": "盆腔静脉曲张症",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "附件/盆腔",
+          "template_id": "temp_0252",
+          "fields_count": 3
+        },
+        {
+          "name": "输卵管积液",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "附件/盆腔",
+          "template_id": "temp_0251",
+          "fields_count": 5
+        },
+        {
+          "name": "输卵管积液[新]",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "附件/盆腔",
+          "template_id": "temp_0011",
+          "fields_count": 12
+        },
+        {
+          "name": "输卵管造影",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "附件/盆腔",
+          "template_id": "temp_0356",
+          "fields_count": 2
+        },
+        {
+          "name": "附件炎性包块",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "附件/盆腔",
+          "template_id": "temp_0241",
+          "fields_count": 5
+        },
+        {
+          "name": "锁骨下A盗血",
+          "level1": "妇产(子宫/卵巢/胎儿)",
+          "level2": "妇产",
+          "level3": "骨骼/肌腱",
+          "template_id": "temp_0077",
+          "fields_count": 8
+        }
+      ],
+      "count": 119
+    },
+    {
+      "level1": "甲状腺/乳腺/浅表",
+      "level2": "浅表",
+      "templates": [
+        {
+          "name": "乳腺癌",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "乳腺",
+          "template_id": "temp_0357",
+          "fields_count": 4
+        },
+        {
+          "name": "亚甲炎",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "其他",
+          "template_id": "temp_0304",
+          "fields_count": 3
+        },
+        {
+          "name": "单纯甲肿",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "其他",
+          "template_id": "temp_0127",
+          "fields_count": 3
+        },
+        {
+          "name": "甲亢",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "其他",
+          "template_id": "temp_0124",
+          "fields_count": 3
+        },
+        {
+          "name": "甲低",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "其他",
+          "template_id": "temp_0125",
+          "fields_count": 3
+        },
+        {
+          "name": "鞘膜腔积液",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "心包",
+          "template_id": "temp_0263",
+          "fields_count": 2
+        },
+        {
+          "name": "正常小淋巴结",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "淋巴结",
+          "template_id": "temp_0216",
+          "fields_count": 1
+        },
+        {
+          "name": "正常淋巴结",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "淋巴结",
+          "template_id": "temp_0160",
+          "fields_count": 9
+        },
+        {
+          "name": "淋巴结结核",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "淋巴结",
+          "template_id": "temp_0162",
+          "fields_count": 9
+        },
+        {
+          "name": "淋巴结肿瘤",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "淋巴结",
+          "template_id": "temp_0163",
+          "fields_count": 10
+        },
+        {
+          "name": "淋巴结良性增生",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "淋巴结",
+          "template_id": "temp_0161",
+          "fields_count": 9
+        },
+        {
+          "name": "桥本氏甲状腺炎",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0303",
+          "fields_count": 3
+        },
+        {
+          "name": "桥本甲状腺炎并合甲减",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0302",
+          "fields_count": 3
+        },
+        {
+          "name": "正常甲状腺",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0123",
+          "fields_count": 3
+        },
+        {
+          "name": "正常甲状腺[新]",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0305",
+          "fields_count": 0
+        },
+        {
+          "name": "残留甲状腺",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0298",
+          "fields_count": 0
+        },
+        {
+          "name": "甲状腺囊腺瘤",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0131",
+          "fields_count": 3
+        },
+        {
+          "name": "甲状腺术后正常",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0122",
+          "fields_count": 0
+        },
+        {
+          "name": "甲状腺炎",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0126",
+          "fields_count": 3
+        },
+        {
+          "name": "甲状腺癌",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0132",
+          "fields_count": 3
+        },
+        {
+          "name": "甲状腺癌[新]",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0299",
+          "fields_count": 4
+        },
+        {
+          "name": "甲状腺结节",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0128",
+          "fields_count": 3
+        },
+        {
+          "name": "甲状腺肿块活检",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0133",
+          "fields_count": 6
+        },
+        {
+          "name": "甲状腺腺瘤",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0130",
+          "fields_count": 3
+        },
+        {
+          "name": "甲状腺腺瘤[新]",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0300",
+          "fields_count": 2
+        },
+        {
+          "name": "结节性甲状腺肿",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0129",
+          "fields_count": 30
+        },
+        {
+          "name": "结节性甲状腺肿[新]",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "甲状腺",
+          "template_id": "temp_0301",
+          "fields_count": 4
+        },
+        {
+          "name": "睾丸发育不良",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "男性浅表",
+          "template_id": "temp_0261",
+          "fields_count": 2
+        },
+        {
+          "name": "睾丸微小钙化症",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "男性浅表",
+          "template_id": "temp_0262",
+          "fields_count": 2
+        },
+        {
+          "name": "睾丸扭转",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "男性浅表",
+          "template_id": "temp_0264",
+          "fields_count": 2
+        },
+        {
+          "name": "睾丸炎",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "男性浅表",
+          "template_id": "temp_0265",
+          "fields_count": 11
+        },
+        {
+          "name": "睾丸炎",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "男性浅表",
+          "template_id": "temp_0359",
+          "fields_count": 11
+        },
+        {
+          "name": "睾丸肿瘤",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "男性浅表",
+          "template_id": "temp_0266",
+          "fields_count": 2
+        },
+        {
+          "name": "精索静脉曲张",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "男性浅表",
+          "template_id": "temp_0268",
+          "fields_count": 4
+        },
+        {
+          "name": "阴囊测值",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "男性浅表",
+          "template_id": "temp_0260",
+          "fields_count": 2
+        },
+        {
+          "name": "附睾郁积",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "男性浅表",
+          "template_id": "temp_0267",
+          "fields_count": 6
+        },
+        {
+          "name": "腹外疝",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "胃肠道",
+          "template_id": "temp_0226",
+          "fields_count": 5
+        },
+        {
+          "name": "腹腔淋巴结",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "胃肠道",
+          "template_id": "temp_0063",
+          "fields_count": 4
+        },
+        {
+          "name": "腮腺肿瘤",
+          "level1": "甲状腺/乳腺/浅表",
+          "level2": "浅表",
+          "level3": "腮腺",
+          "template_id": "temp_0254",
+          "fields_count": 8
+        }
+      ],
+      "count": 39
+    },
+    {
+      "level1": "泌尿(前列腺/膀胱)",
+      "level2": "泌尿",
+      "templates": [
+        {
+          "name": "脐尿管囊肿",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "其他",
+          "template_id": "temp_0017",
+          "fields_count": 2
+        },
+        {
+          "name": "前列腺增大",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "前列腺",
+          "template_id": "temp_0169",
+          "fields_count": 8
+        },
+        {
+          "name": "后尿道结石",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "结石类",
+          "template_id": "temp_0170",
+          "fields_count": 1
+        },
+        {
+          "name": "*多发性肾囊肿",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "肾脏",
+          "template_id": "temp_0027",
+          "fields_count": 3
+        },
+        {
+          "name": "*肾盂癌",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "肾脏",
+          "template_id": "temp_0031",
+          "fields_count": 6
+        },
+        {
+          "name": "多囊肾并多发性结石",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "肾脏",
+          "template_id": "temp_0074",
+          "fields_count": 26
+        },
+        {
+          "name": "*输尿管上段结石",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "膀胱/输尿管",
+          "template_id": "temp_0034",
+          "fields_count": 8
+        },
+        {
+          "name": "*输尿管下段结石",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "膀胱/输尿管",
+          "template_id": "temp_0035",
+          "fields_count": 3
+        },
+        {
+          "name": "*输尿管结石",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "膀胱/输尿管",
+          "template_id": "temp_0033",
+          "fields_count": 6
+        },
+        {
+          "name": "正常膀胱",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "膀胱/输尿管",
+          "template_id": "temp_0014",
+          "fields_count": 2
+        },
+        {
+          "name": "膀胱癌",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "膀胱/输尿管",
+          "template_id": "temp_0016",
+          "fields_count": 7
+        },
+        {
+          "name": "膀胱结石",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "膀胱/输尿管",
+          "template_id": "temp_0015",
+          "fields_count": 7
+        },
+        {
+          "name": "输尿管积水",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "膀胱/输尿管",
+          "template_id": "temp_0175",
+          "fields_count": 5
+        },
+        {
+          "name": "输尿管结石",
+          "level1": "泌尿(前列腺/膀胱)",
+          "level2": "泌尿",
+          "level3": "膀胱/输尿管",
+          "template_id": "temp_0174",
+          "fields_count": 5
+        }
+      ],
+      "count": 14
+    },
+    {
+      "level1": "血管(TCD/颈动脉/下肢)",
+      "level2": "血管",
+      "templates": [
+        {
+          "name": "下肢血管测值",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "下肢血管",
+          "template_id": "temp_0092",
+          "fields_count": 6
+        },
+        {
+          "name": "下肢静脉血栓",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "下肢血管",
+          "template_id": "temp_0087",
+          "fields_count": 8
+        },
+        {
+          "name": "海绵窦动静脉瘘",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "下肢血管",
+          "template_id": "temp_0159",
+          "fields_count": 5
+        },
+        {
+          "name": "神经鞘瘤",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "其他",
+          "template_id": "temp_0258",
+          "fields_count": 6
+        },
+        {
+          "name": "阴茎血流",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "其他",
+          "template_id": "temp_0237",
+          "fields_count": 2
+        },
+        {
+          "name": "假性动脉瘤",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "动脉/血管",
+          "template_id": "temp_0076",
+          "fields_count": 2
+        },
+        {
+          "name": "动脉瘤",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "动脉/血管",
+          "template_id": "temp_0075",
+          "fields_count": 5
+        },
+        {
+          "name": "眼底动脉硬化",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "动脉/血管",
+          "template_id": "temp_0187",
+          "fields_count": 5
+        },
+        {
+          "name": "糖尿病血管",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "动脉/血管",
+          "template_id": "temp_0091",
+          "fields_count": 5
+        },
+        {
+          "name": "脐动脉缺少",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "动脉/血管",
+          "template_id": "temp_0328",
+          "fields_count": 0
+        },
+        {
+          "name": "*肝脏弥漫性病变",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "肝脏",
+          "template_id": "temp_0236",
+          "fields_count": 3
+        },
+        {
+          "name": "肝血管瘤",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "肝脏",
+          "template_id": "temp_0056",
+          "fields_count": 58
+        },
+        {
+          "name": "肝转移瘤",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "肝脏",
+          "template_id": "temp_0054",
+          "fields_count": 60
+        },
+        {
+          "name": "脂肪肝",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "肝脏",
+          "template_id": "temp_0053",
+          "fields_count": 3
+        },
+        {
+          "name": "*肾细胞癌",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "肾脏",
+          "template_id": "temp_0030",
+          "fields_count": 4
+        },
+        {
+          "name": "正常肾动脉",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "肾脏",
+          "template_id": "temp_0090",
+          "fields_count": 0
+        },
+        {
+          "name": "正常肾血管",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "肾脏",
+          "template_id": "temp_0023",
+          "fields_count": 1
+        },
+        {
+          "name": "肾动脉",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "肾脏",
+          "template_id": "temp_0022",
+          "fields_count": 0
+        },
+        {
+          "name": "椎动脉狭窄",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "脑血管/TCD",
+          "template_id": "temp_0180",
+          "fields_count": 2
+        },
+        {
+          "name": "*脾淋巴瘤",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "脾脏",
+          "template_id": "temp_0308",
+          "fields_count": 7
+        },
+        {
+          "name": "正常颈部血管",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "颈动脉/颅外",
+          "template_id": "temp_0176",
+          "fields_count": 5
+        },
+        {
+          "name": "颈动脉体瘤",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "颈动脉/颅外",
+          "template_id": "temp_0256",
+          "fields_count": 5
+        },
+        {
+          "name": "颈动脉硬化",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "颈动脉/颅外",
+          "template_id": "temp_0178",
+          "fields_count": 4
+        },
+        {
+          "name": "颈动静脉瘘",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "颈动脉/颅外",
+          "template_id": "temp_0182",
+          "fields_count": 5
+        },
+        {
+          "name": "颈部肿块",
+          "level1": "血管(TCD/颈动脉/下肢)",
+          "level2": "血管",
+          "level3": "颈动脉/颅外",
+          "template_id": "temp_0134",
+          "fields_count": 44
+        }
+      ],
+      "count": 25
+    }
+  ]
+}

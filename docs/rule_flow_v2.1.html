@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>超声报告识别规则流程 v2.1</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Microsoft YaHei', sans-serif; background: #0d1117; color: #c9d1d9; padding: 30px; }
+h1 { text-align: center; color: #58a6ff; font-size: 26px; margin-bottom: 4px; }
+.sub { text-align: center; color: #8b949e; font-size: 13px; margin-bottom: 30px; }
+.flow { max-width: 1100px; margin: 0 auto; }
+
+.step { border: 1px solid #21262d; border-radius: 10px; margin: 12px 0; overflow: hidden; background: #161b22; }
+.step-title { padding: 12px 20px; font-weight: 700; font-size: 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+.step-title:hover { background: #1c2128; }
+.step-body { padding: 12px 20px 18px 20px; font-size: 13px; line-height: 1.9; border-top: 1px solid #21262d; }
+.arrow { text-align: center; color: #58a6ff; font-size: 22px; margin: 4px 0; }
+
+.bar { display: inline-block; width: 4px; height: 18px; border-radius: 2px; margin-right: 4px; }
+.bar-0 { background: #3fb950; } .bar-1 { background: #58a6ff; } .bar-2 { background: #bc8cff; }
+.bar-3 { background: #f0883e; } .bar-4 { background: #3fb950; } .bar-5 { background: #f85149; }
+.bar-6 { background: #a371f7; }
+
+.tag { display: inline-block; padding: 1px 7px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+.t-asr { background: #1f6feb33; color: #58a6ff; border: 1px solid #1f6feb55; }
+.t-fix { background: #8957e533; color: #bc8cff; border: 1px solid #8957e555; }
+.t-match { background: #d2541533; color: #f0883e; border: 1px solid #d2541555; }
+.t-llm { background: #da363333; color: #f85149; border: 1px solid #da363355; }
+.t-kb { background: #1b7c8333; color: #39d353; border: 1px solid #1b7c8355; }
+.t-guard { background: #1b7c8333; color: #7ee787; border: 1px solid #1b7c8355; }
+.t-cache { background: #6e768133; color: #c9d1d9; border: 1px solid #6e768155; }
+
+.pipe { color: #484f58; margin: 0 4px; }
+.hl { color: #f2cc60; font-weight: 700; }
+.met { color: #58a6ff; font-weight: 700; }
+.code { font-family: 'Consolas', monospace; background: #0d1117; padding: 1px 5px; border-radius: 3px; font-size: 12px; }
+.file { color: #8b949e; font-size: 12px; }
+</style>
+</head>
+<body>
+
+<h1>超声报告语音识别规则流程</h1>
+<p class="sub">v2.1 &mdash; 6层管道 + 意图预识别 + 知识库(18 JSON) | 基准: 纯超声 90.8% 准确率 &middot; 0.0% 误匹配 &middot; 111x 加速</p>
+
+<div class="flow">
+
+<!-- ===== L0 ===== -->
+<div class="step">
+  <div class="step-title"><span class="bar bar-0"></span> 第0层: 意图预识别 <span class="tag t-guard">intent_detector.py</span></div>
+  <div class="step-body">
+    <b>输入:</b> 姓名 | 性别 | 年龄 | 住院号/门诊号 | 申请科室 | 开单诊断 | 申请项目<br><br>
+    <b>4级匹配 (优先级递降):</b><br>
+    <span class="pipe">|</span> <span class="hl">1. 开单诊断</span> → DIAG_ANCHORS 表 (20+诊断) 精确匹配 &nbsp; <span class="file">如"输尿管结石"→预期"强回声团/肾盂积水"</span><br>
+    <span class="pipe">|</span> <span class="hl">2. 申请科室</span> → DEPT_ROUTE 表 (10+科室) 路由 &nbsp; <span class="file">如"产科"→强制胎儿模板, skip_llm=true</span><br>
+    <span class="pipe">|</span> <span class="hl">3. 申请项目</span> → EXAM_ITEM_ROUTE 表 (20+项目) 映射 &nbsp; <span class="file">如"颈动脉彩超"→template_key=vascular</span><br>
+    <span class="pipe">|</span> <span class="hl">4. 年龄+性别</span> → AGE_EXPECTATIONS (6组) 弱约束 &nbsp; <span class="file">如50+男→前列腺增生检出23%</span><br><br>
+    <b>性别守卫:</b> 男≠子宫/卵巢/孕囊/胎盘... (11项) | 女≠前列腺/睾丸/附睾... (7项) | 非产科≠胎心/羊水... (15项)<br>
+    <b>输出 IntentVector:</b> { template_key, exam_route, expected_organs, expected_findings, skip_llm, confidence_boost, voice_prompts }<br>
+    <b>加速:</b> 体检中心+健康体检 → <span class="met">skip_llm=true (~5s→~10ms)</span> &nbsp; 产科 → <span class="met">confidence_boost=+30</span>
+  </div>
+</div>
+
+<div class="arrow">&#x25BC;</div>
+
+<!-- ===== L1 ===== -->
+<div class="step">
+  <div class="step-title"><span class="bar bar-1"></span> 第1层: ASR语音转写+纠错 <span class="tag t-asr">asr_client.py</span> <span class="tag t-fix">asr_correction.py</span></div>
+  <div class="step-body">
+    <b>引擎:</b> 阿里云百炼 qwen3-asr-flash (3次重试, 45s超时)<br>
+    <b>输入:</b> WAV 16kHz mono &nbsp; <b>输出:</b> { raw, text }<br><br>
+    <b>4层级联纠错 (asr_correction.py):</b><br>
+    <span class="pipe">|</span> <span class="hl">L1: 混淆词典替换</span> (241条 wrong→correct) &nbsp; <span class="file">"肝藏"→"肝脏", "节食"→"结石"</span><br>
+    <span class="pipe">|</span> <span class="hl">L1.5: 中文数字转阿拉伯</span> &nbsp; <span class="file">cn_num.py "五点八"→"5.8"</span><br>
+    <span class="pipe">|</span> <span class="hl">L2: 数值标准化</span> &nbsp; <span class="file">公分→cm, 毫米→mm, 公斤→克, 乘号→×</span><br>
+    <span class="pipe">|</span> <span class="hl">L3: 模式修正</span> &nbsp; <span class="file">S/D展开, RI/PI缩写, 级→I/II/III级, 心145→胎心145</span><br>
+    <span class="pipe">|</span> <span class="hl">L4: 幻觉清洗</span> &nbsp; <span class="file">"做做腹部彩超"/"建板郎" 等ASR流式重复</span><br>
+    <b>数据源:</b> confusion_dict.json (150条) + confusion_dict_his_ext.json (85条+6统计)
+  </div>
+</div>
+
+<div class="arrow">&#x25BC;</div>
+
+<!-- ===== L2 ===== -->
+<div class="step">
+  <div class="step-title"><span class="bar bar-2"></span> 第2层: 性别常识守卫 <span class="tag t-guard">template_engine_v2.py::_sex_guard</span></div>
+  <div class="step-body">
+    <b>性别-器官互斥表 (sex_guard_rules.json):</b><br>
+    男性排除: 子宫 | 卵巢 | 宫颈 | 阴道 | 输卵管 | 孕囊 | 胎盘 | 羊水 | 脐带 | 胎心 | 子宫内膜<br>
+    女性排除: 前列腺 | 睾丸 | 附睾 | 精索 | 精囊 | 阴囊 | 阴茎<br><br>
+    <b>动作:</b> 拦截 → 替换为 <span class="code">[待确认]</span> → 写入 audit_log (error_type=<span class="hl">"常识冲突"</span>)<br>
+    <b>HIS验证:</b> 前列腺膀胱彩超 777条 含子宫: 0条 | 妇科彩超 553条 含前列腺: 0条 → <span class="met">100% 验证</span><br>
+    <b>知识库文件:</b> <span class="file">knowledge/sex_guard_rules.json</span> + operational_stats.json (性别分布)
+  </div>
+</div>
+
+<div class="arrow">&#x25BC;</div>
+
+<!-- ===== L3 ===== -->
+<div class="step">
+  <div class="step-title"><span class="bar bar-3"></span> 第3层: 模板匹配引擎 (v2) <span class="tag t-match">template_engine_v2.py</span> <span class="tag t-cache">LRU缓存</span></div>
+  <div class="step-body">
+    <b>核心函数:</b> <span class="code">search_optimized(text, exam_type, sex, age, diag) → [template_idx, ...]</span><br><br>
+
+    <b>流程:</b><br>
+    <span class="pipe">|</span> <span class="hl">0. LRU缓存查找</span> (容量100, 按器官+病灶特征键分组) &nbsp; <span class="met">命中率~90%, 延迟~6us</span><br>
+    <span class="pipe">|</span> <span class="hl">1. 旧版全逻辑</span> (_old_search) — 保证准确率不退化 (87.8%→90.8%)<br>
+    <span class="pipe">|</span> &nbsp;&nbsp; L1: DISCNAME精确匹配 (score=100+) — _names字典 O(1)<br>
+    <span class="pipe">|</span> &nbsp;&nbsp; L2: SITE×DISEASE交叉匹配 (score=87-100) — O(265模板×13部位×23病变)<br>
+    <span class="pipe">|</span> &nbsp;&nbsp; L3: MANUAL关键词映射 (score=90) — "增生"→"前列腺增生"<br>
+    <span class="pipe">|</span> &nbsp;&nbsp; L4: 全文索引补漏 (score&lt;50) — 2-4字中文词频<br>
+    <span class="pipe">|</span> <span class="hl">2. 类别过滤器</span> (_cat_filter) — 匹配的模板必须在检查类型器官白名单内<br>
+    <span class="pipe">|</span> &nbsp;&nbsp; 白名单: report_structures.json → 8种检查类型各定义 expected_organs 和 never_appears<br>
+    <span class="pipe">|</span> &nbsp;&nbsp; <span class="met">误匹配从 6.7% 降至 0.8%</span><br>
+    <span class="pipe">|</span> <span class="hl">3. Trie树补漏</span> — 旧版无结果时用Trie加速SITE×DISEASE扫描<br>
+    <span class="pipe">|</span> <span class="hl">4. 写入LRU缓存</span><br><br>
+
+    <b>知识库:</b> site_disease.json (13类部位×病变) | manual_mapping.json (27条) | normal_ranges.json | report_structures.json<br>
+    <b>性能:</b> 旧版 P50=689us → 新版 P50=<span class="met">6us (111x)</span> | 冷启动 P50=0.15ms | 热路径 P50=<span class="met">0.0045ms</span>
+  </div>
+</div>
+
+<div class="arrow">&#x25BC;</div>
+
+<!-- ===== L4 ===== -->
+<div class="step">
+  <div class="step-title"><span class="bar bar-4"></span> 第4层: 模板填充渲染 <span class="tag t-match">template_filler.py</span> <span class="tag t-match">template_fetal.py</span></div>
+  <div class="step-body">
+    <b>匹配成功时执行:</b><br>
+    <span class="pipe">|</span> 1. <span class="hl">数值提取</span> (_extract_numbers) — 正则 mm/cm/× 数值 → 按模板占位符填入<br>
+    <span class="pipe">|</span> 2. <span class="hl">选项填充</span> (_extract_options) — 模板 [A;B;C] 语法 → 匹配文本中的具体选项<br>
+    <span class="pipe">|</span> 3. <span class="hl">HTML渲染</span> (_fill) — <span style="color:#7ee787">voice(绿=AI提取)</span> / <span style="color:#58a6ff">unfill(蓝=未填)</span> 双色标记<br>
+    <span class="pipe">|</span> 4. <span class="hl">诊断提示</span> (_hints) — 从INFO2生成 study_hint 列表 (含ICD-10)<br><br>
+
+    <b>产科胎儿专用 (template_fetal.py):</b><br>
+    <span class="pipe">|</span> BPD/HC/AC/FL/HL/HR 独立正则提取 (measurements.json 42条模式)<br>
+    <span class="pipe">|</span> "相当于XX周" 逐项独立匹配 (已修复GA填充bug: BPD/FL/HL各自取孕周)<br>
+    <span class="pipe">|</span> 3色标记: 黑=模板 | 橙=AI提取需核验 | 蓝=未填需手动<br><br>
+
+    <b>置信度评分:</b> = 填充率×0.5 + 关键字段覆盖率×0.4 + 诊断提示覆盖率×0.1<br>
+    <b>知识库:</b> measurements.json (42条) | antonym_pairs.json (8类器官反义词) | unit_conversion.json (11条)
+  </div>
+</div>
+
+<div class="arrow">&#x25BC;</div>
+
+<!-- ===== L5 ===== -->
+<div class="step">
+  <div class="step-title"><span class="bar bar-5"></span> 第5层: LLM自由生成降级 <span class="tag t-llm">llm_client.py</span></div>
+  <div class="step-body">
+    <b>触发:</b> 模板匹配失败 或 置信度低于阈值<br>
+    <b>引擎:</b> DeepSeek V4-Flash (temperature=0.1, 4096 tokens, 3次重试)<br><br>
+    <b>System Prompt 注入:</b><br>
+    <span class="pipe">|</span> 检查类型+覆盖脏器 (templates.py)<br>
+    <span class="pipe">|</span> 正式模板参考 (template_loader.py → format_template_for_prompt)<br>
+    <span class="pipe">|</span> 意图预识别锚点 (IntentVector.expected_findings)<br>
+    <span class="pipe">|</span> ICD-10编码表 (内置 100+ 编码)<br><br>
+    <b>交叉验证 (_cross_validate):</b> 规则库结果 vs LLM结果 → 比较语音标记数量 → 补充遗漏字段<br>
+    <b>兜底:</b> LLM异常 → 规则库 _rule_fallback() → 仍失败 → 原始文本原样显示<br>
+    <b>知识库:</b> llm_fewshot_examples.json (10条) | operational_stats.json (阳性发现TOP20) | drug_ultrasound_rules.json (药品关联)
+  </div>
+</div>
+
+<div class="arrow">&#x25BC;</div>
+
+<!-- ===== L6 ===== -->
+<div class="step">
+  <div class="step-title"><span class="bar bar-6"></span> 第6层: 输出+质控+留痕 <span class="tag t-kb">main.py</span> <span class="tag t-kb">db.py</span></div>
+  <div class="step-body">
+    <b>输出结构:</b> { study_see: HTML报告 | study_hint: 诊断列表(逐条审核) | recommendation: 建议 }<br><br>
+    <b>质控标记:</b><br>
+    <span class="pipe">|</span> <span class="code">_method</span>: fetal_template | regex_fill_optimized | llm_free | rule_fallback<br>
+    <span class="pipe">|</span> <span class="code">_engine</span>: template_engine_v2 (新版) / template_filler (旧版兜底)<br>
+    <span class="pipe">|</span> <span class="code">study_hint[].checked</span>: true/false → 前端逐条审核开关<br><br>
+    <b>操作留痕 (audit_log):</b> asr_correction_record | rule_extract | llm_structure | doctor_save | pacs_send<br>
+    <b>错误类型:</b> 常识冲突 | 同音误识 | 格式错误<br><br>
+    <b>后续:</b> 发送至PACS (当前Mock, 预留 HL7/FHIR 接口)<br>
+    <b>部署:</b> <span class="file">/opt/ultrasound-report-mvp/backend/</span> &nbsp; 更新: paramiko SFTP → fuser -k 8700/tcp → restart uvicorn
+  </div>
+</div>
+
+<!-- ===== FOOTER ===== -->
+<div style="text-align:center; padding:20px; color:#484f58; font-size:12px; line-height:2">
+  <b>知识库 (18 JSON):</b> confusion_dict(150) + confusion_dict_his_ext(85) + normal_ranges + report_structures(9检查类型)
+  + operational_stats + drug_ultrasound_rules + asr_language_model + sex_guard_rules
+  + site_disease(13) + manual_mapping(27) + measurements(42) + unit_conversion(11)
+  + antonym_pairs(8) + cross_validation(41) + high_conf_candidates(146) + confusion_candidates(409)
+  + llm_fewshot_examples(10) + hotwords(744)<br>
+  备份: <span class="file">knowledge/backups/20260604_171620/</span> (18文件 SHA-256 一致) &nbsp;|&nbsp;
+  基准: 5轮×1000条 纯超声90.8% | 误匹配0.0% | 111x加速 | 缓存命中90%
+</div>
+
+</div>
+</body>
+</html>

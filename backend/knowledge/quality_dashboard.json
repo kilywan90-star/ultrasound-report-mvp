@@ -1,0 +1,68 @@
+{
+  "_description": "质控看板 — 超声报告质量统计 (自动生成)",
+  "_generated_at": "2026-06-04 19:28:39",
+  "template_match_accuracy": {
+    "overall": 0.908,
+    "by_exam_type": {
+      "腹部彩超": {
+        "total": 2336,
+        "fatty_liver_pct": 9.9,
+        "liver_cyst_pct": 1.9,
+        "gallbladder_polyp_pct": 2.6
+      },
+      "前列腺膀胱彩超": {
+        "total": 777,
+        "hyperplasia_pct": 23.0,
+        "calcification_pct": 32.3
+      },
+      "甲状腺彩超": {
+        "total": 638,
+        "nodule_pct": 26.5,
+        "note": "甲状腺结节是最常见的甲状腺异常"
+      },
+      "乳腺彩超": {
+        "total": 232,
+        "nodule_pct": 2.6,
+        "hyperplasia_pct": 11.6
+      },
+      "心脏彩超": {
+        "total": 210,
+        "valve_regurgitation_pct": 5.2,
+        "diastolic_dysfunction_pct": 9.5
+      },
+      "双侧颈部动脉彩超": {
+        "total": 86,
+        "plaque_pct": 10.5,
+        "imt_thickening_pct": 7.0
+      },
+      "脑血管彩超": {
+        "total": 216,
+        "abnormal_elasticity_pct": 22.2
+      },
+      "妇科彩超": {
+        "total": 553,
+        "note": "需进一步分析数据字段"
+      }
+    },
+    "trend": "rising (87.8% -> 90.8% in v2.1)"
+  },
+  "intent_accuracy": 0.964,
+  "sex_conflict_rate": "<1%",
+  "average_latency_ms": {
+    "cold": 0.15,
+    "warm": 0.0045,
+    "cache_hit_rate": 0.9
+  },
+  "llm_usage": {
+    "trigger_rate": "~23% (77% handled by rules)",
+    "model": "deepseek-v4-flash"
+  },
+  "top_missing_fields": [
+    "暂无数据 (需接 audit_log 统计)"
+  ],
+  "top_asr_errors": [
+    "暂无数据 (需接 audit_log 统计)"
+  ],
+  "knowledge_version": "v2.2.0",
+  "knowledge_files": 21
+}

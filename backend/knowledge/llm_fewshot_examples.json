@@ -1,46 +1,42 @@
 {
-  "前列腺": [
+  "_description": "LLM few-shot 分科室示例 — 按 template_key 注入对应科室样例, 提升大模型输出格式贴合度",
+  "_total_examples": 35,
+  "_departments": {
+    "其他": 30,
+    "腹部": 5
+  },
+  "其他": [
     {
-      "phrase": "前列腺形态大小正常",
-      "frequency": 433
+      "phrase": "肺门及纵隔结构未见异常",
+      "frequency": 69
     },
     {
-      "phrase": "前列腺内未见异常血流信号",
-      "frequency": 305
+      "phrase": "子宫实质内未见异常血流信号",
+      "frequency": 450
     },
     {
-      "phrase": "其内未见异常回声",
-      "frequency": 289
+      "phrase": "盆腔及子宫直肠间隙未见积液",
+      "frequency": 397
     },
     {
-      "phrase": "其内未见异常血流信号",
-      "frequency": 280
+      "phrase": "子宫大小形态正常",
+      "frequency": 392
     },
     {
-      "phrase": "经腹前列腺超声检查",
-      "frequency": 208
-    }
-  ],
-  "甲状腺": [
-    {
-      "phrase": "甲状腺周围未见确切肿大的淋巴结图像",
-      "frequency": 613
+      "phrase": "双侧附件区未见异常血流信息",
+      "frequency": 370
     },
     {
-      "phrase": "甲状腺位置及大小形态正常",
-      "frequency": 597
+      "phrase": "双侧附件未见占位性病变",
+      "frequency": 309
     },
     {
-      "phrase": "甲状腺实质内未见异常血流信号",
-      "frequency": 496
+      "phrase": "经阴道超声检查子宫附件见",
+      "frequency": 56
     },
     {
-      "phrase": "甲状腺实质回声均匀",
-      "frequency": 493
-    },
-    {
-      "phrase": "甲状腺实质回声不均匀",
-      "frequency": 53
+      "phrase": "子宫实质内未见异常血流信号",
+      "frequency": 55
     }
   ],
   "腹部": [
@@ -63,136 +59,6 @@
     {
       "phrase": "双侧肾大小形态正常",
       "frequency": 2312
-    }
-  ],
-  "乳腺": [
-    {
-      "phrase": "双侧乳腺皮肤皮下组织各层次结构清晰",
-      "frequency": 224
-    },
-    {
-      "phrase": "乳腺后间隙未见异常",
-      "frequency": 224
-    },
-    {
-      "phrase": "未见扩张的乳腺导管",
-      "frequency": 214
-    },
-    {
-      "phrase": "双侧腋窝及乳腺周围未见长大的淋巴结",
-      "frequency": 208
-    },
-    {
-      "phrase": "未见异常的血流信号",
-      "frequency": 203
-    }
-  ],
-  "子宫附件": [
-    {
-      "phrase": "子宫实质内未见异常血流信号",
-      "frequency": 450
-    },
-    {
-      "phrase": "盆腔及子宫直肠间隙未见积液",
-      "frequency": 397
-    },
-    {
-      "phrase": "子宫大小形态正常",
-      "frequency": 392
-    },
-    {
-      "phrase": "双侧附件区未见异常血流信息",
-      "frequency": 370
-    },
-    {
-      "phrase": "双侧附件未见占位性病变",
-      "frequency": 309
-    }
-  ],
-  "心脏": [
-    {
-      "phrase": "心内未见明显异常分流",
-      "frequency": 202
-    },
-    {
-      "phrase": "结构未见明显异常",
-      "frequency": 202
-    },
-    {
-      "phrase": "心包腔内未见积液征象",
-      "frequency": 202
-    },
-    {
-      "phrase": "各房室内径正常范围",
-      "frequency": 187
-    },
-    {
-      "phrase": "室间隔与左室壁厚度正常",
-      "frequency": 186
-    }
-  ],
-  "经颅多普勒": [
-    {
-      "phrase": "未见异常血流信号",
-      "frequency": 221
-    },
-    {
-      "phrase": "经颅双功能多普勒超声检查",
-      "frequency": 220
-    },
-    {
-      "phrase": "椎动脉及基底动脉血流方向正常",
-      "frequency": 177
-    },
-    {
-      "phrase": "椎基底动脉血流频谱呈高位转折型频谱",
-      "frequency": 84
-    },
-    {
-      "phrase": "双侧各动脉血流速度及方向正常",
-      "frequency": 71
-    }
-  ],
-  "双侧颈动脉": [
-    {
-      "phrase": "血流速度及频谱未见明显异常",
-      "frequency": 80
-    },
-    {
-      "phrase": "双侧椎动脉颅外段走行及管径未见异常",
-      "frequency": 80
-    },
-    {
-      "phrase": "多普勒检查见其血流速度",
-      "frequency": 80
-    },
-    {
-      "phrase": "颈外动脉内径未见异常",
-      "frequency": 80
-    },
-    {
-      "phrase": "血流方向及频谱形态未见异常",
-      "frequency": 80
-    }
-  ],
-  "胸部": [
-    {
-      "phrase": "肺门及纵隔结构未见异常",
-      "frequency": 69
-    }
-  ],
-  "阴道超声子宫附件": [
-    {
-      "phrase": "经阴道超声检查子宫附件见",
-      "frequency": 56
-    },
-    {
-      "phrase": "子宫实质内未见异常血流信号",
-      "frequency": 55
-    },
-    {
-      "phrase": "双侧附件区未见异常血流信息",
-      "frequency": 52
     }
   ]
 }

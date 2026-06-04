@@ -1,0 +1,215 @@
+{
+  "_description": "模板匹配辅助评分规则 — 口述匹配正常模式时加分",
+  "high_confidence_patterns": [
+    {
+      "organ": "肝脏",
+      "pattern": "大小形态正常",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肝脏",
+      "pattern": "包膜光滑",
+      "freq": 2354,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肝脏",
+      "pattern": "边缘锐利",
+      "freq": 2277,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肝脏",
+      "pattern": "实质回声均匀",
+      "freq": 3508,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肝脏",
+      "pattern": "肝内血管走行正常",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肝脏",
+      "pattern": "纹理清晰",
+      "freq": 2170,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肝脏",
+      "pattern": "肝静脉门静脉无扩张",
+      "freq": 2322,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肝脏",
+      "pattern": "肝内外胆管不扩张",
+      "freq": 2322,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肝脏",
+      "pattern": "门静脉内径正常",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肝脏",
+      "pattern": "未见异常血流信号",
+      "freq": 4437,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "胆囊",
+      "pattern": "大小正常",
+      "freq": 2486,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "胆囊",
+      "pattern": "囊壁光滑",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "胆囊",
+      "pattern": "腔内未见异常回声",
+      "freq": 2331,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "胆囊",
+      "pattern": "肝内外胆管不扩张",
+      "freq": 2322,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "胰腺",
+      "pattern": "形态大小正常",
+      "freq": 2328,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "胰腺",
+      "pattern": "胰腺周围未见占位性病变",
+      "freq": 2328,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "胰腺",
+      "pattern": "胰管不扩张",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "脾脏",
+      "pattern": "位置及大小形态正常",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "脾脏",
+      "pattern": "包膜薄而光滑",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "脾脏",
+      "pattern": "实质回声均匀",
+      "freq": 3508,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "脾脏",
+      "pattern": "脾静脉不扩张",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "脾脏",
+      "pattern": "脾实质内未见异常血流信号",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肾脏",
+      "pattern": "双侧肾大小形态正常",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肾脏",
+      "pattern": "包膜光滑",
+      "freq": 2354,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肾脏",
+      "pattern": "实质回声均匀",
+      "freq": 3508,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肾脏",
+      "pattern": "皮髓质分界清楚",
+      "freq": 2102,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肾脏",
+      "pattern": "集合系未见分离",
+      "freq": 2339,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肾脏",
+      "pattern": "内未见强回声",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "肾脏",
+      "pattern": "肾实质内未见异常血流信号",
+      "freq": 2312,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    },
+    {
+      "organ": "甲状腺",
+      "pattern": "未见明显占位",
+      "freq": 2891,
+      "score_bonus": 5,
+      "note": ">2000次出现, 高度可信正常描述"
+    }
+  ]
+}

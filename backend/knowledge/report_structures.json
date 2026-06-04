@@ -1,0 +1,152 @@
+{
+  "_description": "从HIS 10,042条超声报告提取的报告结构模板 — 按检查类型分段落结构",
+  "_source": "ris_report.csv JCSJ字段 + template_filler.py 模板表 + 现有antonym_pairs.json",
+  "abdomen": {
+    "name": "腹部彩超",
+    "paragraphs": [
+      {"order": 1, "title": "肝脏", "standard_template": "肝脏：大小形态正常，包膜光滑，形态规整，边缘锐利，实质回声均匀，肝内血管走行正常，纹理清晰。肝静脉、门静脉无扩张。"},
+      {"order": 2, "title": "胆囊", "standard_template": "胆囊：大小正常，囊壁光滑，腔内未见异常回声。肝内外胆管不扩张。"},
+      {"order": 3, "title": "胰腺", "standard_template": "胰腺：形态大小正常，回声均匀，胰管不扩张。胰腺周围未见占位性病变。"},
+      {"order": 4, "title": "脾脏", "standard_template": "脾脏：位置及大小形态正常，包膜薄而光滑，实质回声均匀，脾静脉不扩张。"},
+      {"order": 5, "title": "双肾", "standard_template": "双肾：双侧肾大小形态正常，包膜光滑，实质回声均匀，皮髓质分界清楚，集合系未见分离，内未见强回声。"},
+      {"order": 6, "title": "多普勒", "standard_template": "多普勒超声检查见：肝静脉、门静脉血流方向及血流速度正常，脾实质内未见异常血流信号，肾实质内未见异常血流信号。"}
+    ],
+    "organs": ["肝脏","胆囊","胆总管","胰腺","脾脏","左肾","右肾","双肾"],
+    "high_freq_normal": [
+      "实质回声均匀",
+      "大小形态正常",
+      "包膜光滑",
+      "未见异常血流信号"
+    ]
+  },
+  "prostate_bladder": {
+    "name": "前列腺膀胱彩超",
+    "paragraphs": [
+      {"order": 1, "title": "前列腺", "standard_template": "前列腺：形态大小正常，其内未见异常回声，未见异常血流信号。"},
+      {"order": 2, "title": "膀胱", "standard_template": "膀胱：膀胱充盈好，膀胱壁光滑连续，膀胱内无回声暗区清晰，未见结石及占位性病变。"},
+      {"order": 3, "title": "排尿后", "standard_template": "排尿后：膀胱内未见残余尿。"}
+    ],
+    "organs": ["前列腺","膀胱","精囊"],
+    "high_freq_normal": [
+      "前列腺形态大小正常",
+      "膀胱充盈好",
+      "膀胱壁光滑",
+      "未见结石及占位性病变"
+    ]
+  },
+  "thyroid": {
+    "name": "甲状腺彩超",
+    "paragraphs": [
+      {"order": 1, "title": "甲状腺", "standard_template": "甲状腺：位置及大小形态正常，实质回声均匀，未见明显占位。甲状腺周围未见确切肿大的淋巴结图像。"},
+      {"order": 2, "title": "多普勒", "standard_template": "CDFI：甲状腺实质内未见异常血流信号。"}
+    ],
+    "organs": ["甲状腺","甲状旁腺","颈部淋巴结"],
+    "high_freq_normal": [
+      "甲状腺位置及大小形态正常",
+      "实质回声均匀",
+      "未见明显占位",
+      "未见确切肿大的淋巴结图像"
+    ]
+  },
+  "gynecology": {
+    "name": "妇科彩超",
+    "paragraphs": [
+      {"order": 1, "title": "子宫", "standard_template": "子宫：前/后位，大小形态正常，肌壁回声均匀，宫腔线清晰。子宫实质内未见异常血流信号。"},
+      {"order": 2, "title": "附件", "standard_template": "双侧附件区未见占位性病变，未见异常血流信息。"},
+      {"order": 3, "title": "盆腔", "standard_template": "盆腔及子宫直肠间隙未见积液。"}
+    ],
+    "organs": ["子宫","卵巢","输卵管","附件","盆腔"],
+    "high_freq_normal": [
+      "子宫大小形态正常",
+      "子宫实质内未见异常血流信号",
+      "双侧附件区未见异常血流信息",
+      "盆腔及子宫直肠间隙未见积液"
+    ]
+  },
+  "breast": {
+    "name": "乳腺彩超",
+    "paragraphs": [
+      {"order": 1, "title": "乳腺", "standard_template": "双侧乳腺皮肤皮下组织各层次结构清晰，未见异常。乳腺后间隙未见异常。未见扩张的乳腺导管。"},
+      {"order": 2, "title": "淋巴结", "standard_template": "双侧腋窝及乳腺周围未见长大的淋巴结。"},
+      {"order": 3, "title": "多普勒", "standard_template": "未见异常的血流信号。"}
+    ],
+    "organs": ["乳腺","腋窝淋巴结"],
+    "high_freq_normal": [
+      "双侧乳腺皮肤皮下组织各层次结构清晰",
+      "乳腺后间隙未见异常",
+      "未见扩张的乳腺导管",
+      "未见长大的淋巴结"
+    ]
+  },
+  "cardiac": {
+    "name": "心脏彩超",
+    "paragraphs": [
+      {"order": 1, "title": "心腔大小", "standard_template": "各房室内径正常范围。室间隔与左室壁厚度正常。"},
+      {"order": 2, "title": "瓣膜", "standard_template": "二尖瓣/三尖瓣/主动脉瓣/肺动脉瓣形态结构未见明显异常，启闭良好。"},
+      {"order": 3, "title": "分流", "standard_template": "心内未见明显异常分流。"},
+      {"order": 4, "title": "心包", "standard_template": "心包腔内未见积液征象。"}
+    ],
+    "organs": ["左房","左室","右房","右室","二尖瓣","三尖瓣","主动脉瓣","肺动脉瓣","心包"],
+    "high_freq_normal": [
+      "各房室内径正常范围",
+      "室间隔与左室壁厚度正常",
+      "心内未见明显异常分流",
+      "心包腔内未见积液征象"
+    ]
+  },
+  "tcd": {
+    "name": "经颅多普勒(TCD)",
+    "paragraphs": [
+      {"order": 1, "title": "血流速度", "standard_template": "双侧各动脉血流速度及方向正常。椎动脉及基底动脉血流方向正常。"},
+      {"order": 2, "title": "频谱形态", "standard_template": "未见异常血流信号。"}
+    ],
+    "organs": ["大脑中动脉","大脑前动脉","大脑后动脉","椎动脉","基底动脉"],
+    "high_freq_normal": [
+      "双侧各动脉血流速度及方向正常",
+      "未见异常血流信号",
+      "椎动脉及基底动脉血流方向正常"
+    ],
+    "high_freq_abnormal": [
+      "椎基底动脉血流频谱呈高位转折型频谱",
+      "血流速度增快/减慢"
+    ]
+  },
+  "carotid": {
+    "name": "颈部血管彩超",
+    "paragraphs": [
+      {"order": 1, "title": "颈总动脉", "standard_template": "颈总动脉/颈内动脉/颈外动脉内径未见异常，内膜中层厚度正常。"},
+      {"order": 2, "title": "斑块", "standard_template": "未见明显斑块形成。血流速度及频谱未见明显异常。"},
+      {"order": 3, "title": "椎动脉", "standard_template": "双侧椎动脉颅外段走行及管径未见异常。血流方向及频谱形态未见异常。"}
+    ],
+    "organs": ["颈总动脉","颈内动脉","颈外动脉","椎动脉","锁骨下动脉"],
+    "high_freq_normal": [
+      "内径未见异常",
+      "血流速度及频谱未见明显异常",
+      "未见明显斑块形成"
+    ]
+  },
+  "obstetric": {
+    "name": "产科超声",
+    "paragraphs": [
+      {"order": 1, "title": "胎儿测值", "standard_template": "双顶径__cm，头围__cm，腹围__cm，股骨长__cm，肱骨长__cm，小脑横径__cm，胎儿体重__±克。"},
+      {"order": 2, "title": "羊水", "standard_template": "羊水最大平段__cm，羊水指数__cm。"},
+      {"order": 3, "title": "脐带血流", "standard_template": "脐带血流：Vmax__cm/s，RI__，PI__，S/D__。胎儿心率__次/分。"},
+      {"order": 4, "title": "胎儿结构", "standard_template": "胎位：头位/臀位/横位。"},
+      {"order": 5, "title": "胎盘", "standard_template": "胎盘：附着在子宫前/后/左/右壁，__级，厚约__cm。"}
+    ],
+    "organs": ["胎儿","胎盘","羊水","脐带","宫颈"],
+    "high_freq_normal": [
+      "单活胎",
+      "头位",
+      "胎盘成熟度",
+      "未见脐带绕颈"
+    ],
+    "high_freq_abnormal": [
+      "脐带绕颈",
+      "臀位",
+      "横位",
+      "前置胎盘",
+      "羊水过多/过少"
+    ]
+  }
+}

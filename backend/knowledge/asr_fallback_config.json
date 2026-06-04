@@ -1,0 +1,21 @@
+{
+  "_description": "ASR双引擎热备配置 — 主=阿里百炼, 备=Whisper Small(本地)",
+  "primary": {
+    "engine": "qwen3-asr-flash",
+    "provider": "dashscope",
+    "timeout_sec": 45,
+    "retry_count": 2
+  },
+  "fallback": {
+    "engine": "whisper-small",
+    "provider": "local",
+    "trigger": [
+      "primary_timeout",
+      "primary_500_error",
+      "primary_empty_result"
+    ],
+    "model_path": "./whisper-finetune/whisper-small-ultrasound-lora",
+    "note": "仅在主引擎不可用时激活, 部署时需 pip install faster-whisper"
+  },
+  "status": "disabled"
+}

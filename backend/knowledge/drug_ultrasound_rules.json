@@ -1,0 +1,112 @@
+{
+  "_description": "HIS 药品处方数据中与超声检查相关的规则 — 检查前准备用药、适应症诊断分布、耦合剂使用模式",
+  "_source": "drug_master.csv + drug_orders.csv(采样) + audit_hjcfk.csv(91,385处方) + audit_hjcfk_mx.csv(211,621明细) + diagnoses.csv",
+  "_date": "2026-06-04",
+  "_note": "锦州三甲医院 2014-2016，超声专用造影剂(SonoVue)未在药典中出现，符合历史普及时间线",
+
+  "ultrasound_specific_materials": {
+    "耦合剂": {
+      "total_records": 2434,
+      "types": [
+        {"name": "消毒型医用超声耦合剂", "count": "约800+"},
+        {"name": "B超医用耦合剂", "count": "约800+"},
+        {"name": "彩色多普勒超声医用耦合剂", "count": "约634"},
+        {"name": "腔内超声探头隔离套", "count": "约634"}
+      ],
+      "rule": "每次超声检查关联1条耦合剂记录，腔内超声加用隔离套。HIS中表现为处方明细项目。"
+    },
+    "超声造影剂": {
+      "finding": "SonoVue/声诺维/Lumason 未在2014-2016药典中出现",
+      "context": "SonoVue虽2004年获CFDA批准，但在中国三甲医院超声科的普及主要在2016年之后"
+    }
+  },
+
+  "exam_preparation_medications": {
+    "_description": "超声检查前准备用药（导泻、膀胱充盈、解痉）",
+    "bowel_prep": [
+      {"drug": "甘露醇", "dose_route": "口服/灌肠", "freq": 3220, "purpose": "肠道清洁（腹部超声、妇科超声经腹检查前）"},
+      {"drug": "番泻叶", "dose_route": "口服", "freq": 106, "purpose": "导泻"},
+      {"drug": "聚乙二醇4000", "dose_route": "口服", "freq": 24, "purpose": "肠道清洁"},
+      {"drug": "硫酸镁", "dose_route": "口服", "freq": "少量", "purpose": "导泻"}
+    ],
+    "bladder_filling": [
+      {"drug": "呋塞米(速尿)", "dose_route": "口服/注射", "freq": 35, "purpose": "促进膀胱充盈（妇科/前列腺超声检查前）"}
+    ],
+    "antispasmodic": [
+      {"drug": "山莨菪碱(654-2)", "dose_route": "注射", "freq": 7, "purpose": "解痉（缓解输尿管痉挛便于结石显示）"},
+      {"drug": "阿托品", "dose_route": "注射", "freq": 2, "purpose": "解痉"}
+    ]
+  },
+
+  "ultrasound_indication_diagnoses_by_icd_category": {
+    "_description": "HIS diagnoses.csv 中与各超声检查类型对应的诊断分布",
+    "total_ultrasound_relevant_diagnoses": 1112,
+    "total_ultrasound_relevant_occurrences": 52659,
+    "categories": [
+      {"category": "泌尿超声适应症", "icd_types": 289, "occurrences": 17098, "top": "N20肾/输尿管结石、N13肾积水、N40前列腺增生"},
+      {"category": "心脏超声适应症", "icd_types": 135, "occurrences": 12085, "top": "I10高血压、I25冠心病、I50心衰、I48房颤"},
+      {"category": "妇科超声适应症", "icd_types": 223, "occurrences": 11875, "top": "N85瘢痕子宫、D25子宫肌瘤、N80子宫内膜异位"},
+      {"category": "乳腺超声适应症", "icd_types": 73, "occurrences": 5058, "top": "N60乳腺增生、C50乳腺癌"},
+      {"category": "血管超声适应症", "icd_types": 126, "occurrences": 2681, "top": "I65/I66脑梗死、I70动脉粥样硬化"},
+      {"category": "产科超声适应症", "icd_types": 95, "occurrences": 1472, "top": "O42胎膜早破、O26妊娠期管理、O82剖宫产"},
+      {"category": "浅表超声适应症", "icd_types": 112, "occurrences": 1434, "top": "J38声带息肉、E04甲状腺结节"},
+      {"category": "腹部超声适应症", "icd_types": 39, "occurrences": 495, "top": "K80胆囊结石、K76脂肪肝、K81胆囊炎"},
+      {"category": "甲状腺超声适应症", "icd_types": 20, "occurrences": 461, "top": "E04甲状腺结节、E05甲亢、E06甲状腺炎"}
+    ]
+  },
+
+  "high_freq_prescription_combos": {
+    "_description": "与超声检查相关的高频药品组合（audit_hjcfk_mx 处方明细）",
+    "ultrasound_related": [
+      {"combo": "彩色多普勒超声医用耦合剂 + 腔内超声探头隔离套", "freq": 634, "note": "经腔内超声标准配置"},
+      {"combo": "B超医用耦合剂 + 消毒型医用超声耦合剂", "freq": 328, "note": "常规超声双耦合剂配置"},
+      {"combo": "彩色多普勒超声耦合剂(单独)", "freq": "约800+", "note": "心脏/血管/浅表超声配置"}
+    ],
+    "general_co_occurrence": [
+      {"combo": "一次性静脉采血管 + 血细胞分析", "freq": 755, "note": "超声检查常见伴随检验（非超声独有）"}
+    ]
+  },
+
+  "ct_mr_contrast_agents_found": {
+    "_description": "非超声用途的造影剂（用于对比参考）",
+    "agents": [
+      "碘海醇(CT)", "碘帕醇(CT)", "碘普罗胺(CT)", "碘克沙醇(CT)",
+      "钆喷酸葡胺(MR)", "钆塞酸二钠(MR)", "钆双胺(MR)",
+      "碘佛醇(CT)", "碘比醇(CT)", "碘美普尔(CT)", "碘曲仑(CT)"
+    ],
+    "note": "CT/MR造影剂11种，但无超声造影剂。超声增强造影在当时该院非标准流程"
+  },
+
+  "derived_rules": [
+    {
+      "id": "DRUG-001",
+      "rule": "IF 处方含'耦合剂' THEN 可推断超声检查已执行",
+      "certainty": "high",
+      "use": "结构化报告系统可从HIS同步耦合剂记录自动创建超声报告草稿"
+    },
+    {
+      "id": "DRUG-002",
+      "rule": "IF 处方含'山莨菪碱'/'阿托品' + 诊断='肾绞痛'/'输尿管结石' THEN 超声检查目的为结石定位",
+      "certainty": "high",
+      "use": "LLM结构化时加入检查目的上下文"
+    },
+    {
+      "id": "DRUG-003",
+      "rule": "IF 处方含'甘露醇' + 诊断含'腹痛' THEN 超声检查前已做肠道准备",
+      "certainty": "medium",
+      "use": "医生口述'肠道准备好了'时可交叉验证"
+    },
+    {
+      "id": "DRUG-004",
+      "rule": "IF 处方含'腔内超声探头隔离套' THEN 检查类型为经阴道/经直肠超声",
+      "certainty": "high",
+      "use": "自动推断检查途径(经腹/经阴道/经直肠)"
+    },
+    {
+      "id": "DRUG-005",
+      "rule": "IF 处方无超声造影剂 AND 诊断含'肝占位' THEN 超声可能无法明确性质，建议增强CT/MR",
+      "certainty": "medium",
+      "use": "LLM生成建议时参考可用诊断手段"
+    }
+  ]
+}

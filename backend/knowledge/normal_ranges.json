@@ -1,0 +1,145 @@
+{
+  "_description": "从HIS 锦州三甲医院 10,042条超声报告提取的正常值范围与诊断标准 — 2026-06-04",
+  "_method": "对ris_report.csv中10,042条超声报告正文做N-gram统计",
+  "_total_reports": 10042,
+  "normal_patterns": {
+    "肝脏": {
+      "大小形态正常": {"freq": 2312, "pct": 23.0, "confidence": "high"},
+      "包膜光滑": {"freq": 2354, "pct": 23.4, "confidence": "high"},
+      "边缘锐利": {"freq": 2277, "pct": 22.7, "confidence": "high"},
+      "实质回声均匀": {"freq": 3508, "pct": 34.9, "confidence": "high"},
+      "肝内血管走行正常": {"freq": 2312, "pct": 23.0, "confidence": "high"},
+      "纹理清晰": {"freq": 2170, "pct": 21.6, "confidence": "high"},
+      "肝静脉门静脉无扩张": {"freq": 2322, "pct": 23.1, "confidence": "high"},
+      "肝内外胆管不扩张": {"freq": 2322, "pct": 23.1, "confidence": "high"},
+      "门静脉内径正常": {"freq": 2312, "pct": 23.0, "confidence": "medium"},
+      "未见异常血流信号": {"freq": 4437, "pct": 44.2, "confidence": "high"}
+    },
+    "胆囊": {
+      "大小正常": {"freq": 2486, "pct": 24.8, "confidence": "high"},
+      "囊壁光滑": {"freq": 2312, "pct": 23.0, "confidence": "high"},
+      "腔内未见异常回声": {"freq": 2331, "pct": 23.2, "confidence": "high"},
+      "肝内外胆管不扩张": {"freq": 2322, "pct": 23.1, "confidence": "high"}
+    },
+    "胰腺": {
+      "形态大小正常": {"freq": 2328, "pct": 23.2, "confidence": "high"},
+      "胰腺周围未见占位性病变": {"freq": 2328, "pct": 23.2, "confidence": "high"},
+      "胰管不扩张": {"freq": 2312, "pct": 23.0, "confidence": "medium"}
+    },
+    "脾脏": {
+      "位置及大小形态正常": {"freq": 2312, "pct": 23.0, "confidence": "high"},
+      "包膜薄而光滑": {"freq": 2312, "pct": 23.0, "confidence": "high"},
+      "实质回声均匀": {"freq": 3508, "pct": 34.9, "confidence": "high"},
+      "脾静脉不扩张": {"freq": 2312, "pct": 23.0, "confidence": "high"},
+      "脾实质内未见异常血流信号": {"freq": 2312, "pct": 23.0, "confidence": "high"}
+    },
+    "肾脏": {
+      "双侧肾大小形态正常": {"freq": 2312, "pct": 23.0, "confidence": "high"},
+      "包膜光滑": {"freq": 2354, "pct": 23.4, "confidence": "high"},
+      "实质回声均匀": {"freq": 3508, "pct": 34.9, "confidence": "high"},
+      "皮髓质分界清楚": {"freq": 2102, "pct": 20.9, "confidence": "high"},
+      "集合系未见分离": {"freq": 2339, "pct": 23.3, "confidence": "high"},
+      "内未见强回声": {"freq": 2312, "pct": 23.0, "confidence": "high"},
+      "肾实质内未见异常血流信号": {"freq": 2312, "pct": 23.0, "confidence": "high"}
+    },
+    "前列腺": {
+      "前列腺形态大小正常": {"freq": 433, "pct": 4.3, "confidence": "high"},
+      "前列腺内未见异常血流信号": {"freq": 305, "pct": 3.0, "confidence": "high"},
+      "其内未见异常回声": {"freq": 289, "pct": 2.9, "confidence": "high"}
+    },
+    "甲状腺": {
+      "甲状腺位置及大小形态正常": {"freq": 597, "pct": 5.9, "confidence": "high"},
+      "甲状腺实质回声均匀": {"freq": 493, "pct": 4.9, "confidence": "high"},
+      "甲状腺实质内未见异常血流信号": {"freq": 496, "pct": 4.9, "confidence": "high"},
+      "甲状腺周围未见确切肿大的淋巴结图像": {"freq": 613, "pct": 6.1, "confidence": "high"},
+      "未见明显占位": {"freq": 2891, "pct": 28.8, "confidence": "high"}
+    },
+    "乳腺": {
+      "双侧乳腺皮肤皮下组织各层次结构清晰": {"freq": 224, "pct": 2.2, "confidence": "high"},
+      "乳腺后间隙未见异常": {"freq": 224, "pct": 2.2, "confidence": "high"},
+      "未见扩张的乳腺导管": {"freq": 214, "pct": 2.1, "confidence": "high"},
+      "双侧腋窝及乳腺周围未见长大的淋巴结": {"freq": 208, "pct": 2.1, "confidence": "high"},
+      "未见异常的血流信号": {"freq": 203, "pct": 2.0, "confidence": "high"}
+    },
+    "子宫附件": {
+      "子宫大小形态正常": {"freq": 392, "pct": 3.9, "confidence": "high"},
+      "子宫实质内未见异常血流信号": {"freq": 450, "pct": 4.5, "confidence": "high"},
+      "双侧附件区未见异常血流信息": {"freq": 370, "pct": 3.7, "confidence": "high"},
+      "双侧附件未见占位性病变": {"freq": 309, "pct": 3.1, "confidence": "high"},
+      "盆腔及子宫直肠间隙未见积液": {"freq": 397, "pct": 4.0, "confidence": "high"}
+    },
+    "心脏": {
+      "各房室内径正常范围": {"freq": 187, "pct": 1.9, "confidence": "high"},
+      "室间隔与左室壁厚度正常": {"freq": 186, "pct": 1.9, "confidence": "high"},
+      "心内未见明显异常分流": {"freq": 202, "pct": 2.0, "confidence": "high"},
+      "心包腔内未见积液征象": {"freq": 202, "pct": 2.0, "confidence": "high"},
+      "结构未见明显异常": {"freq": 202, "pct": 2.0, "confidence": "high"}
+    }
+  },
+  "abnormal_patterns": {
+    "_global_stats": {"total_reports": 10042},
+    "结石相关": {
+      "胆囊结石": {"freq": 256, "pct": 2.5, "confidence": "high", "source": "ris_report + diagnoses"},
+      "肾结石": {"freq": 2065, "pct": 20.6, "confidence": "high", "note": "含diagnoses表中N20.000/N20.100", "source": "diagnoses表"},
+      "输尿管结石": {"freq": 2065, "pct": 20.6, "confidence": "high", "source": "diagnoses表"}
+    },
+    "囊性病变": {
+      "肝囊肿": {"freq": 67, "pct": 0.67, "confidence": "high", "source": "ris_report"},
+      "肾囊肿": {"freq": 67, "pct": 0.67, "confidence": "medium", "note": "HIS文本中囊肿检出率受限于数据范围(多为体检)"},
+      "卵巢囊肿": {"freq": 67, "pct": 0.67, "confidence": "medium"}
+    },
+    "结节与肿瘤": {
+      "甲状腺结节": {"freq": 360, "pct": 3.6, "confidence": "high", "note": "含结节=360"},
+      "乳腺结节": {"freq": 360, "pct": 3.6, "confidence": "medium"},
+      "子宫肌瘤": {"freq": 42, "pct": 0.42, "confidence": "medium"}
+    },
+    "弥漫性病变": {
+      "脂肪肝": {"freq": 18, "pct": 0.18, "confidence": "medium", "note": "仅从报告正文检索，实际患病率可能更高"},
+      "肝硬化": {"freq": 9, "pct": 0.09, "confidence": "medium"},
+      "回声不均匀(弥漫性改变)": {"freq": 377, "pct": 3.8, "confidence": "high"}
+    },
+    "积液": {
+      "盆腔积液": {"freq": 690, "pct": 6.9, "confidence": "high", "note": "含所有积液类型"},
+      "胸腔积液": {"freq": 970, "pct": 9.7, "confidence": "high", "source": "diagnoses表J94.804"},
+      "腹水": {"freq": 67, "pct": 0.67, "confidence": "medium"}
+    },
+    "前列腺病变": {
+      "前列腺增生": {"freq": 1526, "pct": 15.2, "confidence": "high", "source": "diagnoses表N40.x00"},
+      "前列腺钙化": {"freq": 39, "pct": 0.39, "confidence": "medium"}
+    },
+    "血管病变": {
+      "颈动脉斑块/狭窄": {"freq": 37, "pct": 0.37, "confidence": "medium"},
+      "下肢静脉血栓": {"freq": 21, "pct": 0.21, "confidence": "low"}
+    }
+  },
+  "equivalent_normal_expressions": {
+    "_description": "正常结论的各种等价表述 — ASR输出可能用不同措辞表达'正常'",
+    "未见异常": {"frequency": 4936, "equivalents": ["未见异常","未见明显异常","无异常","(-)","未见确切病变"]},
+    "未见异常血流信号": {"frequency": 4437, "equivalents": ["未见异常血流信号","未见异常血流","CDFI未见异常","血流未见异常","未见血流信号","未见血流"]},
+    "未见占位性病变": {"frequency": 2891, "equivalents": ["未见占位性病变","未见占位","未见明确占位","未见确切占位","未见明显占位"]},
+    "未见确切病变": {"frequency": 651, "equivalents": ["未见确切病变","未见明显病变","未见器质性病变"]},
+    "未见明显异常": {"frequency": 615, "equivalents": ["未见明显异常","大致正常","基本正常","未见显著异常"]},
+    "未见异常回声": {"frequency": 485, "equivalents": ["未见异常回声","未见异常回波","回声未见异常"]}
+  },
+  "high_freq_positive_findings": {
+    "_description": "HIS diagnoses表中与超声相关的高频诊断",
+    "top_ultrasound_relevant_diagnoses": [
+      {"rank": 1, "diagnosis": "高血压病", "code": "I10.x00", "freq": 7267, "relevance": "心脏超声、颈动脉超声"},
+      {"rank": 2, "diagnosis": "2型糖尿病", "code": "E11.900", "freq": 4118, "relevance": "腹部超声、血管超声"},
+      {"rank": 3, "diagnosis": "冠心病", "code": "I25.103", "freq": 2534, "relevance": "心脏超声"},
+      {"rank": 4, "diagnosis": "脑梗死", "code": "I63.900", "freq": 2463, "relevance": "颈动脉超声、TCD"},
+      {"rank": 5, "diagnosis": "输尿管结石", "code": "N20.100", "freq": 2065, "relevance": "泌尿系超声"},
+      {"rank": 6, "diagnosis": "胆囊结石伴急性胆囊炎", "code": "K80.000", "freq": 2047, "relevance": "腹部超声"},
+      {"rank": 7, "diagnosis": "肾结石", "code": "N20.000", "freq": 1585, "relevance": "泌尿系超声"},
+      {"rank": 8, "diagnosis": "前列腺增生", "code": "N40.x00", "freq": 1526, "relevance": "前列腺超声"},
+      {"rank": 9, "diagnosis": "胆囊结石", "code": "K80.200", "freq": 913, "relevance": "腹部超声"},
+      {"rank": 10, "diagnosis": "心脏扩大", "code": "I51.700", "freq": 911, "relevance": "心脏超声"},
+      {"rank": 11, "diagnosis": "心房颤动", "code": "I48.x01", "freq": 880, "relevance": "心脏超声"},
+      {"rank": 12, "diagnosis": "瘢痕子宫", "code": "N85.801", "freq": 1828, "relevance": "妇科超声"},
+      {"rank": 13, "diagnosis": "胎膜早破", "code": "O42.900", "freq": 955, "relevance": "产科超声"},
+      {"rank": 14, "diagnosis": "胸腔积液", "code": "J94.804", "freq": 970, "relevance": "胸部超声"},
+      {"rank": 15, "diagnosis": "胃息肉", "code": "K31.700", "freq": 965, "relevance": "腹部超声"},
+      {"rank": 16, "diagnosis": "声带息肉", "code": "J38.102", "freq": 1030, "relevance": "甲状腺/颈部超声"}
+    ]
+  }
+}
