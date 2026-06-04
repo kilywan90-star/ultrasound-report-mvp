@@ -432,8 +432,31 @@ async def structure(req: StructureRequest):
 
     # EF合并: ABCD → 一次v4-flash完成模板选择+填充+交叉验证
     candidates = search_candidates(A, req.exam_type, limit=8)
-    EF = await asyncio.to_thread(select_fill_and_validate, A, B, C, D, req.exam_type, candidates)
-    EF["_method"] = "abcdef_v3"
+
+    # 模板匹配质量判断: 候选最高分<50或候选为空 → 无合适模板, 使用B路自由生成
+    best_score = candidates[0]["score"] if candidates else 0
+    template_good_match = best_score >= 50
+
+    if template_good_match:
+        EF = await asyncio.to_thread(select_fill_and_validate, A, B, C, D, req.exam_type, candidates)
+        EF["_method"] = "abcdef_v3"
+    else:
+        # 无合适模板 → 回退到B路自由生成 + C路规则引擎混合
+        b_see = B.get("study_see", "") if B else ""
+        c_see = C.get("study_see", "") if C else ""
+        # 优先B路自由生成(内容完整), C路作为补充
+        # B路即使较短, 也包含ASR原文的全部关键信息
+        fallback_see = b_see if b_see else c_see
+        EF = {
+            "template_name": "自由生成(无匹配模板)",
+            "filled_study_see_html": fallback_see or f"<div class='rpt-html'>{A}</div>",
+            "study_hint": (B.get("study_hint", []) if B else []) or (C.get("study_hint", []) if C else []),
+            "recommendation": (B.get("recommendation", "") if B else "") or (C.get("recommendation", "") if C else ""),
+            "confidence": 0.5,
+            "conflicts": [{"field": "模板匹配", "sources": {"candidates": len(candidates), "best_score": best_score}, "resolution": "无合适模板,使用自由生成"}],
+            "reasoning": f"候选模板最高分数{best_score}<50, 回退到B/C路自由生成",
+            "_method": "abcdef_v3_fallback",
+        }
 
     # === 验证层: 固定文本完整性 + 内容溯源 + 医疗合规 ===
     import re as _re
