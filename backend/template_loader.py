@@ -14,6 +14,35 @@ _category_index: dict[str, list[str]] = defaultdict(list)
 _module_index: dict[str, list[str]] = defaultdict(list)
 
 
+
+def _infer_module(name, info1, info2):
+    """从模板内容推断器官模块"""
+    text = (name or '') + ' ' + (info1 or '') + ' ' + (info2 or '')
+    # 器官→模块映射
+    organ_module = {
+        '子宫': '子宫', '卵巢': '附件', '宫颈': '子宫', '内膜': '子宫', '盆腔': '子宫',
+        '胎儿': '产科', '孕囊': '产科', '胎盘': '产科', '羊水': '产科', '脐带': '产科', '胎心': '产科',
+        '前列腺': '前列腺', '膀胱': '泌尿', '肾': '肾脏', '输尿管': '泌尿',
+        '甲状腺': '甲状腺', '乳腺': '乳腺', '腋窝': '乳腺',
+        '二尖瓣': '心脏', '三尖瓣': '心脏', '主动脉瓣': '心脏', '心包': '心脏',
+        '心室': '心脏', '心房': '心脏', '室间隔': '心脏', '肺动脉': '心脏',
+        '肝脏': '肝脏', '胆囊': '胆道', '胰腺': '胰腺', '脾脏': '脾脏',
+        '颈动脉': '周围血管', '椎动脉': '周围血管', '动脉': '周围血管', 'IMT': '周围血管',
+        '大脑': '颅脑', '基底动脉': '颅脑', '经颅': '颅脑',
+        '睾丸': '男生殖系', '附睾': '男生殖系', '阴囊': '男生殖系',
+        '关节': '骨肌系统', '骨骼': '骨肌系统', '肌腱': '骨肌系统',
+        '肺': '胸部', '胸腔': '胸部', '胸膜': '胸部',
+        '眼球': '眼部', '视网膜': '眼部',
+    }
+    scores = {}
+    for organ, mod in organ_module.items():
+        if organ in text:
+            scores[mod] = scores.get(mod, 0) + 1
+    if scores:
+        return max(scores, key=scores.get)
+    return '其他'
+
+
 def load_templates() -> OrderedDict[str, dict]:
     """加载长沙医院模板CSV到内存（懒加载，只加载一次）"""
     global _templates_loaded, _template_index, _keyword_index, _category_index, _module_index
@@ -38,6 +67,10 @@ def load_templates() -> OrderedDict[str, dict]:
             module = (row.get("MODULENAME") or "其他").strip()
             group = (row.get("DISCGROUP") or "").strip()
             visc = (row.get("VISCNAME") or "").strip()
+
+            module = (row.get("MODULENAME") or "").strip()
+            if not module or module == "NULL" or module.strip() == "":
+                module = _infer_module(name, info1, info2)
 
             # 过滤无用的"噪音"模板 (INFO1太短或纯数字代码)
             if len(info1) < 20:
@@ -109,6 +142,17 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10) -> list[d
                 else:
                     extra_bonus = -50  # 无证据强扣分
             scored[name] = max(scored.get(name, 0), 100 + len(keyword) * 5 + extra_bonus)
+
+        # 策略1.5: 模板匹配关键词精确匹配 (master_rules.json)
+    from rule_engine import get_rule as _gr2
+    match_kw_dict = _gr2("templates.match_keywords", {})
+    if match_kw_dict:
+        for tpl_name, keywords in match_kw_dict.items():
+            for kw in keywords:
+                if kw in text and len(kw) >= 2:
+                    if tpl_name in _template_index:
+                        scored[tpl_name] = max(scored.get(tpl_name, 0), 200)  # 最高优先级
+                        break
 
     # 策略2: 器官词匹配INFO1 (从规则引擎加载)
     from rule_engine import get_rule as _gr
