@@ -409,20 +409,33 @@ function showIntent(ft){
 }
 // 填充模板选择下拉框(默认展示)
 function populateTemplateSelect(){
-  if(!ALL_TAGS_CACHE)return;
   var sel=document.getElementById('intent_sel');
-  if(sel.options.length>2)return; // already populated
   sel.innerHTML='<option value="">自动选择...</option>';
-  for(var cat in ALL_TAGS_CACHE){
+  // 优先从ALL_TAGS_CACHE加载(fixed-template/tags API)
+  if(ALL_TAGS_CACHE){
+    for(var cat in ALL_TAGS_CACHE){
+      var og=document.createElement('optgroup');
+      og.label=cat;
+      ALL_TAGS_CACHE[cat].forEach(function(tag){
+        var o=document.createElement('option');
+        o.value=cat;o.textContent=tag;og.appendChild(o);
+      });
+      sel.appendChild(og);
+    }
+    return;
+  }
+  // Fallback: 硬编码常见模板选项
+  var defaults={'腹部':['正常腹部','脂肪肝','肝囊肿','胆囊结石','胆囊息肉','肾结石','肾囊肿'],'妇产':['早孕','中孕','子宫肌瘤','卵巢囊肿','正常妇科'],'心脏':['正常心脏','二尖瓣反流','心包积液'],'甲状腺乳腺':['正常甲状腺','甲状腺结节','正常乳腺','乳腺增生'],'血管':['正常颈动脉','颈动脉斑块'],'泌尿':['正常前列腺','前列腺增生']};
+  for(var cat in defaults){
     var og=document.createElement('optgroup');
     og.label=cat;
-    ALL_TAGS_CACHE[cat].forEach(function(tag){
-      var o=document.createElement('option');
-      o.value=cat;o.textContent=tag;og.appendChild(o);
-    });
+    defaults[cat].forEach(function(tag){var o=document.createElement('option');o.value=cat;o.textContent=tag;og.appendChild(o)});
     sel.appendChild(og);
   }
 }
+// 页面加载时填充模板下拉框
+setTimeout(populateTemplateSelect, 500);
+setTimeout(loadAllTags, 1000);
 function onTemplateChange(){
   var sel=document.getElementById('intent_sel');
   var cat=sel.value;
@@ -500,22 +513,18 @@ var TPL_FILLED_TEXT='';
 function toggleTemplatePreview(){
   var panel=document.getElementById('template_preview_panel');
   if(panel.style.display==='block'){panel.style.display='none';return}
-  // 获取当前选中模板的内容
   var tplName=document.getElementById('intent_name').textContent||'';
-  if(!tplName||tplName==='-'){t('请先完成结构化或选择一个模板','e');return}
-  // Show panel with available content
-  document.getElementById('tpl_preview_name').textContent='模板预览: '+tplName;
-  var see=document.getElementById('se').innerHTML||'';
-  TPL_FILLED_TEXT=(see||'').replace(/<[^>]+>/g,'');
-  // Get template name from sources if available
+  // 从 sources 或 template_name_display 获取实际模板名
   var tplUsed=document.getElementById('template_name_display').textContent||tplName;
+  if(!tplUsed||tplUsed==='-'){t('请先完成结构化或从下拉框选择模板','e');return}
   document.getElementById('tpl_preview_name').textContent='模板: '+tplUsed;
+  // 优先显示已填充内容, 其次显示超声所见原文
+  var see=document.getElementById('se').innerText||'';
+  var filled=(see||'').trim();
   var content='';
-  if(TPL_PREVIEW_TEXT){
-    content=TPL_PREVIEW_TEXT;
-  }else if(TPL_FILLED_TEXT){
-    content='(原始模板内容可切换到固定模板填充后查看，当前显示填充后内容)\n\n'+TPL_FILLED_TEXT;
-  }
+  if(TPL_PREVIEW_TEXT){content=TPL_PREVIEW_TEXT;}
+  else if(filled){content='(当前填充结果)\n\n'+filled;}
+  else{content='(暂无模板内容, 请先完成结构化提取)';}
   document.getElementById('tpl_preview_content').textContent=content;
   panel.style.display='block';
 }

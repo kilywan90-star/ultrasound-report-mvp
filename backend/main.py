@@ -60,6 +60,24 @@ async def security_headers(request: Request, call_next):
     response.headers["Permissions-Policy"] = "microphone=(self)"
     return response
 
+# API认证中间件 (基于Token)
+API_TOKEN = os.getenv("API_TOKEN", "")  # 生产环境设置环境变量
+if API_TOKEN:
+    @app.middleware("http")
+    async def api_auth(request: Request, call_next):
+        # 放行: 根路径、health、OpenAPI文档、静态文件
+        path = request.url.path
+        if path in ("/", "/api/health", "/docs", "/openapi.json") or path.startswith("/api/audio/"):
+            return await call_next(request)
+        # 检查 Authorization header
+        auth = request.headers.get("Authorization", "")
+        if not auth.startswith("Bearer "):
+            return JSONResponse({"detail": "未授权: 缺少API Token"}, status_code=401)
+        token = auth[7:]
+        if token != API_TOKEN:
+            return JSONResponse({"detail": "未授权: Token无效"}, status_code=403)
+        return await call_next(request)
+
 AUDIO_DIR = Path(__file__).parent / "audio_backups"
 AUDIO_DIR.mkdir(exist_ok=True)
 
@@ -95,6 +113,8 @@ async def patient_quick_add(req: PatientAddRequest):
     if not req.exam_type.strip(): raise HTTPException(400, "检查类型不能为空")
     if len(req.exam_type.strip()) > 50: raise HTTPException(400, "检查类型过长(最多50字符)")
     patient = db.patient_add(req.name.strip(), req.gender, req.age, req.exam_type.strip(), req.exam_part)
+    db.audit_log("patient_add", patient_id=patient["id"], input_text=f"{req.name},{req.gender},{req.age}",
+                  output_text=f"patient_id={patient['id']}", detail={"exam_type": req.exam_type})
     return {"success": True, "patient": patient}
 
 @app.get("/api/patients/queue")
@@ -105,6 +125,7 @@ async def patient_queue():
 async def patient_update_status(patient_id: int, status: str = "检查中"):
     p = db.patient_update_status(patient_id, status)
     if not p: raise HTTPException(404, "患者不存在")
+    db.audit_log("patient_status", patient_id=patient_id, input_text=status, output_text="ok")
     return {"success": True, "patient": p}
 
 # ==================== 音频（持久化+回放） ====================
@@ -530,6 +551,22 @@ async def structure(req: StructureRequest):
         "_reasoning": EF.get("reasoning", ""),
     }
     report = _wrap_hints_with_toggle(report)
+
+    # P0-3: 统一颜色标记 — 对所有非胎儿模板也应用 voice/unfill 标签
+    if method != "fetal_template" and report.get("study_see"):
+        see_html = report["study_see"]
+        # 标记未填充的数值占位符 (___mm / __ / 未测)
+        see_html = _re.sub(
+            r'(___?\s*(?:mm|cm|毫米|厘米)?|未测|__)',
+            r'<i class="unfill">\1</i>', see_html
+        )
+        # 标记已填充的数值 (纯数字+单位)
+        def _mark_voice(m):
+            val = m.group(0)
+            if '<' in val: return val  # already tagged
+            return f'<b class="voice">{val}</b>'
+        see_html = _re.sub(r'\b\d+(?:\.\d+)?\s*(?:mm|cm|毫米|厘米|次/分|克|平方厘米|Wd|级)?', _mark_voice, see_html)
+        report["study_see"] = see_html
 
     # 保存
     report_id = None; pid = None
