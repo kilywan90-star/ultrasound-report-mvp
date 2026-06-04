@@ -39,6 +39,13 @@ def load_templates() -> OrderedDict[str, dict]:
             group = (row.get("DISCGROUP") or "").strip()
             visc = (row.get("VISCNAME") or "").strip()
 
+            # 过滤无用的"噪音"模板 (INFO1太短或纯数字代码)
+            if len(info1) < 20:
+                # 检查info1是否有结构性超声文本 (含器官/测量/描述词)
+                organ_kw = ['经','探查','位','大小','回声','见','mm','cm','正常','异常']
+                if not any(kw in info1 for kw in organ_kw):
+                    continue
+
             entry = {
                 "name": name,
                 "info1": info1,
@@ -89,7 +96,19 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10) -> list[d
     for keyword in sorted(_keyword_index.keys(), key=len, reverse=True):
         if keyword in text and len(keyword) >= 2:
             name = _keyword_index[keyword]
-            scored[name] = max(scored.get(name, 0), 100 + len(keyword) * 5)
+            # P0-2: 异常模板需证据——DISCNAME含疾病词时必须有ASR文本证据
+            abnormal_kw = ["癌","瘤","结石","囊肿","增生","钙化","硬化","异位","梗塞","血栓","积水","腹水","畸形","占位","肿物","团块"]
+            entry = _template_index.get(name, {})
+            is_abnormal = any(kw in keyword for kw in abnormal_kw)
+            extra_bonus = 0
+            if is_abnormal:
+                # 检查文本中是否有匹配的疾病关键词
+                has_evidence = any(kw in text for kw in abnormal_kw)
+                if has_evidence:
+                    extra_bonus = 20  # 有证据加成
+                else:
+                    extra_bonus = -50  # 无证据强扣分
+            scored[name] = max(scored.get(name, 0), 100 + len(keyword) * 5 + extra_bonus)
 
     # 策略2: 器官词匹配INFO1 (从规则引擎加载)
     from rule_engine import get_rule as _gr
@@ -117,15 +136,58 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10) -> list[d
         if kw in exam_type or kw in text[:80]:
             matched_modules.update(mods)
 
+    # P0-1: 跨模块守卫——模板器官词与文本器官词完全不匹配则扣分
+    organ_module_map = {
+        "前列腺": ["前列腺","膀胱","肾","精囊","睾丸","附睾","男生殖系"],
+        "子宫": ["子宫","卵巢","附件","宫颈","盆腔","内膜","输卵管","阴道"],
+        "乳腺": ["乳腺","腋窝"],
+        "甲状腺": ["甲状腺","甲状旁腺","峡部","颈部"],
+        "心脏": ["心室","心房","瓣","室间隔","心包","主动脉","肺动脉","二尖瓣","三尖瓣"],
+        "颈动脉": ["颈动脉","椎动脉","IMT","颈总","颈内","颈外","内膜中层"],
+        "TCD": ["大脑","基底动脉","椎动脉","经颅","MCA","ACA","PCA","BA"],
+        "胎儿": ["胎儿","孕囊","胎盘","羊水","脐带","胎心","BPD"],
+    }
+    # 确定文本属于哪个器官类别
+    text_organ_categories = set()
+    for cat, organs in organ_module_map.items():
+        if any(o in text for o in organs):
+            text_organ_categories.add(cat)
+
     for name in list(_template_index.keys()):
         entry = _template_index[name]
         mod = entry.get("module", "")
         # 模块匹配加分 (有明确模块名的模板优先)
         if mod and mod in matched_modules:
-            scored[name] = scored.get(name, 0) + 60  # 大幅加分，强过滤
+            scored[name] = scored.get(name, 0) + 60
         elif not mod or not mod.strip():
-            # 无模块名模板降权 (避免跨类别误匹配)
             scored[name] = scored.get(name, 0) - 20
+
+        # P0-1: 跨模块守卫——模板所属器官类别与文本器官类别不匹配则扣分
+        if text_organ_categories and name in scored:
+            tpl_text = entry.get("info1", "") + entry.get("name", "")
+            tpl_categories = set()
+            for cat, organs in organ_module_map.items():
+                if any(o in tpl_text for o in organs):
+                    tpl_categories.add(cat)
+            # 更严格的守卫: 如果模板INFO1中没有任何文本中的器官词 → 强扣分
+            tpl_has_text_organ = any(o in tpl_text for o in organ_words)
+            if not tpl_has_text_organ:
+                scored[name] -= 70
+            elif tpl_categories and not tpl_categories.intersection(text_organ_categories):
+                scored[name] -= 50
+
+        # P0-1增强: 模板INFO1与文本完全不共享任何器官词 → 强制删除
+        if name in scored:
+            tpl_text_all = entry.get("info1", "") + entry.get("name", "")
+            all_organs = set()
+            for organs in organ_module_map.values():
+                all_organs.update(organs)
+            tpl_has_any_organ = any(o in tpl_text_all for o in all_organs)
+            text_has_any_organ = any(o in text for o in all_organs)
+            if text_has_any_organ and not tpl_has_any_organ:
+                scored[name] -= 90
+            if scored.get(name, 0) <= 0:
+                del scored[name]
 
     # 策略5: 无模块名的模板只在有器官词命中时才保留
     for name in list(scored.keys()):

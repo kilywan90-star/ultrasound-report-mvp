@@ -301,11 +301,21 @@ function downloadAudio(){
   t('下载中...','s');
 }
 
-// ==================== ABCDEF v3 结构化函数 ====================
+// ==================== ABCDEF v3 结构化函数(渐进展示) ====================
 function doStruct(){var text=document.getElementById('rt').value.trim();if(!text){t('请先在识别文本框输入内容','e');return}
 var examType=(S.sel?S.sel.exam_type:'腹部超声');
 var patientId=(S.sel?String(S.sel.id):null);
 setSt('o','提取中...');document.getElementById('sb').disabled=true;
+
+// 先展示ASR原文(即时)
+document.getElementById('src_a_text').textContent=text.substring(0,300);
+document.getElementById('sources_panel').style.display='block';
+
+// 渐进标记: B/C正在进行
+document.getElementById('src_b_see').textContent='处理中...';
+document.getElementById('src_c_see').textContent='处理中...';
+document.getElementById('src_d_see').textContent='等待中...';
+
 fetch('/api/structure',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,exam_type:examType,patient_id:patientId})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail||'失败','e');setSt('idle');document.getElementById('sb').disabled=false;return}
   S.rpt=d.report;S.dels=new Set();S.sources=d.sources||null;S.method=d.method||'';
   document.getElementById('se').innerHTML=d.report.study_see||'';renderHints(d.report);
