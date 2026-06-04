@@ -335,7 +335,20 @@ def select_fill_and_validate(
 ) -> dict:
     """EF合并: 一次v4-flash调用完成模板选择+填充+交叉验证"""
     from template_loader import get_template_by_name
+    from rule_engine import get_rule
     client = _get_client()
+
+    # 加载字段ASR提示词，注入到system prompt中帮助v4-flash精准匹配
+    field_hints = get_rule("extraction.field_asr_hints", {})
+    hints_text = ""
+    if field_hints:
+        hint_parts = []
+        for field_id, info in list(field_hints.items())[:20]:
+            kwds = "、".join(info.get("keywords", [])[:4])
+            unit = info.get("unit", "")
+            rng = info.get("range", [])
+            hint_parts.append(f"- {field_id}: 搜索\"{kwds}\" 单位{unit} 范围{rng}")
+        hints_text = "\n## 字段ASR搜索提示\n" + "\n".join(hint_parts)
 
     cand_parts = []
     for c in candidates[:8]:
@@ -351,7 +364,7 @@ def select_fill_and_validate(
     d_see = _extract_plain_text(d_result.get("study_see", ""))[:400] if d_result else "(无)"
     d_hint = json.dumps(d_result.get("study_hint", []), ensure_ascii=False)[:200] if d_result else "[]"
 
-    user_msg = f"""## ASR(A路)\n{asr_text[:500]}\n## B路(自由生成)\nsee: {b_see}\nhint: {b_hint}\n## C路(规则引擎)\nsee: {c_see}\nhint: {c_hint}\n## D路(规则增强)\nsee: {d_see}\nhint: {d_hint}\n## 候选模板\n{cand_text}"""
+    user_msg = f"""## ASR(A路)\n{asr_text[:500]}\n## B路(自由生成)\nsee: {b_see}\nhint: {b_hint}\n## C路(规则引擎)\nsee: {c_see}\nhint: {c_hint}\n## D路(规则增强)\nsee: {d_see}\nhint: {d_hint}\n## 候选模板\n{cand_text}{hints_text}"""
 
     for attempt in range(2):
         try:
