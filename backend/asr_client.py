@@ -1,11 +1,13 @@
-"""阿里云百炼 DashScope 语音识别 — 带重试和容错"""
+"""阿里云百炼 DashScope 语音识别 — 支持流式输出 v2"""
 
-import os, asyncio, tempfile, dashscope, time
+import os, asyncio, tempfile, dashscope, time, logging
 from asr_correction import correct_ASR_text
+
+_log = logging.getLogger(__name__)
 
 
 async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> dict:
-    """返回 {"raw": 原始ASR文本, "text": 纠错后文本}"""
+    """返回 {"raw": 原始ASR文本, "text": 纠错后文本} (非流式, 保持兼容)"""
     api_key = os.getenv("DASHSCOPE_API_KEY")
     if not api_key:
         raise RuntimeError("DASHSCOPE_API_KEY 环境变量未设置")
@@ -56,3 +58,62 @@ async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> dict:
     try: os.unlink(tmp_path)
     except: pass
     raise RuntimeError(f"语音识别失败({len(str(last_error))}): {last_error}")
+
+
+async def transcribe_audio_stream(audio_data: bytes, sample_rate: int = 16000):
+    """
+    流式语音识别 — 返回 async generator, 逐段 yield 识别结果
+
+    用法:
+        async for chunk in transcribe_audio_stream(audio_data):
+            print(chunk["text"])  # 增量文本
+            # chunk["text"] 是增量文本, 前端逐字追加
+    """
+    api_key = os.getenv("DASHSCOPE_API_KEY")
+    if not api_key:
+        raise RuntimeError("DASHSCOPE_API_KEY 环境变量未设置")
+
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        tmp.write(audio_data)
+        tmp_path = tmp.name
+
+    try:
+        def _call():
+            return dashscope.MultiModalConversation.call(
+                model="qwen3-asr-flash",
+                messages=[{"role":"user","content":[{"audio":tmp_path}]}],
+                api_key=api_key,
+                stream=True,
+                incremental_output=True,
+            )
+
+        response = await asyncio.to_thread(_call)
+
+        accumulated_text = ""
+        for chunk in response:
+            if chunk.status_code == 200:
+                try:
+                    content = chunk.output.choices[0].message.content
+                    if isinstance(content, list):
+                        delta = "".join(c.get("text","") if isinstance(c,dict) else str(c) for c in content)
+                    else:
+                        delta = str(content) if content else ""
+                    if delta:
+                        accumulated_text += delta
+                        yield {"text": delta, "accumulated": accumulated_text, "is_final": False}
+                except (AttributeError, IndexError):
+                    pass
+
+        # Final yield with corrected full text
+        if accumulated_text.strip():
+            corrected = correct_ASR_text(accumulated_text.strip())
+            yield {"text": "", "accumulated": accumulated_text.strip(), "corrected": corrected, "is_final": True}
+        else:
+            yield {"text": "", "accumulated": "", "corrected": "", "is_final": True, "error": "ASR未返回识别文本"}
+
+    except Exception as e:
+        _log.error(f"流式ASR失败: {e}")
+        yield {"text": "", "accumulated": "", "corrected": "", "is_final": True, "error": str(e)}
+    finally:
+        try: os.unlink(tmp_path)
+        except: pass
