@@ -171,6 +171,9 @@ app.add_middleware(
 # Security headers (生产级 WAF 安全头)
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
+    # Skip WS
+    if request.scope.get("type") == "websocket":
+        return await call_next(request)
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
@@ -186,6 +189,10 @@ async def security_headers(request: Request, call_next):
 # Request logger + request_id injection
 @app.middleware("http")
 async def request_context(request: Request, call_next):
+    # 跳过WebSocket请求 (不做JSON包装)
+    if request.scope.get("type") == "websocket":
+        return await call_next(request)
+
     t0 = time.time()
     rid = request.headers.get("X-Request-ID", "") or _uuid.uuid4().hex[:12]
     request.state.request_id = rid
@@ -873,6 +880,83 @@ async def mcp_transcribe(req: McpTranscribeRequest):
         if tmp_path:
             try: _os.unlink(tmp_path)
             except OSError: pass
+
+
+# ── WebSocket: 小智ESP32直连音频流 (OPUS → 阿里ASR → 结构化) ──
+
+@app.websocket("/v1/ws/asr")
+async def ws_xiaozhi_asr(websocket):
+    """小智ESP32直连WebSocket: 接收OPUS音频 → 阿里百炼ASR → 结构化 → 返回JSON"""
+    import base64, tempfile, os as _os
+    rid = _uuid.uuid4().hex[:12]
+    logger.info({"phase": "ws_asr_connect", "client": str(websocket.client)})
+    await websocket.accept()
+    audio_bytes = bytearray()
+    patient_id = "WS-" + rid
+    exam_type = "腹部超声"
+    gender = ""; age = 0; name = ""
+
+    try:
+        while True:
+            data = await websocket.receive()
+            if data["type"] == "websocket.disconnect":
+                break
+            if "text" in data:
+                # JSON控制消息
+                msg = json.loads(data["text"])
+                if msg.get("type") == "config":
+                    patient_id = msg.get("patient_id", patient_id)
+                    exam_type = msg.get("exam_type", exam_type)
+                    gender = msg.get("gender", "")
+                    age = msg.get("age", 0)
+                    name = msg.get("name", "")
+                    await websocket.send_text(json.dumps({"type":"config_ack","status":"ok"}, ensure_ascii=False))
+                    logger.info({"phase": "ws_config", "patient_id": patient_id, "exam": exam_type})
+                elif msg.get("type") == "done":
+                    # 音频传输完毕 → 处理
+                    break
+            elif "bytes" in data:
+                audio_bytes.extend(data["bytes"])
+
+        if len(audio_bytes) < 400:
+            await websocket.send_text(json.dumps({"code":400,"msg":"音频数据过小","study_see":""}, ensure_ascii=False))
+            await websocket.close()
+            return
+
+        logger.info({"phase": "ws_asr_process", "size": len(audio_bytes), "patient_id": patient_id})
+
+        # 写临时文件 → 调ASR → 结构化
+        with tempfile.NamedTemporaryFile(suffix=".webm", delete=False) as tmp:
+            tmp.write(bytes(audio_bytes))
+            tmp_path = tmp.name
+
+        ctx = PatientContext(patient_id=patient_id, gender=gender, age=age, exam_type=exam_type, name=name)
+        try:
+            result = await run_pipeline(request_type="transcribe", audio_bytes=bytes(audio_bytes), patient_ctx=ctx)
+            result.request_id = rid
+            resp = {
+                "code": 200, "msg": "success", "request_id": rid,
+                "template": result.template_used, "method": result.method,
+                "elapsed_ms": result.elapsed_ms, "confidence": result.confidence,
+                "study_see": result.study_see,
+                "study_hint": [{"rank":h.rank,"diagnosis":h.diagnosis,"icd10":h.icd10} for h in result.study_hint],
+                "recommendation": result.recommendation,
+                "warnings": result.warnings,
+            }
+        except Exception as e:
+            resp = {"code":500,"msg":f"处理失败:{str(e)[:200]}","study_see":""}
+        finally:
+            try: _os.unlink(tmp_path)
+            except OSError: pass
+
+        await websocket.send_text(json.dumps(resp, ensure_ascii=False))
+    except Exception as e:
+        logger.error({"phase": "ws_asr_error", "error": str(e)})
+        try: await websocket.send_text(json.dumps({"code":500,"msg":str(e)[:200]}, ensure_ascii=False))
+        except: pass
+    finally:
+        try: await websocket.close()
+        except: pass
 
 
 # ── Startup ──
