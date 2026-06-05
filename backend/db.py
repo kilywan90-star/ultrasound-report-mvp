@@ -50,6 +50,30 @@ def init_db():
             updated_at  TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
         );
 
+        -- 标准化报告存档表 (匹配 2报告内容.csv 格式 + audio_path)
+        CREATE TABLE IF NOT EXISTS api_reports (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            examdate        TEXT,                   -- 检查日期 YYYY-MM-DD
+            examtime        TEXT,                   -- 检查时间 HH:MM:SS
+            machinetype     TEXT,                   -- 设备类型 (默认 "彩超")
+            VISCERAS        TEXT,                   -- 检查脏器/部位
+            NAME            TEXT,                   -- 患者姓名
+            SEX             TEXT,                   -- 性别
+            age             INTEGER,                -- 年龄
+            AGEUNIT         TEXT DEFAULT '岁',       -- 年龄单位
+            FromDeptName    TEXT,                   -- 申请科室
+            OUTPATIENTNO    TEXT,                   -- 门诊号 (patient_id)
+            INPATIENTNO     TEXT,                   -- 住院号
+            DESCRIBES       TEXT,                   -- 超声所见 → study_see
+            DIAGNOSIS       TEXT,                   -- 超声提示 → study_hint 拼接
+            ModuleName      TEXT,                   -- 模板名称 → template_used
+            ClinicDiagnosis TEXT,                   -- 临床诊断
+            audio_path      TEXT,                   -- 语音文件路径
+            tenant_id       INTEGER,                -- 租户ID
+            request_id      TEXT,                   -- API请求ID
+            created_at      TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+        );
+
         CREATE TABLE IF NOT EXISTS audit_log (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
             patient_id  INTEGER,
@@ -60,7 +84,11 @@ def init_db():
             operator    TEXT    NOT NULL DEFAULT 'system',
             created_at  TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
         );
-        """)
+
+        CREATE INDEX IF NOT EXISTS idx_api_reports_date ON api_reports(examdate);
+        CREATE INDEX IF NOT EXISTS idx_api_reports_tenant ON api_reports(tenant_id);
+        CREATE INDEX IF NOT EXISTS idx_api_reports_patient ON api_reports(OUTPATIENTNO);
+    """)
     c.commit()
 
 
@@ -185,6 +213,58 @@ def audit_log(action: str, patient_id: int = None, input_text: str = None,
          json.dumps(detail, ensure_ascii=False) if detail else None, operator),
     )
     c.commit()
+
+
+# ==================== 标准化报告存档 (匹配CSV格式) ====================
+
+def api_report_save(
+    patient_id: str, name: str, gender: str, age: int,
+    exam_type: str, department: str, clinical_diag: str,
+    study_see: str, study_hint: list[dict], template_used: str,
+    audio_path: str = None, tenant_id: int = None, request_id: str = None,
+) -> int:
+    """将API调用结果按2报告内容.csv格式存入api_reports表"""
+    from datetime import datetime as dt
+    now = dt.now()
+
+    # 拼接超声提示
+    diagnosis_text = "; ".join(
+        f"{h['rank']}. {h['diagnosis']} [{h.get('icd10', '')}]"
+        for h in (study_hint or [])
+    ) or ""
+
+    # 提取纯文本超声所见
+    import re as _re2
+    describes_clean = _re2.sub(r'<[^>]+>', '', study_see or "")
+
+    c = _conn()
+    cur = c.execute(
+        """INSERT INTO api_reports (
+            examdate, examtime, machinetype, VISCERAS, NAME, SEX, age, AGEUNIT,
+            FromDeptName, OUTPATIENTNO, DESCRIBES, DIAGNOSIS, ModuleName,
+            ClinicDiagnosis, audio_path, tenant_id, request_id
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (
+            now.strftime("%Y-%m-%d"), now.strftime("%H:%M:%S"), "彩超",
+            exam_type or "", name or "", gender or "", age or 0, "岁",
+            department or "", patient_id or "",
+            describes_clean[:5000], diagnosis_text[:2000], template_used or "",
+            clinical_diag or "", audio_path or "", tenant_id, request_id,
+        ),
+    )
+    c.commit()
+    return cur.lastrowid
+
+
+def api_report_list(days: int = 30, limit: int = 100) -> list[dict]:
+    c = _conn()
+    rows = c.execute(
+        """SELECT * FROM api_reports
+           WHERE created_at >= datetime('now','localtime','-'||?||' days')
+           ORDER BY created_at DESC LIMIT ?""",
+        (days, limit),
+    ).fetchall()
+    return [dict(r) for r in rows]
 
 
 # 启动时建表

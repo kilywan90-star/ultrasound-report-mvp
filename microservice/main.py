@@ -41,7 +41,12 @@ from .schema import (
 from .logger import logger, setup_logger
 from .pipeline import run_pipeline
 
-# API Platform imports
+# 确保 backend/ 可导入
+_backend_api = _root / "backend"
+if str(_backend_api) not in sys.path:
+    sys.path.insert(0, str(_backend_api))
+
+import db as ultrasound_db  # 内部医院DB (ultrasound.db)
 _backend = _root / "backend"
 if str(_backend) not in sys.path:
     sys.path.insert(0, str(_backend))
@@ -86,26 +91,25 @@ AUDIO_STORE_DIR = Path(__file__).resolve().parent.parent / "audio_store"
 AUDIO_STORE_DIR.mkdir(exist_ok=True)
 
 
-def _save_audio_to_disk(audio_bytes: bytes, tenant_id: int, patient_id: str, filename: str) -> str:
+def _save_audio_to_disk(audio_bytes: bytes, tenant_id: int, patient_id: str, filename: str, age: int = 0) -> str:
     """保存音频到本地磁盘，返回相对路径
-    目录结构: audio_store/{tenant_id}/{YYYY-MM}/{patient_id}_{timestamp}.webm
+    命名规则: {YYYYMMDD}_{HHmmss}_{patient_id}_{age}.webm
     """
     from datetime import datetime
     now = datetime.now()
-    tenant_dir = AUDIO_STORE_DIR / str(tenant_id) / now.strftime("%Y-%m")
-    tenant_dir.mkdir(parents=True, exist_ok=True)
-    ext = Path(filename).suffix.lower() or ".webm"
-    ts = now.strftime("%H%M%S")
+    date_str = now.strftime("%Y%m%d")
+    time_str = now.strftime("%H%M%S")
     safe_pid = patient_id.replace("/", "_").replace("\\", "_")[:32]
-    fname = f"{safe_pid}_{ts}{ext}"
-    fpath = tenant_dir / fname
+    ext = Path(filename).suffix.lower() or ".webm"
+    fname = f"{date_str}_{time_str}_{safe_pid}_{age}{ext}"
+    fpath = AUDIO_STORE_DIR / fname
     counter = 1
     while fpath.exists():
-        fname = f"{safe_pid}_{ts}_{counter}{ext}"
-        fpath = tenant_dir / fname
+        fname = f"{date_str}_{time_str}_{safe_pid}_{age}_{counter}{ext}"
+        fpath = AUDIO_STORE_DIR / fname
         counter += 1
     fpath.write_bytes(audio_bytes)
-    return str(fpath.relative_to(AUDIO_STORE_DIR))
+    return str(fpath)
 
 
 def _get_request_id(request: Request) -> str:
@@ -453,11 +457,11 @@ async def transcribe(
         asr_seconds=asr_seconds, cost=cost_info["total"], billed=max(billed, 0.0),
     )
 
-    # 保存音频到本地
+    # 保存音频到本地 (命名: YYYYMMDD_HHmmss_patientID_age.webm)
     audio_path = ""
     if ctx and ctx.patient_id:
         try:
-            audio_path = _save_audio_to_disk(audio_bytes, tenant["id"], ctx.patient_id, audio_file.filename)
+            audio_path = _save_audio_to_disk(audio_bytes, tenant["id"], ctx.patient_id, audio_file.filename, age=ctx.age)
             logger.info({"phase": "audio_saved", "path": audio_path, "size": len(audio_bytes)})
             # 音频文件索引入库
             try:
@@ -553,6 +557,26 @@ async def structure(
         tokens_in=tokens_in, tokens_out=tokens_out,
         cost=cost_info["total"], billed=max(billed, 0.0),
     )
+
+    # 存入标准化报告表 (匹配CSV格式)
+    try:
+        ultrasound_db.api_report_save(
+            patient_id=req.patient_context.patient_id,
+            name=req.patient_context.name or "",
+            gender=req.patient_context.gender or "",
+            age=req.patient_context.age or 0,
+            exam_type=req.patient_context.exam_type or "",
+            department=req.patient_context.department or "",
+            clinical_diag=req.patient_context.clinical_diag or "",
+            study_see=result.study_see or "",
+            study_hint=[h.model_dump() for h in result.study_hint] if result.study_hint else [],
+            template_used=template_name,
+            audio_path="",  # structure 无音频
+            tenant_id=tenant["id"],
+            request_id=rid,
+        )
+    except Exception as e:
+        logger.warning(f"api_report_save failed: {e}")
 
     response_obj = {
         "code": 200, "msg": "degraded" if result.degraded else "success",
