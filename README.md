@@ -24,7 +24,7 @@
 ### 1. 克隆仓库
 
 ```bash
-git clone https://github.com/kilywan90-star/ultrasound-report-mvp.git
+git clone https://github.com/your-org/ultrasound-report-mvp.git
 cd ultrasound-report-mvp
 ```
 

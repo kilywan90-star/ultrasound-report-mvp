@@ -8,7 +8,7 @@ import csv, re, json
 from pathlib import Path
 from collections import defaultdict
 
-CSV_PATH = Path(r"C:\Users\Administrator\Desktop\超声结构化报告\模板表.csv")
+CSV_PATH = Path(os.environ.get("TEMPLATE_CSV", ""))
 OUT_PATH = Path(__file__).resolve().parent / "knowledge" / "template_fields.json"
 
 # ============================================================

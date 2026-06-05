@@ -3,7 +3,7 @@
 
 ## 项目信息
 - 名称: 超声报告语音结构化系统
-- 版本: v3.0-ABCDEF 超声绿版 (长沙话适配)
+- 版本: v3.0-ABCDEF 超声绿版 (方言适配)
 - 部署: https://47.109.151.238 | http://47.109.151.238:9999
 - 代码位置: E:\claude\ultrasound-report-mvp\
 - 服务器: root@47.109.151.238 (sql2k8!WF)
@@ -43,7 +43,7 @@ Stage 8: 异步审计日志 (audit.db)
 - extension/ — Chrome扩展
 
 ## 关键数据资产
-- 模板: 4871条 (长沙医院模板123.csv), 968 match_keywords, 963 tags
+- 模板: 4871条, 968 match_keywords, 963 tags
 - 真实报告: 2报告内容.csv(3067条), 报告结果表.csv(6830条)
 - 测试: test_sample_1000.csv(1000条)
 

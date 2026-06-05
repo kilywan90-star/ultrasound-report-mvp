@@ -18,7 +18,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 # ── Config ──
 TAG_FILE = Path(__file__).parent / "knowledge" / "template_tags_v2.json"
 RULE_FILE = Path(__file__).parent / "knowledge" / "master_rules.json"
-CSV_FILE = Path(r"C:\Users\Administrator\Desktop\超声结构化报告\长沙医院模板123.csv")
+CSV_FILE = Path(os.environ.get("TEMPLATE_CSV", ""))
 TEST_FILE = Path(__file__).parent / "test_sample_1000.csv"
 
 # ── Load  ──

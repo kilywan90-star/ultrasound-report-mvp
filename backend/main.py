@@ -38,7 +38,11 @@ from template_fetal import fill_fetal_template
 from knowledge.loader import get_kb
 import db
 
-app = FastAPI(title="超声报告语音结构化", version="3.0.0.ABCDEF")
+app = FastAPI(title="超声报告语音结构化", version="4.0.0.ABCDEF")
+
+# API Platform — 管理后台路由
+from api_platform.admin import router as admin_router
+app.include_router(admin_router)
 
 # CORS: 允许常见来源但不回显任意Origin（避免creds问题）
 app.add_middleware(
@@ -743,7 +747,7 @@ async def get_default_templates():
 frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 
 # 禁止路径遍历的文件名白名单
-_ALLOWED_STATIC = {"index.html"}
+_ALLOWED_STATIC = {"index.html", "developer.html"}
 docs_dir = Path(__file__).resolve().parent.parent / "docs"
 
 if frontend_dir.exists():

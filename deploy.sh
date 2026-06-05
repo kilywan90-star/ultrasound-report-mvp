@@ -16,7 +16,7 @@ apt-get install -y -qq python3 python3-pip python3-venv git nginx 2>/dev/null
 echo "[2/5] 拉取代码..."
 cd /opt
 rm -rf ultrasound-report-mvp 2>/dev/null
-git clone https://github.com/kilywan90-star/ultrasound-report-mvp.git
+git clone https://github.com/your-org/ultrasound-report-mvp.git
 cd ultrasound-report-mvp
 
 # 3. 安装 Python 依赖

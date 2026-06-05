@@ -1,11 +1,11 @@
-"""正式超声报告模板加载器 — v3: 加载长沙医院模板123.csv"""
+"""正式超声报告模板加载器 — v3"""
 
 import csv, os, re
 from pathlib import Path
 from collections import defaultdict, OrderedDict
 
-TEMPLATE_DIR = Path(os.environ.get("TEMPLATE_DIR", r"C:\Users\Administrator\Desktop\超声结构化报告"))
-TEMPLATE_CSV = TEMPLATE_DIR / "长沙医院模板123.csv"
+TEMPLATE_DIR = Path(os.environ.get("TEMPLATE_DIR", ""))
+TEMPLATE_CSV = TEMPLATE_DIR / "超声模板.csv"
 
 _template_index: OrderedDict[str, dict] = OrderedDict()
 _templates_loaded = False
@@ -44,7 +44,7 @@ def _infer_module(name, info1, info2):
 
 
 def load_templates() -> OrderedDict[str, dict]:
-    """加载长沙医院模板CSV到内存（懒加载，只加载一次）"""
+    """加载超声模板CSV到内存（懒加载，只加载一次）"""
     global _templates_loaded, _template_index, _keyword_index, _category_index, _module_index
 
     if _templates_loaded:
@@ -103,7 +103,7 @@ def load_templates() -> OrderedDict[str, dict]:
                 _module_index[module].append(name)
 
     _templates_loaded = True
-    print(f"[模板加载] 长沙医院模板: {len(_template_index)}条, "
+    print(f"[模板加载] 超声模板: {len(_template_index)}条, "
           f"{len(_module_index)}个模块, {len(_category_index)}个分组")
     return _template_index
 

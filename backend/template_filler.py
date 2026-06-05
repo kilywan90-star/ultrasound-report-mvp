@@ -5,7 +5,7 @@ from pathlib import Path
 from collections import defaultdict
 from cn_num import cn_to_arabic
 
-TEMPLATE_CSV = Path(os.environ.get("TEMPLATE_DIR", r"C:\Users\Administrator\Desktop\超声结构化报告")) / "模板表.csv"
+TEMPLATE_CSV = Path(os.environ.get("TEMPLATE_CSV", ""))
 _templates: list[dict] = []
 _fulltext: dict[str, list[int]] = defaultdict(list)
 _categories: dict[str, list[int]] = defaultdict(list)

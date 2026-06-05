@@ -37,7 +37,7 @@ AUDIT_DB_PATH: Path = Path(os.getenv("AUDIT_DB_PATH", str(_project_root / "backe
 
 # ── 模板配置 ──
 TEMPLATE_DIR: str = os.getenv("TEMPLATE_DIR", str(_project_root / "backend" / "knowledge"))
-TEMPLATE_CSV: str = os.getenv("TEMPLATE_CSV", r"C:\Users\Administrator\Desktop\超声结构化报告\长沙医院模板123.csv")
+TEMPLATE_CSV: str = os.getenv("TEMPLATE_CSV", "")
 
 # ── 调试 ──
 DEBUG: bool = os.getenv("ULTRASOUND_DEBUG", "false").lower() in ("1", "true", "yes")

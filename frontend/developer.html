@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超声报告语音结构化 API — 开发者门户</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f8fafc;color:#1e293b}
+nav{background:#0f172a;color:white;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
+nav h1{font-size:18px}
+nav .ver{font-size:12px;color:#94a3b8}
+main{max-width:960px;margin:32px auto;padding:0 16px}
+.card{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:24px;margin-bottom:20px}
+.card h2{font-size:16px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card h2 .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.dot.green{background:#22c55e}
+.dot.yellow{background:#eab308}
+.key-box{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:14px;display:flex;align-items:center;justify-content:space-between}
+.key-box button{background:#3b82f6;color:white;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e2e8f0}
+th{color:#64748b;font-weight:500;font-size:13px}
+.quota-bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-top:4px}
+.quota-bar .fill{height:100%;border-radius:4px;transition:width .3s}
+.fill.safe{background:#22c55e}
+.fill.warn{background:#eab308}
+.fill.danger{background:#ef4444}
+.plan-tags{display:flex;gap:8px;margin-top:12px}
+.plan-tag{border:2px solid #e2e8f0;border-radius:8px;padding:12px;flex:1;cursor:pointer;text-align:center;transition:.2s}
+.plan-tag:hover{border-color:#3b82f6}
+.plan-tag.active{border-color:#3b82f6;background:#eff6ff}
+.plan-tag .name{font-weight:600;font-size:15px}
+.plan-tag .price{font-size:24px;font-weight:700;color:#1e40af;margin:4px 0}
+.plan-tag .quota{font-size:13px;color:#64748b}
+.plan-tag .overage{font-size:12px;color:#94a3b8}
+.curl-box{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:13px;overflow-x:auto;white-space:pre-wrap;margin:8px 0}
+code{border:1px solid #e2e8f0;background:#f1f5f9;padding:1px 4px;border-radius:3px;font-size:13px}
+.badge{font-size:11px;padding:2px 8px;border-radius:12px;font-weight:500}
+.badge.post{background:#dbeafe;color:#1d4ed8}
+.badge.get{background:#dcfce7;color:#16a34a}
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>超声报告语音结构化 API 平台</h1>
+  <span class="ver">v4.0.0</span>
+</nav>
+
+<main>
+
+  <!-- API Key 卡片 -->
+  <div class="card">
+    <h2><span class="dot green"></span>您的 API Key</h2>
+    <div class="key-box">
+      <span id="apiKeyDisplay">加载中...</span>
+      <button onclick="copyKey()">复制</button>
+    </div>
+    <p style="margin-top:8px;color:#64748b;font-size:13px">
+      请在请求的 <code>Authorization</code> header 中携带: <code>Bearer &lt;your-api-key&gt;</code>
+    </p>
+  </div>
+
+  <!-- 用量卡片 -->
+  <div class="card">
+    <h2><span class="dot yellow"></span>本月用量</h2>
+    <table>
+      <tr><th>套餐</th><td id="usagePlan">-</td><th>调用次数</th><td id="usageCalls">-</td></tr>
+      <tr><th>配额</th><td id="usageQuota">-</td><th>剩余</th><td id="usageRemaining">-</td></tr>
+      <tr><th>ASR时长(秒)</th><td id="usageAsr">-</td><th>本月费用</th><td id="usageBilled">-</td></tr>
+    </table>
+    <div class="quota-bar" style="margin-top:12px"><div class="fill safe" id="usageBar" style="width:0%"></div></div>
+  </div>
+
+  <!-- 套餐选择 -->
+  <div class="card">
+    <h2>套餐方案</h2>
+    <div class="plan-tags" id="planTags">
+      <div class="plan-tag" onclick="selectPlan('free')">
+        <div class="name">免费版</div><div class="price">¥0</div>
+        <div class="quota">100次/月</div><div class="overage">超量停用</div>
+      </div>
+      <div class="plan-tag" onclick="selectPlan('basic')">
+        <div class="name">基础版</div><div class="price">¥300</div>
+        <div class="quota">1,000次/月</div><div class="overage">超量 ¥0.50/次</div>
+      </div>
+      <div class="plan-tag" onclick="selectPlan('pro')">
+        <div class="name">专业版</div><div class="price">¥1,200</div>
+        <div class="quota">5,000次/月</div><div class="overage">超量 ¥0.40/次</div>
+      </div>
+      <div class="plan-tag" onclick="selectPlan('enterprise')">
+        <div class="name">企业版</div><div class="price">议价</div>
+        <div class="quota">不限量</div><div class="overage">¥0.30/次</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- API 文档 -->
+  <div class="card">
+    <h2>API 参考</h2>
+
+    <h3 style="margin:16px 0 8px"><span class="badge post">POST</span> /v1/transcribe — 语音→报告</h3>
+    <p style="font-size:13px;color:#64748b">上传音频文件, 返回结构化超声报告。支持 wav/mp3/webm 格式, 最大 50MB。</p>
+    <div class="curl-box">curl -X POST https://47.109.151.238:8800/v1/transcribe \
+  -H "Authorization: Bearer sk-YOUR_API_KEY" \
+  -F "audio_file=@recording.wav" \
+  -F 'patient_context={"gender":"男","age":52,"exam_type":"腹部超声"}'</div>
+
+    <h3 style="margin:16px 0 8px"><span class="badge post">POST</span> /v1/structure — 文本→报告</h3>
+    <p style="font-size:13px;color:#64748b">直接提交 ASR 文本, 返回结构化报告。</p>
+    <div class="curl-box">curl -X POST https://47.109.151.238:8800/v1/structure \
+  -H "Authorization: Bearer sk-YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"text":"肝脏大小正常,胆囊壁光滑,未见异常","patient_context":{"exam_type":"腹部超声"}}'</div>
+
+    <h3 style="margin:16px 0 8px"><span class="badge get">GET</span> /v1/usage</h3>
+    <p style="font-size:13px;color:#64748b">查询当前租户的月度用量统计。</p>
+    <div class="curl-box">curl -H "Authorization: Bearer sk-YOUR_API_KEY" \
+  https://47.109.151.238:8800/v1/usage</div>
+
+    <h3 style="margin:16px 0 8px"><span class="badge get">GET</span> /v1/health</h3>
+    <p style="font-size:13px;color:#64748b">健康检查, 不需要鉴权。</p>
+    <div class="curl-box">curl https://47.109.151.238:8800/v1/health</div>
+  </div>
+
+  <!-- Swagger 文档链接 -->
+  <div class="card" style="text-align:center">
+    <p>完整的 OpenAPI/Swagger 交互式文档:</p>
+    <a href="/docs" target="_blank" style="color:#3b82f6;font-weight:600">/docs — Swagger UI</a>
+    &nbsp;&nbsp;
+    <a href="/redoc" target="_blank" style="color:#3b82f6;font-weight:600">/redoc — ReDoc</a>
+  </div>
+
+</main>
+
+<script>
+// 从 URL hash 或 localStorage 读取 API Key
+function getStoredKey() {
+  return localStorage.getItem('dev_api_key') || '';
+}
+function setStoredKey(k) { localStorage.setItem('dev_api_key', k); }
+
+// 页面初始化
+async function init() {
+  const key = getStoredKey();
+  if (key) {
+    document.getElementById('apiKeyDisplay').textContent = key;
+    await loadUsage(key);
+  } else {
+    document.getElementById('apiKeyDisplay').textContent = '请先设置 API Key';
+  }
+}
+
+async function loadUsage(key) {
+  try {
+    const resp = await fetch('/v1/usage', { headers: { 'Authorization': 'Bearer ' + key } });
+    if (!resp.ok) throw new Error(resp.status);
+    const data = await resp.json();
+    document.getElementById('usagePlan').textContent = data.tenant.plan_name;
+    document.getElementById('usageCalls').textContent = data.usage.total_calls;
+    document.getElementById('usageQuota').textContent = data.usage.monthly_quota;
+    document.getElementById('usageRemaining').textContent = data.usage.remaining;
+    document.getElementById('usageAsr').textContent = data.usage.total_asr_seconds.toFixed(1);
+    document.getElementById('usageBilled').textContent = '¥' + data.usage.total_billed.toFixed(2);
+    // 进度条
+    const pct = data.usage.monthly_quota > 0
+      ? Math.min(100, (data.usage.total_calls / data.usage.monthly_quota) * 100)
+      : 0;
+    const bar = document.getElementById('usageBar');
+    bar.style.width = pct + '%';
+    bar.className = 'fill ' + (pct > 80 ? 'danger' : pct > 60 ? 'warn' : 'safe');
+  } catch(e) {
+    document.getElementById('usagePlan').textContent = '未能加载';
+  }
+}
+
+function copyKey() {
+  const key = document.getElementById('apiKeyDisplay').textContent;
+  if (key && key.length > 5) {
+    navigator.clipboard.writeText(key).then(() => {
+      alert('API Key 已复制到剪贴板');
+    });
+  }
+}
+
+function selectPlan(planId) {
+  // Visual feedback only — actual upgrade requires admin
+  document.querySelectorAll('.plan-tag').forEach(el => el.classList.remove('active'));
+  const tags = document.querySelectorAll('.plan-tag');
+  const plans = ['free','basic','pro','enterprise'];
+  tags[plans.indexOf(planId)].classList.add('active');
+  alert('套餐升级请联系管理员: 微信/电话联系');
+}
+
+// 首次访问: 提示设置 API Key
+window.onload = () => {
+  const key = getStoredKey();
+  if (!key) {
+    const input = prompt('请输入您的 API Key (首次使用请从管理员获取):');
+    if (input && input.trim()) {
+      setStoredKey(input.trim());
+    }
+  }
+  init();
+};
+</script>
+</body>
+</html>

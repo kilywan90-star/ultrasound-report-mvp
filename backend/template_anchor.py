@@ -5,7 +5,7 @@ Phase 1: Template Anchoring Engine (D-Path)
 
 策略:
 1. 利用 template_tags_v2.json 的363个标签 + 关键词匹配 → 选出top-3候选模板
-2. 从 长沙医院模板123.csv 中提取完整 INFO1 模板文本
+2. 从超声模板CSV中提取完整 INFO1 模板文本
 3. 解析 INFO1 中的 [变量] 和 [选项A;选项B] 格式
 4. LLM deepseek-chat 仅做一件事: 从ASR文本中提取值填入变量
 5. 输出: 完全填充的报告 + voice/unfill 颜色标记
@@ -20,7 +20,7 @@ _log = logging.getLogger(__name__)
 
 # ── Config ──
 TAG_FILE = Path(__file__).parent / "knowledge" / "template_tags_v2.json"
-CSV_FILE = Path(r"C:\Users\Administrator\Desktop\超声结构化报告\长沙医院模板123.csv")
+CSV_FILE = Path(os.environ.get("TEMPLATE_CSV", ""))
 RULE_FILE = Path(__file__).parent / "knowledge" / "master_rules.json"
 
 # ── 1. 模板精确匹配 ──
