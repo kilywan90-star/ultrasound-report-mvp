@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  ultrasound-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+    ports:
+      - "8800:8800"
+    env_file:
+      - .env
+    volumes:
+      - ./backend/knowledge:/app/backend/knowledge:ro
+      - ./audio_store:/app/audio_store
+      - api_db:/app/backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8800/v1/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  ultrasound-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: web
+    ports:
+      - "9999:9999"
+    env_file:
+      - .env
+    volumes:
+      - ./backend/knowledge:/app/backend/knowledge:ro
+      - ./frontend:/app/frontend:ro
+      - ./docs:/app/docs:ro
+      - web_db:/app/backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:9999/api/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  api_db:
+  web_db:

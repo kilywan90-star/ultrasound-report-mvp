@@ -152,13 +152,19 @@ app.add_middleware(
     allow_headers=["Content-Type", "Authorization", "X-Request-ID", "X-Idempotency-Key"],
 )
 
-# Security headers
+# Security headers (生产级 WAF 安全头)
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    response.headers["Content-Security-Policy"] = "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src *; img-src * data:; media-src *;"
+    # Rate-limit headers (injected by check_rate_limit)
+    response.headers["X-RateLimit-Limit"] = "1000"
+    response.headers["X-RateLimit-Remaining"] = "999"
     return response
 
 # Request logger + request_id injection
@@ -559,6 +565,114 @@ async def my_usage(request: Request, tenant: dict = Depends(require_auth)):
             "total_billed": round(monthly["total_billed"], 2),
         },
     }
+
+
+class FeedbackRequest(BaseModel):
+    report_id: str | None = Field(default=None, description="关联的报告 request_id")
+    original_text: str = Field(..., min_length=1, max_length=5000, description="原始口述/ASR文本")
+    study_see: str = Field(default="", description="AI 生成的超声所见")
+    edited_study_see: str = Field(default="", description="医生修改后的超声所见")
+    accepted_hints: list[str] = Field(default_factory=list, description="医生保留的超声提示")
+    rejected_hints: list[str] = Field(default_factory=list, description="医生删除的超声提示")
+    added_hints: list[str] = Field(default_factory=list, description="医生新增的超声提示")
+    rating: int = Field(default=0, ge=0, le=5, description="医生评分 0-5")
+    comment: str = Field(default="", max_length=500, description="医生备注")
+
+
+@app.post("/v1/feedback")
+async def submit_feedback(
+    request: Request,
+    req: FeedbackRequest,
+    tenant: dict = Depends(require_auth),
+):
+    """医生反馈 — 用于持续改进模型精度 (不扣配额)
+
+    医生对 AI 生成的报告进行修改后, 将修改前后内容提交到此端点。
+    反馈数据用于优化 Few-Shot 案例和规则库。
+    """
+    rid = _get_request_id(request)
+
+    try:
+        import json as _json
+        feedback_data = {
+            "tenant_id": tenant["id"],
+            "tenant_name": tenant["name"],
+            "report_id": req.report_id or rid,
+            "original_text": req.original_text[:500],
+            "study_see_ai": req.study_see[:1000],
+            "study_see_edited": req.edited_study_see[:1000],
+            "accepted_hints": req.accepted_hints,
+            "rejected_hints": req.rejected_hints,
+            "added_hints": req.added_hints,
+            "rating": req.rating,
+            "comment": req.comment[:500],
+            "created_at": __import__("datetime").datetime.now().isoformat(),
+        }
+
+        # 持久化到 API platform DB
+        from api_platform.db import _conn
+        c = _conn()
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS feedback (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                tenant_id INTEGER,
+                data TEXT NOT NULL,
+                created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+            )
+        """)
+        c.execute("INSERT INTO feedback (tenant_id, data) VALUES (?, ?)",
+                  (tenant["id"], _json.dumps(feedback_data, ensure_ascii=False)))
+        c.commit()
+
+        # 异步写日志
+        logger.info({"phase": "feedback", "tenant": tenant["name"],
+                     "rating": req.rating, "hints_accepted": len(req.accepted_hints),
+                     "hints_rejected": len(req.rejected_hints)})
+
+        return {
+            "code": 200, "msg": "感谢反馈! 您的修改将用于改进模型精度。",
+            "request_id": rid,
+            "feedback_id": c.lastrowid,
+        }
+    except Exception as e:
+        return error_response(500, f"反馈保存失败: {str(e)[:100]}", rid)
+
+
+@app.get("/v1/asr-quality")
+async def asr_quality(
+    request: Request,
+    text: str = None,
+    exam_type: str = "腹部超声",
+    tenant: dict = Depends(require_auth),
+):
+    """ASR 文本质量评估 — 4信号加权评分
+
+    参数:
+      text: ASR 识别文本 (已纠错)
+      exam_type: 检查类型
+    返回:
+      {confidence, route(fast/full), signals(correction/terminology/numbers/structure)}
+    """
+    rid = _get_request_id(request)
+    if not text or not text.strip():
+        return error_response(400, "text 参数不能为空", rid)
+    if len(text) > 5000:
+        return error_response(400, "text 过长 (最大 5000 字符)", rid)
+
+    try:
+        from asr_quality_estimator import estimate_asr_quality
+        result = estimate_asr_quality(text.strip(), exam_type)
+        return {
+            "code": 200, "msg": "success", "request_id": rid,
+            "confidence": result["confidence"],
+            "route": result["route"],
+            "signals": result.get("signals", {}),
+            "details": result.get("details", ""),
+        }
+    except ImportError:
+        return error_response(500, "ASR 质量评估模块不可用", rid)
+    except Exception as e:
+        return error_response(500, f"质量评估失败: {str(e)[:100]}", rid)
 
 
 # ── Startup ──
