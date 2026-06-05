@@ -27,7 +27,8 @@ class KnowledgeBase:
                  'asr_language_model',
                  'pregnancy_ga_constraints',
                  'measurements', 'site_disease',
-                 'manual_mapping', 'unit_rules')
+                 'manual_mapping', 'unit_rules',
+                 'antonym_pairs', 'cross_validation')
 
     def __init__(self):
         self.confusion_dict = {}
@@ -42,6 +43,8 @@ class KnowledgeBase:
         self.site_disease = {}
         self.manual_mapping = {}
         self.unit_rules = {}
+        self.antonym_pairs = {}
+        self.cross_validation = {}
 
     def __repr__(self):
         return (f"KnowledgeBase(confusion={len(self.confusion_dict)}, "
@@ -105,6 +108,12 @@ def load_knowledge() -> KnowledgeBase:
 
     # === 单位转换规则 ===
     kb.unit_rules = _load_json("unit_conversion.json")
+
+    # === 反义词对 (矛盾检测增强) ===
+    kb.antonym_pairs = _load_json("antonym_pairs.json")
+
+    # === 交叉验证模式 (正常报告增强) ===
+    kb.cross_validation = _load_json("cross_validation.json")
 
     return kb
 

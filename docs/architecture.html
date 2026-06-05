@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超声报告语音结构化 — 系统架构图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#0f172a;color:#e2e8f0;padding:20px;min-width:1200px}
+h1{text-align:center;font-size:20px;margin-bottom:8px;color:#f8fafc}
+.sub{text-align:center;font-size:11px;color:#94a3b8;margin-bottom:24px}
+
+.diagram{display:flex;flex-direction:column;gap:16px;max-width:1400px;margin:0 auto}
+
+.row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+
+.box{border-radius:8px;padding:12px 16px;min-width:180px;flex:1;max-width:320px}
+.box h3{font-size:13px;margin-bottom:6px}
+.box p,.box li{font-size:11px;line-height:1.6;color:#cbd5e1}
+.box ul{padding-left:14px}
+
+/* Layers */
+.user-layer .box{background:#1e293b;border:2px solid #334155}
+.asr-layer .box{background:#1a2332;border:2px solid #64748b}
+.llm-layer .box{background:#1a1a2e;border:2px solid #7c3aed}
+.rule-layer .box{background:#1a2e1a;border:2px solid #16a34a}
+.fusion-layer .box{background:#2e1a1a;border:2px solid #f59e0b}
+.validate-layer .box{background:#1e2e3b;border:2px solid #0ea5e9}
+.output-layer .box{background:#1e293b;border:2px solid #059669}
+
+.arrow{text-align:center;font-size:18px;color:#475569;padding:0}
+.arrow-row{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;padding:4px 0}
+.arrow-label{font-size:9px;color:#64748b;background:#1e293b;padding:2px 6px;border-radius:3px;white-space:nowrap}
+
+.section-title{color:#94a3b8;font-size:11px;padding:8px 0;border-bottom:1px solid #1e293b;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.section-title .num{background:#334155;color:#e2e8f0;border-radius:50%;width:20px;height:20px;display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700}
+
+.flow-line{text-align:center;padding:4px}
+.flow-line .pipe{display:inline-block;background:#334155;border-radius:4px;padding:3px 12px;font-size:11px;color:#94a3b8;margin:2px}
+
+.highlight{color:#fbbf24;font-weight:600}
+.green{color:#34d399}
+.purple{color:#a78bfa}
+.blue{color:#38bdf8}
+.orange{color:#fb923c}
+.gray{color:#94a3b8}
+
+.legend{display:flex;gap:16px;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:10px}
+.legend-swatch{width:12px;height:12px;border-radius:2px}
+
+</style>
+</head>
+<body>
+
+<h1>超声报告语音结构化 — 智能体架构</h1>
+<div class="sub">ABCDEF 六路流水线 + 规则引擎 + LLM + 模板引擎 + 验证层</div>
+
+<div class="diagram">
+
+<!-- ====== LAYER 0: 用户输入 ====== -->
+<div class="section-title"><span class="num">0</span> 输入层 — 语音/文本获取</div>
+<div class="row user-layer">
+  <div class="box">
+    <h3>🎤 浏览器录音</h3>
+    <p>MediaRecorder API → WebM/Opus</p>
+    <p>上传 <span class="gray">POST /api/transcribe</span></p>
+  </div>
+  <div class="box">
+    <h3>📁 WAV文件上传</h3>
+    <p>医生直接上传音频文件</p>
+    <p><span class="gray">FileReader → FormData</span></p>
+  </div>
+  <div class="box">
+    <h3>⌨ 文本框输入</h3>
+    <p>手动贴入口述文本</p>
+    <p><span class="gray">textarea → 直接发 /api/structure</span></p>
+  </div>
+  <div class="box">
+    <h3>🔘 快速测试按钮</h3>
+    <p>10种预置测试文本</p>
+    <p><span class="gray">一键填入 + 自动结构化</span></p>
+  </div>
+</div>
+
+<!-- ====== LAYER 1: ASR ====== -->
+<div class="section-title"><span class="num">1</span> ASR 层 — 语音转文字（A路）</div>
+<div class="row asr-layer">
+  <div class="box">
+    <h3>🔊 阿里云百炼 DashScope</h3>
+    <ul>
+      <li>API: <span class="highlight">qwen3-asr-flash</span> 模型</li>
+      <li>输入: WebM/WAV 音频二进制</li>
+      <li>输出: 原始ASR中文文本</li>
+      <li>环境变量: <span class="gray">DASHSCOPE_API_KEY</span></li>
+      <li>3次重试 / 45s超时</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>🔧 ASR 后处理 <span class="gray">asr_correction.py</span></h3>
+    <ul>
+      <li>混淆词纠错（医学专科词典）</li>
+      <li>反义词消歧</li>
+      <li>语音识别语言模型 hotwords 注入</li>
+      <li>输出 <span class="highlight">A = corrected_text</span></li>
+    </ul>
+  </div>
+</div>
+
+<div class="arrow-row">
+  <span class="arrow-label">A路: ASR文本</span>
+  <span style="color:#475569">→</span>
+  <span class="arrow-label">性别/妊娠冲突检测</span>
+  <span style="color:#475569">→</span>
+  <span class="arrow-label">PII脱敏(姓名/手机号)</span>
+</div>
+
+<!-- ====== LAYER 2: Route Decision ====== -->
+<div class="section-title"><span class="num">2</span> 路由决策 — 智能分流（Agent决策节点）</div>
+<div class="row fusion-layer">
+  <div class="box" style="max-width:380px">
+    <h3>🧠 三路分流 <span class="gray">main.py:structure()</span></h3>
+    <ul>
+      <li><span class="green">胎儿快速通道</span>: 关键词匹配(产科/孕/BPD...) → 直接调用 <span class="gray">fill_fetal_template</span></li>
+      <li><span class="green">正常报告快速通道</span>: 无异常关键词 → 规则引擎直出，<span class="highlight">跳过全部LLM调用</span></li>
+      <li><span class="orange">通用路径</span>: 触发完整 ABCDEF v3 流水线</li>
+    </ul>
+  </div>
+  <div class="box" style="max-width:380px">
+    <h3>⚡ 并行执行 <span class="gray">asyncio.gather</span></h3>
+    <ul>
+      <li><span class="purple">B路 LLM</span> 与 <span class="green">C路 Regex</span> 并行调用</li>
+      <li>D路依赖B路结果（B→规则引擎再分析）</li>
+      <li>EF合并依赖ABCD全部结果</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====== LAYER 3: LLM ====== -->
+<div class="section-title"><span class="num">3</span> LLM 层 — 自由生成（B路）</div>
+<div class="row llm-layer">
+  <div class="box">
+    <h3>🤖 DeepSeek Chat API</h3>
+    <ul>
+      <li>模型: <span class="highlight">deepseek-chat</span></li>
+      <li>API: <span class="gray">https://api.deepseek.com/v1</span></li>
+      <li>温度: 0.1（低创造性）</li>
+      <li>max_tokens: 4096</li>
+      <li>2次重试</li>
+      <li>函数: <span class="gray">generate_free_report()</span></li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>📝 System Prompt 构建</h3>
+    <ul>
+      <li>角色: 资深超声科主任医师</li>
+      <li>检查类型 + 覆盖脏器列表</li>
+      <li>输出JSON Schema约束</li>
+      <li>缺失值填 <span class="highlight">___mm</span> 占位</li>
+      <li>口语→标准术语</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>🔧 JSON 解析修复</h3>
+    <ul>
+      <li>提取 Markdown fences</li>
+      <li>补全未闭合括号</li>
+      <li>截断末行重试</li>
+      <li>ICD-10编码补全</li>
+      <li>输出: {study_see, study_hint[], recommendation}</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====== LAYER 4: Rule Engine ====== -->
+<div class="section-title"><span class="num">4</span> 规则引擎层 — 正则提取（C路）</div>
+<div class="row rule-layer">
+  <div class="box">
+    <h3>📏 rule_engine.py</h3>
+    <ul>
+      <li>加载 knowledge/ JSON配置</li>
+      <li>矛盾检测规则、正常范围规则</li>
+      <li>性别保护规则、孕周约束</li>
+      <li>药物-超声互斥规则</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>📋 template_engine_v2.py</h3>
+    <ul>
+      <li>template_filler: CSV模板字段→文本变量替换</li>
+      <li>template_loader: 长沙医院528份模板</li>
+      <li>关键词+TF-IDF 模板匹配</li>
+      <li>数值正则提取 (mm/cm/g等)</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>📐 fixed_template_engine.py</h3>
+    <ul>
+      <li>process_with_fixed_template()</li>
+      <li>意图检测: intent_detector.py</li>
+      <li>6大类标签匹配 (腹部/妇产/心脏/甲状腺/血管/泌尿)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====== LAYER 5: Enhanced ====== -->
+<div class="section-title"><span class="num">5</span> 增强层 — B→规则引擎再分析（D路）</div>
+<div class="row fusion-layer">
+  <div class="box" style="max-width:500px">
+    <h3>🔄 D路: LLM结果二次提取</h3>
+    <ul>
+      <li>输入: B路LLM生成的 study_see (HTML stripped)</li>
+      <li>处理: match_and_fill_optimized() 再次匹配模板</li>
+      <li>目的: <span class="highlight">从LLM自由生成中提取结构化数值</span></li>
+      <li>兜底: process_with_fixed_template → fixed模板填充</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====== LAYER 6: Template Fusion ====== -->
+<div class="section-title"><span class="num">6</span> 模板融合层 — 选举+填充+验证（EF合并）</div>
+<div class="row llm-layer">
+  <div class="box" style="max-width:700px">
+    <h3>🧬 EF合并 — DeepSeek v4-flash 一次完成</h3>
+    <ul>
+      <li><span class="highlight">select_fill_and_validate()</span> 函数</li>
+      <li>输入: ASR原文 + B/C/D三路结果 + 候选模板列表(前8)</li>
+      <li>LLM任务: ①选最优模板 ②填测量值 ③标注voice/unfill ④交叉验证</li>
+      <li>Template score &lt; 50 → 回退到B/C混合自由生成</li>
+      <li>输出: 最终结构化报告HTML (带颜色标记)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====== LAYER 7: Validation ====== -->
+<div class="section-title"><span class="num">7</span> 验证层 — 多维度质量控制</div>
+<div class="row validate-layer">
+  <div class="box">
+    <h3>L2 固定文本完整性</h3>
+    <p>模板关键词 vs 填充文本比对，缺失&gt;30%触发降级</p>
+  </div>
+  <div class="box">
+    <h3>L4 内容溯源</h3>
+    <p>规则引擎数值 vs 最终报告数值，检测遗漏/引入</p>
+  </div>
+  <div class="box">
+    <h3>L5 医疗合规</h3>
+    <p>矛盾描述检测(如"可见"+"未见")、性别脏器冲突</p>
+  </div>
+</div>
+
+<!-- ====== LAYER 8: Output ====== -->
+<div class="section-title"><span class="num">8</span> 输出层 — 报告渲染与持久化</div>
+<div class="row output-layer">
+  <div class="box">
+    <h3>🏷 颜色标记 <span class="gray">voice/unfill</span></h3>
+    <ul>
+      <li><span class="green">绿色加粗</span>: AI填充的数值</li>
+      <li><span class="orange">橙色下划线</span>: 未填充的占位符</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>💾 数据库存储 <span class="gray">db.py</span></h3>
+    <ul>
+      <li>report_create(): 保存结构化报告</li>
+      <li>audit_log(): 审计日志</li>
+      <li>SQLite: ultrasound.db</li>
+    </ul>
+  </div>
+  <div class="box">
+    <h3>📊 前端展示</h3>
+    <ul>
+      <li>逐条审核卡片 (删除/恢复)</li>
+      <li>报告预览 (所见+提示+建议)</li>
+      <li>ABCDEF六路来源对比面板</li>
+      <li>方法论徽章 + 置信度条</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ====== Legend ====== -->
+<div class="legend">
+  <div class="legend-item"><div class="legend-swatch" style="background:#7c3aed"></div> LLM 路径</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#16a34a"></div> 规则引擎路径</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#f59e0b"></div> 融合/路由</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#0ea5e9"></div> 验证层</div>
+  <div class="legend-item"><div class="legend-swatch" style="background:#64748b"></div> ASR层</div>
+</div>
+
+</div>
+
+</body>
+</html>

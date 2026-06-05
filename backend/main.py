@@ -17,7 +17,7 @@ from datetime import datetime
 
 from fastapi import FastAPI, File, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel, Field
 
 try:
@@ -413,7 +413,7 @@ async def structure(req: StructureRequest):
                       detail={"method": C.get("_method", "fast_normal")})
         return {"success": True, "report": report, "report_id": report_id, "method": "fast_normal",
                 "warnings": warnings, "template_used": C.get("_template_matched", "正常"), "confidence": 0.95,
-                "conflicts": [], "sources": {"A_asr": A[:300], "C_regex": {"study_see": C.get("study_see","")[:300] if C else ""}}}
+                "conflicts": [], "sources": {"A_asr": A[:300], "C_regex": {"study_see": C.get("study_see","")[:300] if C else ""}}, "top3": [{"name": t["tpl_name"], "pct": t["confidence_pct"]} for t in candidates[:3]] if candidates else []}
 
     # B和C并行
     async def _route_b():
@@ -553,10 +553,11 @@ async def structure(req: StructureRequest):
     report = _wrap_hints_with_toggle(report)
 
     # P0-3: 统一颜色标记 — 对所有非胎儿模板也应用 voice/unfill 标签
-    if method != "fetal_template" and report.get("study_see"):
+    if report.get("study_see"):
+        import re as _re2
         see_html = report["study_see"]
         # 标记未填充的数值占位符 (___mm / __ / 未测)
-        see_html = _re.sub(
+        see_html = _re2.sub(
             r'(___?\s*(?:mm|cm|毫米|厘米)?|未测|__)',
             r'<i class="unfill">\1</i>', see_html
         )
@@ -565,7 +566,7 @@ async def structure(req: StructureRequest):
             val = m.group(0)
             if '<' in val: return val  # already tagged
             return f'<b class="voice">{val}</b>'
-        see_html = _re.sub(r'\b\d+(?:\.\d+)?\s*(?:mm|cm|毫米|厘米|次/分|克|平方厘米|Wd|级)?', _mark_voice, see_html)
+        see_html = _re2.sub(r'\b\d+(?:\.\d+)?\s*(?:mm|cm|毫米|厘米|次/分|克|平方厘米|Wd|级)?', _mark_voice, see_html)
         report["study_see"] = see_html
 
     # 保存
@@ -743,11 +744,24 @@ frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 
 # 禁止路径遍历的文件名白名单
 _ALLOWED_STATIC = {"index.html"}
+docs_dir = Path(__file__).resolve().parent.parent / "docs"
 
 if frontend_dir.exists():
     @app.get("/")
     async def index():
         return FileResponse(frontend_dir / "index.html")
+
+    @app.get("/app")
+    async def app_page():
+        return FileResponse(docs_dir / "index.html") if (docs_dir / "index.html").exists() else Response(status_code=404)
+
+    @app.get("/architecture")
+    async def arch_page():
+        return FileResponse(docs_dir / "architecture.html") if (docs_dir / "architecture.html").exists() else Response(status_code=404)
+
+    @app.get("/mock-pacs")
+    async def mock_pacs():
+        return FileResponse(docs_dir / "mock_pacs.html") if (docs_dir / "mock_pacs.html").exists() else Response(status_code=404)
 
     @app.get("/{filename}")
     async def serve_static(filename: str):

@@ -1,0 +1,2687 @@
+{
+  "_description": "超声医学术语热词表 - 从6830份真实报告自动提取",
+  "_total": 670,
+  "_source": "报告结果表.csv + 2报告内容.csv + 2报告内容.csv(DIAGNOSIS)",
+  "hotwords": [
+    {
+      "word": "实质回声",
+      "weight": 10
+    },
+    {
+      "word": "未见明显",
+      "weight": 10
+    },
+    {
+      "word": "均匀",
+      "weight": 10
+    },
+    {
+      "word": "大小正常",
+      "weight": 10
+    },
+    {
+      "word": "长沙昱景",
+      "weight": 10
+    },
+    {
+      "word": "健康体检",
+      "weight": 10
+    },
+    {
+      "word": "中心",
+      "weight": 10
+    },
+    {
+      "word": "信号",
+      "weight": 10
+    },
+    {
+      "word": "分布均匀",
+      "weight": 10
+    },
+    {
+      "word": "异常血流",
+      "weight": 10
+    },
+    {
+      "word": "大小约",
+      "weight": 10
+    },
+    {
+      "word": "多普勒超",
+      "weight": 10
+    },
+    {
+      "word": "血流信号",
+      "weight": 10
+    },
+    {
+      "word": "声检查见",
+      "weight": 10
+    },
+    {
+      "word": "规则",
+      "weight": 10
+    },
+    {
+      "word": "形态规则",
+      "weight": 10
+    },
+    {
+      "word": "见明显异",
+      "weight": 10
+    },
+    {
+      "word": "形态正常",
+      "weight": 10
+    },
+    {
+      "word": "所检脏器",
+      "weight": 10
+    },
+    {
+      "word": "肿大淋巴",
+      "weight": 10
+    },
+    {
+      "word": "内未见明",
+      "weight": 10
+    },
+    {
+      "word": "包膜光滑",
+      "weight": 10
+    },
+    {
+      "word": "常血流信",
+      "weight": 10
+    },
+    {
+      "word": "双肾",
+      "weight": 10
+    },
+    {
+      "word": "壁光滑",
+      "weight": 10
+    },
+    {
+      "word": "明显异常",
+      "weight": 10
+    },
+    {
+      "word": "完整",
+      "weight": 10
+    },
+    {
+      "word": "走形正常",
+      "weight": 10
+    },
+    {
+      "word": "表面光滑",
+      "weight": 10
+    },
+    {
+      "word": "膀胱充盈",
+      "weight": 10
+    },
+    {
+      "word": "显包块回",
+      "weight": 10
+    },
+    {
+      "word": "扩张",
+      "weight": 10
+    },
+    {
+      "word": "双侧附件",
+      "weight": 10
+    },
+    {
+      "word": "血流速度",
+      "weight": 10
+    },
+    {
+      "word": "被膜光滑",
+      "weight": 10
+    },
+    {
+      "word": "未见占位",
+      "weight": 10
+    },
+    {
+      "word": "性病变",
+      "weight": 10
+    },
+    {
+      "word": "小形态正",
+      "weight": 10
+    },
+    {
+      "word": "回声",
+      "weight": 10
+    },
+    {
+      "word": "肝脏形态",
+      "weight": 10
+    },
+    {
+      "word": "双肾形态",
+      "weight": 10
+    },
+    {
+      "word": "前列腺形",
+      "weight": 10
+    },
+    {
+      "word": "双侧颈部",
+      "weight": 10
+    },
+    {
+      "word": "脾脏",
+      "weight": 10
+    },
+    {
+      "word": "胰腺",
+      "weight": 10
+    },
+    {
+      "word": "甲状腺双",
+      "weight": 10
+    },
+    {
+      "word": "双侧输尿",
+      "weight": 10
+    },
+    {
+      "word": "结回声",
+      "weight": 10
+    },
+    {
+      "word": "肝静脉",
+      "weight": 10
+    },
+    {
+      "word": "形态大小",
+      "weight": 10
+    },
+    {
+      "word": "内部回声",
+      "weight": 10
+    },
+    {
+      "word": "管未见明",
+      "weight": 10
+    },
+    {
+      "word": "显扩张",
+      "weight": 10
+    },
+    {
+      "word": "门静脉内",
+      "weight": 10
+    },
+    {
+      "word": "其内未见",
+      "weight": 10
+    },
+    {
+      "word": "流方向及",
+      "weight": 10
+    },
+    {
+      "word": "肝内管系",
+      "weight": 10
+    },
+    {
+      "word": "欠均匀",
+      "weight": 10
+    },
+    {
+      "word": "胆总管上",
+      "weight": 10
+    },
+    {
+      "word": "脾厚正常",
+      "weight": 10
+    },
+    {
+      "word": "增强",
+      "weight": 10
+    },
+    {
+      "word": "主胰管内",
+      "weight": 10
+    },
+    {
+      "word": "径不扩张",
+      "weight": 10
+    },
+    {
+      "word": "胰头厚正",
+      "weight": 10
+    },
+    {
+      "word": "胰体厚正",
+      "weight": 10
+    },
+    {
+      "word": "段内径正",
+      "weight": 10
+    },
+    {
+      "word": "肝胆",
+      "weight": 10
+    },
+    {
+      "word": "规整",
+      "weight": 10
+    },
+    {
+      "word": "颈内",
+      "weight": 10
+    },
+    {
+      "word": "双肾集合",
+      "weight": 10
+    },
+    {
+      "word": "腔内透声",
+      "weight": 10
+    },
+    {
+      "word": "血彩充填",
+      "weight": 10
+    },
+    {
+      "word": "占位",
+      "weight": 10
+    },
+    {
+      "word": "形态规整",
+      "weight": 10
+    },
+    {
+      "word": "肝内血管",
+      "weight": 10
+    },
+    {
+      "word": "膀胱",
+      "weight": 10
+    },
+    {
+      "word": "边界清晰",
+      "weight": 10
+    },
+    {
+      "word": "胆囊大小",
+      "weight": 10
+    },
+    {
+      "word": "颈外动脉",
+      "weight": 10
+    },
+    {
+      "word": "多普勒检",
+      "weight": 10
+    },
+    {
+      "word": "纹理清晰",
+      "weight": 10
+    },
+    {
+      "word": "肌壁回声",
+      "weight": 10
+    },
+    {
+      "word": "输尿管彩",
+      "weight": 10
+    },
+    {
+      "word": "透声可",
+      "weight": 10
+    },
+    {
+      "word": "强回声团",
+      "weight": 10
+    },
+    {
+      "word": "门静脉血",
+      "weight": 10
+    },
+    {
+      "word": "走行正常",
+      "weight": 10
+    },
+    {
+      "word": "系无明显",
+      "weight": 10
+    },
+    {
+      "word": "液暗区及",
+      "weight": 10
+    },
+    {
+      "word": "双侧颈动",
+      "weight": 10
+    },
+    {
+      "word": "内未见异",
+      "weight": 10
+    },
+    {
+      "word": "流信号",
+      "weight": 10
+    },
+    {
+      "word": "胆囊内未",
+      "weight": 10
+    },
+    {
+      "word": "肝内外胆",
+      "weight": 10
+    },
+    {
+      "word": "动脉",
+      "weight": 10
+    },
+    {
+      "word": "包膜完整",
+      "weight": 10
+    },
+    {
+      "word": "皮髓质分",
+      "weight": 10
+    },
+    {
+      "word": "大小形态",
+      "weight": 10
+    },
+    {
+      "word": "甲状腺实",
+      "weight": 10
+    },
+    {
+      "word": "双侧腋窝",
+      "weight": 10
+    },
+    {
+      "word": "光滑",
+      "weight": 10
+    },
+    {
+      "word": "包膜薄而",
+      "weight": 10
+    },
+    {
+      "word": "胰管不扩",
+      "weight": 10
+    },
+    {
+      "word": "胰腺周围",
+      "weight": 10
+    },
+    {
+      "word": "双侧肾大",
+      "weight": 10
+    },
+    {
+      "word": "双侧颈总",
+      "weight": 10
+    },
+    {
+      "word": "子宫实质",
+      "weight": 10
+    },
+    {
+      "word": "管不扩张",
+      "weight": 10
+    },
+    {
+      "word": "脾静脉不",
+      "weight": 10
+    },
+    {
+      "word": "界清楚",
+      "weight": 10
+    },
+    {
+      "word": "位置及大",
+      "weight": 10
+    },
+    {
+      "word": "肾实质内",
+      "weight": 10
+    },
+    {
+      "word": "门静脉无",
+      "weight": 10
+    },
+    {
+      "word": "脾实质内",
+      "weight": 10
+    },
+    {
+      "word": "常回声",
+      "weight": 10
+    },
+    {
+      "word": "见分离",
+      "weight": 10
+    },
+    {
+      "word": "运动协调",
+      "weight": 10
+    },
+    {
+      "word": "肝脏大小",
+      "weight": 10
+    },
+    {
+      "word": "集合系未",
+      "weight": 10
+    },
+    {
+      "word": "内未见强",
+      "weight": 10
+    },
+    {
+      "word": "肝内未见",
+      "weight": 10
+    },
+    {
+      "word": "度正常",
+      "weight": 10
+    },
+    {
+      "word": "边缘锐利",
+      "weight": 10
+    },
+    {
+      "word": "盆腔及子",
+      "weight": 10
+    },
+    {
+      "word": "宫直肠间",
+      "weight": 10
+    },
+    {
+      "word": "内透声可",
+      "weight": 10
+    },
+    {
+      "word": "异常声像",
+      "weight": 10
+    },
+    {
+      "word": "声清晰",
+      "weight": 10
+    },
+    {
+      "word": "测值",
+      "weight": 10
+    },
+    {
+      "word": "隙未见积",
+      "weight": 10
+    },
+    {
+      "word": "囊内无回",
+      "weight": 10
+    },
+    {
+      "word": "均质",
+      "weight": 10
+    },
+    {
+      "word": "结节",
+      "weight": 10
+    },
+    {
+      "word": "各房室内",
+      "weight": 10
+    },
+    {
+      "word": "双侧乳腺",
+      "weight": 10
+    },
+    {
+      "word": "增厚",
+      "weight": 10
+    },
+    {
+      "word": "子宫大小",
+      "weight": 10
+    },
+    {
+      "word": "常声像",
+      "weight": 10
+    },
+    {
+      "word": "脾动脉",
+      "weight": 10
+    },
+    {
+      "word": "脾静脉血",
+      "weight": 10
+    },
+    {
+      "word": "区未见异",
+      "weight": 10
+    },
+    {
+      "word": "边界清",
+      "weight": 10
+    },
+    {
+      "word": "内膜居中",
+      "weight": 10
+    },
+    {
+      "word": "声结节",
+      "weight": 10
+    },
+    {
+      "word": "尚清",
+      "weight": 10
+    },
+    {
+      "word": "态饱满",
+      "weight": 10
+    },
+    {
+      "word": "回声均匀",
+      "weight": 10
+    },
+    {
+      "word": "房室间隔",
+      "weight": 10
+    },
+    {
+      "word": "回声清晰",
+      "weight": 10
+    },
+    {
+      "word": "多谱勒检",
+      "weight": 10
+    },
+    {
+      "word": "小约",
+      "weight": 10
+    },
+    {
+      "word": "双侧椎动",
+      "weight": 10
+    },
+    {
+      "word": "囊壁不厚",
+      "weight": 10
+    },
+    {
+      "word": "近场回声",
+      "weight": 10
+    },
+    {
+      "word": "远场回声",
+      "weight": 10
+    },
+    {
+      "word": "分布欠均",
+      "weight": 10
+    },
+    {
+      "word": "声像",
+      "weight": 10
+    },
+    {
+      "word": "征象",
+      "weight": 10
+    },
+    {
+      "word": "呈前位",
+      "weight": 10
+    },
+    {
+      "word": "声检查",
+      "weight": 10
+    },
+    {
+      "word": "衰减",
+      "weight": 10
+    },
+    {
+      "word": "结声像",
+      "weight": 10
+    },
+    {
+      "word": "壁薄",
+      "weight": 10
+    },
+    {
+      "word": "甲状腺右",
+      "weight": 10
+    },
+    {
+      "word": "前后径",
+      "weight": 10
+    },
+    {
+      "word": "后壁回声",
+      "weight": 10
+    },
+    {
+      "word": "甲状腺周",
+      "weight": 10
+    },
+    {
+      "word": "内回声清",
+      "weight": 10
+    },
+    {
+      "word": "态规则",
+      "weight": 10
+    },
+    {
+      "word": "淋巴结图",
+      "weight": 10
+    },
+    {
+      "word": "左右径",
+      "weight": 10
+    },
+    {
+      "word": "上下径",
+      "weight": 10
+    },
+    {
+      "word": "围未见确",
+      "weight": 10
+    },
+    {
+      "word": "切肿大的",
+      "weight": 10
+    },
+    {
+      "word": "前列腺测",
+      "weight": 10
+    },
+    {
+      "word": "心包腔内",
+      "weight": 10
+    },
+    {
+      "word": "未见积液",
+      "weight": 10
+    },
+    {
+      "word": "分流",
+      "weight": 10
+    },
+    {
+      "word": "甲状腺位",
+      "weight": 10
+    },
+    {
+      "word": "肝脏",
+      "weight": 10
+    },
+    {
+      "word": "边界清楚",
+      "weight": 10
+    },
+    {
+      "word": "其中一个",
+      "weight": 10
+    },
+    {
+      "word": "室间隔连",
+      "weight": 10
+    },
+    {
+      "word": "续完整",
+      "weight": 10
+    },
+    {
+      "word": "结构未见",
+      "weight": 10
+    },
+    {
+      "word": "心内未见",
+      "weight": 10
+    },
+    {
+      "word": "经腹前列",
+      "weight": 10
+    },
+    {
+      "word": "腺超声检",
+      "weight": 10
+    },
+    {
+      "word": "内径正常",
+      "weight": 10
+    },
+    {
+      "word": "径正常范",
+      "weight": 10
+    },
+    {
+      "word": "相当于",
+      "weight": 10
+    },
+    {
+      "word": "颈总",
+      "weight": 10
+    },
+    {
+      "word": "甲状腺内",
+      "weight": 10
+    },
+    {
+      "word": "大动脉关",
+      "weight": 10
+    },
+    {
+      "word": "左室壁厚",
+      "weight": 10
+    },
+    {
+      "word": "胎儿超声",
+      "weight": 10
+    },
+    {
+      "word": "径正常",
+      "weight": 10
+    },
+    {
+      "word": "侧叶切面",
+      "weight": 10
+    },
+    {
+      "word": "置及大小",
+      "weight": 10
+    },
+    {
+      "word": "侧叶形态",
+      "weight": 10
+    },
+    {
+      "word": "甲状腺左",
+      "weight": 10
+    },
+    {
+      "word": "博幅正常",
+      "weight": 10
+    },
+    {
+      "word": "显示欠清",
+      "weight": 10
+    },
+    {
+      "word": "各瓣膜形",
+      "weight": 10
+    },
+    {
+      "word": "回声结节",
+      "weight": 10
+    },
+    {
+      "word": "前列腺包",
+      "weight": 10
+    },
+    {
+      "word": "膜完整",
+      "weight": 10
+    },
+    {
+      "word": "欠佳",
+      "weight": 10
+    },
+    {
+      "word": "内膜光滑",
+      "weight": 10
+    },
+    {
+      "word": "室间隔与",
+      "weight": 10
+    },
+    {
+      "word": "狭窄及扩",
+      "weight": 10
+    },
+    {
+      "word": "管腔内无",
+      "weight": 10
+    },
+    {
+      "word": "明显斑块",
+      "weight": 10
+    },
+    {
+      "word": "侧叶未见",
+      "weight": 10
+    },
+    {
+      "word": "子宫",
+      "weight": 10
+    },
+    {
+      "word": "态大小正",
+      "weight": 10
+    },
+    {
+      "word": "余瓣膜口",
+      "weight": 10
+    },
+    {
+      "word": "未见扩张",
+      "weight": 10
+    },
+    {
+      "word": "肝脏内未",
+      "weight": 10
+    },
+    {
+      "word": "声团",
+      "weight": 10
+    },
+    {
+      "word": "及其内的",
+      "weight": 10
+    },
+    {
+      "word": "肝内管状",
+      "weight": 10
+    },
+    {
+      "word": "结构走行",
+      "weight": 10
+    },
+    {
+      "word": "经阴道超",
+      "weight": 10
+    },
+    {
+      "word": "清晰自然",
+      "weight": 10
+    },
+    {
+      "word": "体积增大",
+      "weight": 10
+    },
+    {
+      "word": "轴位扫描",
+      "weight": 10
+    },
+    {
+      "word": "内膜厚约",
+      "weight": 9
+    },
+    {
+      "word": "显示部分",
+      "weight": 9
+    },
+    {
+      "word": "宫颈前后",
+      "weight": 9
+    },
+    {
+      "word": "血流方向",
+      "weight": 9
+    },
+    {
+      "word": "异常回声",
+      "weight": 9
+    },
+    {
+      "word": "见少量以",
+      "weight": 9
+    },
+    {
+      "word": "改变而移",
+      "weight": 9
+    },
+    {
+      "word": "胆囊",
+      "weight": 9
+    },
+    {
+      "word": "宫腔线居",
+      "weight": 9
+    },
+    {
+      "word": "二尖瓣前",
+      "weight": 9
+    },
+    {
+      "word": "显结节及",
+      "weight": 9
+    },
+    {
+      "word": "轮廓清晰",
+      "weight": 9
+    },
+    {
+      "word": "清晰",
+      "weight": 9
+    },
+    {
+      "word": "子宫前后",
+      "weight": 9
+    },
+    {
+      "word": "各瓣膜口",
+      "weight": 9
+    },
+    {
+      "word": "左室后壁",
+      "weight": 9
+    },
+    {
+      "word": "占位回声",
+      "weight": 9
+    },
+    {
+      "word": "血流",
+      "weight": 9
+    },
+    {
+      "word": "子宫前位",
+      "weight": 8
+    },
+    {
+      "word": "的返流",
+      "weight": 8
+    },
+    {
+      "word": "室间隔及",
+      "weight": 8
+    },
+    {
+      "word": "肺动脉内",
+      "weight": 8
+    },
+    {
+      "word": "区未见明",
+      "weight": 8
+    },
+    {
+      "word": "血流分布",
+      "weight": 8
+    },
+    {
+      "word": "的囊性团",
+      "weight": 8
+    },
+    {
+      "word": "肝内胆管",
+      "weight": 8
+    },
+    {
+      "word": "较大约",
+      "weight": 8
+    },
+    {
+      "word": "声影",
+      "weight": 8
+    },
+    {
+      "word": "心功能",
+      "weight": 8
+    },
+    {
+      "word": "血流充盈",
+      "weight": 8
+    },
+    {
+      "word": "良好",
+      "weight": 8
+    },
+    {
+      "word": "启闭自如",
+      "weight": 8
+    },
+    {
+      "word": "连续中断",
+      "weight": 8
+    },
+    {
+      "word": "叶曲线呈",
+      "weight": 8
+    },
+    {
+      "word": "双峰",
+      "weight": 8
+    },
+    {
+      "word": "前后叶运",
+      "weight": 8
+    },
+    {
+      "word": "动异向",
+      "weight": 8
+    },
+    {
+      "word": "未见过隔",
+      "weight": 8
+    },
+    {
+      "word": "肝内可见",
+      "weight": 8
+    },
+    {
+      "word": "心包及心",
+      "weight": 8
+    },
+    {
+      "word": "包腔未见",
+      "weight": 8
+    },
+    {
+      "word": "各瓣膜清",
+      "weight": 8
+    },
+    {
+      "word": "不厚",
+      "weight": 8
+    },
+    {
+      "word": "收缩期可",
+      "weight": 8
+    },
+    {
+      "word": "不随体位",
+      "weight": 8
+    },
+    {
+      "word": "蓝色为主",
+      "weight": 8
+    },
+    {
+      "word": "质内未见",
+      "weight": 8
+    },
+    {
+      "word": "宫壁回声",
+      "weight": 8
+    },
+    {
+      "word": "返流血彩",
+      "weight": 8
+    },
+    {
+      "word": "充盈缺损",
+      "weight": 8
+    },
+    {
+      "word": "甲状腺",
+      "weight": 7
+    },
+    {
+      "word": "的低回声",
+      "weight": 7
+    },
+    {
+      "word": "肾内血管",
+      "weight": 7
+    },
+    {
+      "word": "甲状腺结",
+      "weight": 7
+    },
+    {
+      "word": "可见点状",
+      "weight": 7
+    },
+    {
+      "word": "后方回声",
+      "weight": 7
+    },
+    {
+      "word": "及宽景成",
+      "weight": 7
+    },
+    {
+      "word": "实质光点",
+      "weight": 7
+    },
+    {
+      "word": "切面形态",
+      "weight": 7
+    },
+    {
+      "word": "前列腺未",
+      "weight": 7
+    },
+    {
+      "word": "厚约",
+      "weight": 7
+    },
+    {
+      "word": "波幅正常",
+      "weight": 7
+    },
+    {
+      "word": "重博波可",
+      "weight": 7
+    },
+    {
+      "word": "不均匀",
+      "weight": 7
+    },
+    {
+      "word": "见异常",
+      "weight": 7
+    },
+    {
+      "word": "走向正常",
+      "weight": 7
+    },
+    {
+      "word": "流通畅",
+      "weight": 7
+    },
+    {
+      "word": "为入肝血",
+      "weight": 7
+    },
+    {
+      "word": "三尖瓣口",
+      "weight": 7
+    },
+    {
+      "word": "后伴声影",
+      "weight": 7
+    },
+    {
+      "word": "经阴道探",
+      "weight": 7
+    },
+    {
+      "word": "径及位置",
+      "weight": 7
+    },
+    {
+      "word": "关系正常",
+      "weight": 7
+    },
+    {
+      "word": "彩超",
+      "weight": 7
+    },
+    {
+      "word": "前列腺内",
+      "weight": 7
+    },
+    {
+      "word": "径约",
+      "weight": 7
+    },
+    {
+      "word": "增粗",
+      "weight": 7
+    },
+    {
+      "word": "充盈",
+      "weight": 7
+    },
+    {
+      "word": "质回声均",
+      "weight": 7
+    },
+    {
+      "word": "其一大小",
+      "weight": 7
+    },
+    {
+      "word": "密集",
+      "weight": 7
+    },
+    {
+      "word": "胸部",
+      "weight": 7
+    },
+    {
+      "word": "呈后位",
+      "weight": 7
+    },
+    {
+      "word": "颈动脉",
+      "weight": 6
+    },
+    {
+      "word": "表面欠光",
+      "weight": 6
+    },
+    {
+      "word": "输尿管",
+      "weight": 6
+    },
+    {
+      "word": "主动脉瓣",
+      "weight": 6
+    },
+    {
+      "word": "宫内可见",
+      "weight": 6
+    },
+    {
+      "word": "双层",
+      "weight": 6
+    },
+    {
+      "word": "输尿管未",
+      "weight": 6
+    },
+    {
+      "word": "次结构清",
+      "weight": 6
+    },
+    {
+      "word": "测值正常",
+      "weight": 6
+    },
+    {
+      "word": "壁欠光滑",
+      "weight": 6
+    },
+    {
+      "word": "回声暗区",
+      "weight": 6
+    },
+    {
+      "word": "置正常",
+      "weight": 6
+    },
+    {
+      "word": "膀胱内无",
+      "weight": 6
+    },
+    {
+      "word": "节育环",
+      "weight": 6
+    },
+    {
+      "word": "内中膜未",
+      "weight": 6
+    },
+    {
+      "word": "滑连续",
+      "weight": 6
+    },
+    {
+      "word": "节育环位",
+      "weight": 6
+    },
+    {
+      "word": "伴声影",
+      "weight": 6
+    },
+    {
+      "word": "声区",
+      "weight": 6
+    },
+    {
+      "word": "未见结石",
+      "weight": 6
+    },
+    {
+      "word": "不均",
+      "weight": 6
+    },
+    {
+      "word": "无液性暗",
+      "weight": 6
+    },
+    {
+      "word": "内见多个",
+      "weight": 6
+    },
+    {
+      "word": "内可见强",
+      "weight": 6
+    },
+    {
+      "word": "经腹超声",
+      "weight": 6
+    },
+    {
+      "word": "支气管开",
+      "weight": 6
+    },
+    {
+      "word": "肾静脉",
+      "weight": 6
+    },
+    {
+      "word": "肾动脉脉",
+      "weight": 6
+    },
+    {
+      "word": "及血流速",
+      "weight": 6
+    },
+    {
+      "word": "肾动脉血",
+      "weight": 6
+    },
+    {
+      "word": "流指数正",
+      "weight": 6
+    },
+    {
+      "word": "胆总管未",
+      "weight": 6
+    },
+    {
+      "word": "见明显扩",
+      "weight": 6
+    },
+    {
+      "word": "内回声欠",
+      "weight": 6
+    },
+    {
+      "word": "回声分布",
+      "weight": 6
+    },
+    {
+      "word": "胸廓对称",
+      "weight": 6
+    },
+    {
+      "word": "气管",
+      "weight": 6
+    },
+    {
+      "word": "口通畅",
+      "weight": 6
+    },
+    {
+      "word": "右肾集合",
+      "weight": 5
+    },
+    {
+      "word": "无回声区",
+      "weight": 5
+    },
+    {
+      "word": "不清",
+      "weight": 5
+    },
+    {
+      "word": "低回声区",
+      "weight": 5
+    },
+    {
+      "word": "系无液暗",
+      "weight": 5
+    },
+    {
+      "word": "宫颈未见",
+      "weight": 5
+    },
+    {
+      "word": "升主动脉",
+      "weight": 5
+    },
+    {
+      "word": "前列腺大",
+      "weight": 5
+    },
+    {
+      "word": "回声欠均",
+      "weight": 5
+    },
+    {
+      "word": "暗区",
+      "weight": 5
+    },
+    {
+      "word": "状强回声",
+      "weight": 5
+    },
+    {
+      "word": "回声增强",
+      "weight": 5
+    },
+    {
+      "word": "左肾实质",
+      "weight": 5
+    },
+    {
+      "word": "见多个粗",
+      "weight": 5
+    },
+    {
+      "word": "大点片状",
+      "weight": 5
+    },
+    {
+      "word": "豹纹征",
+      "weight": 5
+    },
+    {
+      "word": "侧叶结节",
+      "weight": 5
+    },
+    {
+      "word": "区及强回",
+      "weight": 5
+    },
+    {
+      "word": "病变",
+      "weight": 5
+    },
+    {
+      "word": "为主",
+      "weight": 5
+    },
+    {
+      "word": "双乳组织",
+      "weight": 5
+    },
+    {
+      "word": "充盈好",
+      "weight": 5
+    },
+    {
+      "word": "胸壁未见",
+      "weight": 5
+    },
+    {
+      "word": "宫体前位",
+      "weight": 5
+    },
+    {
+      "word": "见异常血",
+      "weight": 5
+    },
+    {
+      "word": "宫颈探及",
+      "weight": 5
+    },
+    {
+      "word": "子宫直肠",
+      "weight": 5
+    },
+    {
+      "word": "的囊性结",
+      "weight": 5
+    },
+    {
+      "word": "左肾集合",
+      "weight": 5
+    },
+    {
+      "word": "其内可见",
+      "weight": 5
+    },
+    {
+      "word": "内血彩未",
+      "weight": 5
+    },
+    {
+      "word": "见充盈缺",
+      "weight": 5
+    },
+    {
+      "word": "宫内膜厚",
+      "weight": 5
+    },
+    {
+      "word": "子宫壁未",
+      "weight": 5
+    },
+    {
+      "word": "胎儿颈部",
+      "weight": 5
+    },
+    {
+      "word": "内中膜厚",
+      "weight": 5
+    },
+    {
+      "word": "内回声不",
+      "weight": 5
+    },
+    {
+      "word": "明显血流",
+      "weight": 5
+    },
+    {
+      "word": "低回声结",
+      "weight": 5
+    },
+    {
+      "word": "缺损",
+      "weight": 5
+    },
+    {
+      "word": "光斑",
+      "weight": 5
+    },
+    {
+      "word": "脑中线居",
+      "weight": 5
+    },
+    {
+      "word": "显异常",
+      "weight": 5
+    },
+    {
+      "word": "轮廓正常",
+      "weight": 5
+    },
+    {
+      "word": "层次清楚",
+      "weight": 5
+    },
+    {
+      "word": "边界光滑",
+      "weight": 5
+    },
+    {
+      "word": "右侧叶内",
+      "weight": 5
+    },
+    {
+      "word": "强回声伴",
+      "weight": 5
+    },
+    {
+      "word": "声斑",
+      "weight": 5
+    },
+    {
+      "word": "右侧颈动",
+      "weight": 5
+    },
+    {
+      "word": "上述颈动",
+      "weight": 5
+    },
+    {
+      "word": "测值约",
+      "weight": 5
+    },
+    {
+      "word": "宫腔无分",
+      "weight": 5
+    },
+    {
+      "word": "窦部",
+      "weight": 5
+    },
+    {
+      "word": "主肺动脉",
+      "weight": 5
+    },
+    {
+      "word": "胎儿脐带",
+      "weight": 5
+    },
+    {
+      "word": "形态欠规",
+      "weight": 5
+    },
+    {
+      "word": "双乳内无",
+      "weight": 5
+    },
+    {
+      "word": "以前后径",
+      "weight": 5
+    },
+    {
+      "word": "膀胱壁光",
+      "weight": 5
+    },
+    {
+      "word": "未见充盈",
+      "weight": 4
+    },
+    {
+      "word": "前列腺增",
+      "weight": 4
+    },
+    {
+      "word": "脉走形正",
+      "weight": 4
+    },
+    {
+      "word": "的囊性暗",
+      "weight": 4
+    },
+    {
+      "word": "乳腺后间",
+      "weight": 4
+    },
+    {
+      "word": "隙未见异",
+      "weight": 4
+    },
+    {
+      "word": "边界欠清",
+      "weight": 4
+    },
+    {
+      "word": "急诊超声",
+      "weight": 4
+    },
+    {
+      "word": "胎盘附着",
+      "weight": 4
+    },
+    {
+      "word": "显示不清",
+      "weight": 4
+    },
+    {
+      "word": "显异常声",
+      "weight": 4
+    },
+    {
+      "word": "于右房侧",
+      "weight": 4
+    },
+    {
+      "word": "囊壁纤细",
+      "weight": 4
+    },
+    {
+      "word": "皮肤皮下",
+      "weight": 4
+    },
+    {
+      "word": "组织各层",
+      "weight": 4
+    },
+    {
+      "word": "的强回声",
+      "weight": 4
+    },
+    {
+      "word": "胎儿腹部",
+      "weight": 4
+    },
+    {
+      "word": "胎儿四肢",
+      "weight": 4
+    },
+    {
+      "word": "头位",
+      "weight": 4
+    },
+    {
+      "word": "脉内血彩",
+      "weight": 4
+    },
+    {
+      "word": "无声影",
+      "weight": 4
+    },
+    {
+      "word": "各段血流",
+      "weight": 4
+    },
+    {
+      "word": "囊内回声",
+      "weight": 4
+    },
+    {
+      "word": "肺门及纵",
+      "weight": 4
+    },
+    {
+      "word": "宫内妊娠",
+      "weight": 4
+    },
+    {
+      "word": "单活胎",
+      "weight": 4
+    },
+    {
+      "word": "胎儿大小",
+      "weight": 4
+    },
+    {
+      "word": "子宫附件",
+      "weight": 4
+    },
+    {
+      "word": "胎盘",
+      "weight": 4
+    },
+    {
+      "word": "多个囊性",
+      "weight": 4
+    },
+    {
+      "word": "左侧颈动",
+      "weight": 4
+    },
+    {
+      "word": "及乳腺周",
+      "weight": 4
+    },
+    {
+      "word": "围未见长",
+      "weight": 4
+    },
+    {
+      "word": "大的淋巴",
+      "weight": 4
+    },
+    {
+      "word": "隔结构未",
+      "weight": 4
+    },
+    {
+      "word": "及占位性",
+      "weight": 4
+    },
+    {
+      "word": "声检查子",
+      "weight": 4
+    },
+    {
+      "word": "宫附件见",
+      "weight": 4
+    },
+    {
+      "word": "分离",
+      "weight": 4
+    },
+    {
+      "word": "及大小约",
+      "weight": 4
+    },
+    {
+      "word": "质回声不",
+      "weight": 4
+    },
+    {
+      "word": "内壁光滑",
+      "weight": 4
+    },
+    {
+      "word": "二尖瓣口",
+      "weight": 4
+    },
+    {
+      "word": "显示尚清",
+      "weight": 4
+    },
+    {
+      "word": "左侧叶内",
+      "weight": 4
+    },
+    {
+      "word": "血彩未见",
+      "weight": 4
+    },
+    {
+      "word": "可见斑片",
+      "weight": 4
+    },
+    {
+      "word": "管口可见",
+      "weight": 4
+    },
+    {
+      "word": "喷尿现象",
+      "weight": 4
+    },
+    {
+      "word": "量反流",
+      "weight": 4
+    },
+    {
+      "word": "胎儿心率",
+      "weight": 4
+    },
+    {
+      "word": "颈内动脉",
+      "weight": 4
+    },
+    {
+      "word": "左室收缩",
+      "weight": 4
+    },
+    {
+      "word": "无回声结",
+      "weight": 4
+    },
+    {
+      "word": "胆囊正常",
+      "weight": 4
+    },
+    {
+      "word": "团块",
+      "weight": 4
+    },
+    {
+      "word": "分布不均",
+      "weight": 4
+    },
+    {
+      "word": "膀胱无尿",
+      "weight": 4
+    },
+    {
+      "word": "双顶径",
+      "weight": 4
+    },
+    {
+      "word": "头围",
+      "weight": 4
+    },
+    {
+      "word": "强回声",
+      "weight": 4
+    },
+    {
+      "word": "颈总动脉",
+      "weight": 4
+    },
+    {
+      "word": "内可见一",
+      "weight": 4
+    },
+    {
+      "word": "左侧附件",
+      "weight": 4
+    },
+    {
+      "word": "于左房侧",
+      "weight": 4
+    },
+    {
+      "word": "后伴弱声",
+      "weight": 4
+    },
+    {
+      "word": "右侧附件",
+      "weight": 4
+    },
+    {
+      "word": "囊肿后方",
+      "weight": 4
+    },
+    {
+      "word": "宫腔内探",
+      "weight": 4
+    },
+    {
+      "word": "胎儿双侧",
+      "weight": 4
+    },
+    {
+      "word": "心律齐",
+      "weight": 4
+    },
+    {
+      "word": "结构描述",
+      "weight": 4
+    },
+    {
+      "word": "胎儿鼻骨",
+      "weight": 4
+    },
+    {
+      "word": "内脏",
+      "weight": 4
+    },
+    {
+      "word": "双侧上臂",
+      "weight": 4
+    },
+    {
+      "word": "肱骨可见",
+      "weight": 4
+    },
+    {
+      "word": "双侧大腿",
+      "weight": 4
+    },
+    {
+      "word": "股骨可见",
+      "weight": 4
+    },
+    {
+      "word": "宽景成像",
+      "weight": 4
+    },
+    {
+      "word": "质回声欠",
+      "weight": 4
+    },
+    {
+      "word": "子宫体积",
+      "weight": 4
+    },
+    {
+      "word": "饱满",
+      "weight": 4
+    },
+    {
+      "word": "边界尚清",
+      "weight": 4
+    },
+    {
+      "word": "内中膜不",
+      "weight": 4
+    },
+    {
+      "word": "内膜面毛",
+      "weight": 4
+    },
+    {
+      "word": "可见一",
+      "weight": 4
+    },
+    {
+      "word": "囊壁上及",
+      "weight": 4
+    },
+    {
+      "word": "其囊性团",
+      "weight": 4
+    },
+    {
+      "word": "块内未见",
+      "weight": 4
+    },
+    {
+      "word": "的乳腺导",
+      "weight": 4
+    },
+    {
+      "word": "后方伴有",
+      "weight": 4
+    },
+    {
+      "word": "内未见占",
+      "weight": 4
+    },
+    {
+      "word": "脂肪肝",
+      "weight": 10
+    },
+    {
+      "word": "显异常声像",
+      "weight": 10
+    },
+    {
+      "word": "前列腺未见明",
+      "weight": 10
+    },
+    {
+      "word": "输尿管未见明",
+      "weight": 10
+    },
+    {
+      "word": "甲状腺左侧叶",
+      "weight": 6
+    },
+    {
+      "word": "钙化灶",
+      "weight": 6
+    },
+    {
+      "word": "甲状腺右侧叶",
+      "weight": 5
+    },
+    {
+      "word": "前列腺钙化灶",
+      "weight": 5
+    },
+    {
+      "word": "甲状腺双侧叶",
+      "weight": 5
+    },
+    {
+      "word": "三尖瓣口轻度",
+      "weight": 4
+    },
+    {
+      "word": "明显异常声像",
+      "weight": 4
+    },
+    {
+      "word": "左室收缩舒张",
+      "weight": 4
+    },
+    {
+      "word": "功能测值正常",
+      "weight": 4
+    },
+    {
+      "word": "心内结构未见",
+      "weight": 4
+    },
+    {
+      "word": "前列腺增生并",
+      "weight": 3
+    },
+    {
+      "word": "胆囊多发息肉",
+      "weight": 3
+    },
+    {
+      "word": "样病变",
+      "weight": 3
+    },
+    {
+      "word": "收缩功能测值",
+      "weight": 3
+    },
+    {
+      "word": "二尖瓣口轻度",
+      "weight": 2
+    },
+    {
+      "word": "多发结节",
+      "weight": 2
+    },
+    {
+      "word": "左室松弛性下",
+      "weight": 2
+    },
+    {
+      "word": "肝多发囊肿",
+      "weight": 2
+    },
+    {
+      "word": "前列腺增大并",
+      "weight": 2
+    },
+    {
+      "word": "肝囊肿",
+      "weight": 2
+    },
+    {
+      "word": "请结合临床及",
+      "weight": 2
+    },
+    {
+      "word": "实验室检查",
+      "weight": 2
+    },
+    {
+      "word": "前列腺多发钙",
+      "weight": 2
+    },
+    {
+      "word": "前列腺稍大并",
+      "weight": 2
+    },
+    {
+      "word": "肝血管瘤",
+      "weight": 2
+    },
+    {
+      "word": "低回声结节",
+      "weight": 2
+    },
+    {
+      "word": "右肾囊肿",
+      "weight": 2
+    },
+    {
+      "word": "胆囊息肉样病",
+      "weight": 2
+    },
+    {
+      "word": "肝内钙化灶",
+      "weight": 1
+    },
+    {
+      "word": "度返流",
+      "weight": 1
+    },
+    {
+      "word": "左侧多发",
+      "weight": 1
+    },
+    {
+      "word": "甲状腺实质弥",
+      "weight": 1
+    },
+    {
+      "word": "漫性病变",
+      "weight": 1
+    },
+    {
+      "word": "前列腺增大",
+      "weight": 1
+    },
+    {
+      "word": "附件未见明显",
+      "weight": 1
+    },
+    {
+      "word": "主动脉弹性减",
+      "weight": 1
+    },
+    {
+      "word": "无回声结节",
+      "weight": 1
+    },
+    {
+      "word": "囊性结节",
+      "weight": 1
+    },
+    {
+      "word": "肺动脉瓣口轻",
+      "weight": 1
+    },
+    {
+      "word": "肝内稍高回声",
+      "weight": 1
+    },
+    {
+      "word": "胆囊结石",
+      "weight": 1
+    },
+    {
+      "word": "多发钙化灶",
+      "weight": 1
+    },
+    {
+      "word": "前列腺稍大",
+      "weight": 1
+    },
+    {
+      "word": "多发混合回声",
+      "weight": 1
+    },
+    {
+      "word": "胆囊多发结石",
+      "weight": 1
+    },
+    {
+      "word": "左房增大",
+      "weight": 1
+    },
+    {
+      "word": "右肾多发结石",
+      "weight": 1
+    },
+    {
+      "word": "小结石",
+      "weight": 1
+    },
+    {
+      "word": "右侧多发",
+      "weight": 1
+    },
+    {
+      "word": "肝内多发强回",
+      "weight": 1
+    },
+    {
+      "word": "前列腺囊肿",
+      "weight": 1
+    },
+    {
+      "word": "肝内多发钙化",
+      "weight": 1
+    },
+    {
+      "word": "考虑肝血管瘤",
+      "weight": 1
+    },
+    {
+      "word": "左肾囊肿",
+      "weight": 1
+    },
+    {
+      "word": "膀胱未见明显",
+      "weight": 1
+    },
+    {
+      "word": "前列腺增生",
+      "weight": 1
+    },
+    {
+      "word": "非均质性脂肪",
+      "weight": 1
+    },
+    {
+      "word": "近峡部结节",
+      "weight": 1
+    },
+    {
+      "word": "建议定期复查",
+      "weight": 1
+    },
+    {
+      "word": "胆囊壁多发胆",
+      "weight": 1
+    },
+    {
+      "word": "固醇结晶",
+      "weight": 1
+    },
+    {
+      "word": "肝内强回声斑",
+      "weight": 1
+    },
+    {
+      "word": "二尖瓣",
+      "weight": 1
+    },
+    {
+      "word": "混合回声结节",
+      "weight": 1
+    },
+    {
+      "word": "伴局限性积水",
+      "weight": 1
+    },
+    {
+      "word": "双肾多发囊肿",
+      "weight": 1
+    },
+    {
+      "word": "伴部分囊壁钙",
+      "weight": 1
+    },
+    {
+      "word": "左肾多个强回",
+      "weight": 1
+    },
+    {
+      "word": "多发低回声结",
+      "weight": 1
+    },
+    {
+      "word": "甲状腺峡部无",
+      "weight": 1
+    },
+    {
+      "word": "钙化灶或肝内",
+      "weight": 1
+    },
+    {
+      "word": "胆管结石",
+      "weight": 1
+    },
+    {
+      "word": "肝内低回声区",
+      "weight": 1
+    },
+    {
+      "word": "考虑非均质性",
+      "weight": 1
+    },
+    {
+      "word": "建议复查和进",
+      "weight": 1
+    },
+    {
+      "word": "一步检查",
+      "weight": 1
+    },
+    {
+      "word": "胆囊壁稍毛糙",
+      "weight": 1
+    },
+    {
+      "word": "靠近肝背膜",
+      "weight": 1
+    },
+    {
+      "word": "双肾内强回声",
+      "weight": 1
+    },
+    {
+      "word": "考虑小泥沙或",
+      "weight": 1
+    },
+    {
+      "word": "肝小囊肿",
+      "weight": 1
+    },
+    {
+      "word": "肝脂肪沉积",
+      "weight": 1
+    },
+    {
+      "word": "考虑胆固醇结",
+      "weight": 1
+    },
+    {
+      "word": "右肾小结石",
+      "weight": 1
+    },
+    {
+      "word": "主动脉瓣口轻",
+      "weight": 1
+    },
+    {
+      "word": "左室舒张功能",
+      "weight": 1
+    },
+    {
+      "word": "胆囊壁胆固醇",
+      "weight": 1
+    },
+    {
+      "word": "室间隔及左室",
+      "weight": 1
+    },
+    {
+      "word": "后壁稍厚",
+      "weight": 1
+    },
+    {
+      "word": "回声不均匀所",
+      "weight": 1
+    },
+    {
+      "word": "等回声结节",
+      "weight": 1
+    },
+    {
+      "word": "肝实质回声增",
+      "weight": 1
+    },
+    {
+      "word": "甲状腺肿大",
+      "weight": 1
+    },
+    {
+      "word": "甲状腺碘",
+      "weight": 1
+    },
+    {
+      "word": "治疗术后声像",
+      "weight": 1
+    },
+    {
+      "word": "泥沙型",
+      "weight": 1
+    },
+    {
+      "word": "主动脉内径增",
+      "weight": 1
+    },
+    {
+      "word": "主动脉壁波幅",
+      "weight": 1
+    },
+    {
+      "word": "稍低平",
+      "weight": 1
+    },
+    {
+      "word": "双肾多发结石",
+      "weight": 1
+    },
+    {
+      "word": "左室顺应性减",
+      "weight": 1
+    },
+    {
+      "word": "双侧颈总动脉",
+      "weight": 1
+    },
+    {
+      "word": "颈外动脉未见",
+      "weight": 1
+    },
+    {
+      "word": "变可疑",
+      "weight": 1
+    },
+    {
+      "word": "甲状腺全切术",
+      "weight": 1
+    },
+    {
+      "word": "后声像",
+      "weight": 1
+    },
+    {
+      "word": "胆囊稍高回声",
+      "weight": 1
+    },
+    {
+      "word": "考虑息肉样病",
+      "weight": 1
+    },
+    {
+      "word": "右侧输尿管未",
+      "weight": 1
+    },
+    {
+      "word": "见明显异常声",
+      "weight": 1
+    },
+    {
+      "word": "肝内钙化灶或",
+      "weight": 1
+    },
+    {
+      "word": "肝内胆管结石",
+      "weight": 1
+    },
+    {
+      "word": "右肾错构瘤",
+      "weight": 1
+    },
+    {
+      "word": "盆腔积液",
+      "weight": 1
+    },
+    {
+      "word": "左房偏大",
+      "weight": 1
+    },
+    {
+      "word": "可疑肝血管瘤",
+      "weight": 1
+    },
+    {
+      "word": "双侧颈动脉内",
+      "weight": 1
+    },
+    {
+      "word": "中膜增厚伴左",
+      "weight": 1
+    },
+    {
+      "word": "侧斑块形成",
+      "weight": 1
+    },
+    {
+      "word": "肝脏部分切除",
+      "weight": 1
+    },
+    {
+      "word": "术后声像",
+      "weight": 1
+    },
+    {
+      "word": "主动脉",
+      "weight": 1
+    },
+    {
+      "word": "升主动脉内径",
+      "weight": 1
+    },
+    {
+      "word": "实质性结节",
+      "weight": 1
+    },
+    {
+      "word": "混合性结节",
+      "weight": 1
+    },
+    {
+      "word": "非均质回声结",
+      "weight": 1
+    },
+    {
+      "word": "肝内钙化灶形",
+      "weight": 1
+    },
+    {
+      "word": "甲状腺实质回",
+      "weight": 1
+    },
+    {
+      "word": "声欠均匀",
+      "weight": 1
+    },
+    {
+      "word": "考虑钙化灶",
+      "weight": 1
+    },
+    {
+      "word": "肝实质光点增",
+      "weight": 1
+    },
+    {
+      "word": "近峡部无回声",
+      "weight": 1
+    },
+    {
+      "word": "乳头状囊肿",
+      "weight": 1
+    },
+    {
+      "word": "建议复查",
+      "weight": 1
+    },
+    {
+      "word": "宫内节育器",
+      "weight": 1
+    },
+    {
+      "word": "位置正常",
+      "weight": 1
+    },
+    {
+      "word": "餐后胆囊",
+      "weight": 1
+    },
+    {
+      "word": "右房稍大",
+      "weight": 1
+    },
+    {
+      "word": "胆囊多发胆固",
+      "weight": 1
+    },
+    {
+      "word": "醇结晶",
+      "weight": 1
+    },
+    {
+      "word": "右肾声像改变",
+      "weight": 1
+    },
+    {
+      "word": "重复肾",
+      "weight": 1
+    },
+    {
+      "word": "脾切除术后声",
+      "weight": 1
+    },
+    {
+      "word": "子宫实质性肿",
+      "weight": 1
+    },
+    {
+      "word": "考虑子宫多发",
+      "weight": 1
+    },
+    {
+      "word": "钙化灶或胆管",
+      "weight": 1
+    },
+    {
+      "word": "稍低回声结节",
+      "weight": 1
+    },
+    {
+      "word": "胆囊切除术后",
+      "weight": 1
+    },
+    {
+      "word": "心包腔积液",
+      "weight": 1
+    },
+    {
+      "word": "左肾稍高回声",
+      "weight": 1
+    },
+    {
+      "word": "考虑错构瘤",
+      "weight": 1
+    },
+    {
+      "word": "局灶性脂肪浸",
+      "weight": 1
+    },
+    {
+      "word": "血管瘤",
+      "weight": 1
+    },
+    {
+      "word": "胆囊胆固醇结",
+      "weight": 1
+    },
+    {
+      "word": "肝脏部分切面",
+      "weight": 1
+    },
+    {
+      "word": "多发包块",
+      "weight": 1
+    },
+    {
+      "word": "左房高值",
+      "weight": 1
+    },
+    {
+      "word": "左肾钙化灶",
+      "weight": 1
+    },
+    {
+      "word": "肝内稍低回声",
+      "weight": 1
+    },
+    {
+      "word": "三尖瓣轻度返",
+      "weight": 1
+    },
+    {
+      "word": "子宫腺肌症",
+      "weight": 1
+    },
+    {
+      "word": "双肾小结石",
+      "weight": 1
+    },
+    {
+      "word": "左肾强回声点",
+      "weight": 1
+    },
+    {
+      "word": "左肾轻度积水",
+      "weight": 1
+    },
+    {
+      "word": "心动过缓",
+      "weight": 1
+    },
+    {
+      "word": "主动脉瓣回声",
+      "weight": 1
+    }
+  ]
+}

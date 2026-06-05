@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock PACS — Ultrasound Report System</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'PingFang SC','Microsoft YaHei',sans-serif;background:#f1f5f9;color:#0f172a;min-height:100vh}
+.top-bar{background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:white;padding:10px 24px;display:flex;justify-content:space-between;align-items:center}
+.top-bar h1{font-size:16px;font-weight:600}
+.top-bar span{font-size:10px;opacity:0.7}
+.app{max-width:900px;margin:16px auto;display:flex;flex-direction:column;gap:10px;padding:0 16px}
+.card{background:white;border:1px solid #e2e8f0;border-radius:8px;overflow:hidden}
+.card h3{padding:10px 14px;background:#f8fafc;font-size:13px;border-bottom:1px solid #e2e8f0;color:#1e40af}
+.card-body{padding:12px 14px}
+.row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap;align-items:center}
+.row label{font-size:12px;width:80px;color:#64748b;flex-shrink:0}
+.row input,.row select,.row textarea{padding:6px 10px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;font-family:inherit;outline:none;flex:1;min-width:150px}
+.row input:focus,.row select:focus,.row textarea:focus{border-color:#2563eb}
+.row textarea{min-height:60px;resize:vertical}
+.btn{padding:6px 14px;border:none;border-radius:4px;cursor:pointer;font-size:11px;font-weight:500;transition:all 0.15s}
+.btn-primary{background:#2563eb;color:white}.btn-primary:hover{background:#1d4ed8}
+.btn-success{background:#059669;color:white}.btn-success:hover{background:#047857}
+.btn-outline{border:1px solid #e2e8f0;background:white;color:#64748b}.btn-outline:hover{background:#f1f5f9}
+.patient-info{display:flex;gap:12px;flex-wrap:wrap}
+.patient-info .field{flex:1;min-width:120px}
+.field-id{font-size:9px;color:#94a3b8;margin-top:1px}
+.result-area{min-height:100px;padding:10px;background:#fafbfc;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;line-height:1.7;white-space:pre-wrap}
+.result-area:empty::before{content:"AI result will appear here...";color:#94a3b8}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:500}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-blue{background:#dbeafe;color:#1e40af}
+.badge-red{background:#fee2e2;color:#991b1b}
+.tab-bar{display:flex;border-bottom:1px solid #e2e8f0}
+.tab-bar button{padding:8px 16px;border:none;background:none;cursor:pointer;font-size:11px;color:#64748b;border-bottom:2px solid transparent;transition:all 0.15s}
+.tab-bar button:hover{color:#0f172a}
+.tab-bar button.active{color:#2563eb;border-bottom-color:#2563eb;font-weight:600}
+.tab-content{display:none}
+.tab-content.active{display:block}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <h1>PACS System — Ultrasound Report</h1>
+  <span id="topExamType">No exam selected</span>
+</div>
+
+<div class="app">
+  <!-- Patient Info -->
+  <div class="card">
+    <h3>Patient Information</h3>
+    <div class="card-body">
+      <div class="patient-info">
+        <div class="field">
+          <div class="row"><label>Patient ID</label><input id="patient_id" value="20260605001" readonly></div>
+        </div>
+        <div class="field">
+          <div class="row"><label>Name</label><input id="patient_name" value="Zhang San" placeholder="Patient name"></div>
+        </div>
+        <div class="field">
+          <div class="row"><label>Gender</label><select id="gender"><option value="">Select</option><option value="男" selected>Male</option><option value="女">Female</option></select></div>
+        </div>
+        <div class="field">
+          <div class="row"><label>Age</label><input id="age" type="number" value="52" min="0" max="200"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exam Info -->
+  <div class="card">
+    <h3>Examination</h3>
+    <div class="card-body">
+      <div class="row">
+        <label>Exam Part</label>
+        <select id="exam_item" onchange="switchTab()">
+          <option value="">Select exam part...</option>
+          <optgroup label="Abdominal">
+            <option value="腹部超声" selected>Abdominal Ultrasound</option>
+            <option value="泌尿前列腺">Urinary / Prostate</option>
+          </optgroup>
+          <optgroup label="OB/GYN">
+            <option value="妇产超声">OB/GYN</option>
+          </optgroup>
+          <optgroup label="Cardiac">
+            <option value="心脏超声">Cardiac Ultrasound</option>
+          </optgroup>
+          <optgroup label="Small Parts">
+            <option value="甲状腺超声">Thyroid</option>
+            <option value="小器官超声">Breast</option>
+          </optgroup>
+          <optgroup label="Vascular">
+            <option value="血管超声">Vascular</option>
+          </optgroup>
+        </select>
+        <label style="width:auto">Department</label>
+        <select id="department">
+          <option value="体检中心">Physical Exam Center</option>
+          <option value="泌尿外科">Urology</option>
+          <option value="产科">Obstetrics</option>
+          <option value="心内科">Cardiology</option>
+          <option value="普外科">General Surgery</option>
+          <option value="内分泌科">Endocrinology</option>
+        </select>
+        <label style="width:auto">Clinical Diag</label>
+        <input id="clinical_diag" placeholder="Clinical diagnosis (optional)" style="min-width:180px">
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabbed Report Fields -->
+  <div class="card">
+    <div class="tab-bar" id="tabBar">
+      <button class="active" data-tab="abdominal">Abdominal</button>
+      <button data-tab="obgyn">OB/GYN</button>
+      <button data-tab="cardiac">Cardiac</button>
+      <button data-tab="breast">Breast</button>
+      <button data-tab="thyroid">Thyroid</button>
+      <button data-tab="vascular">Vascular</button>
+      <button data-tab="urology">Urinary/Prostate</button>
+    </div>
+
+    <!-- Abdominal Tab -->
+    <div class="tab-content active" id="tab-abdominal">
+      <div class="card-body">
+        <div class="row"><label>Liver Size</label><input id="input_liver_size" placeholder="e.g. normal"><span class="field-id">#input_liver_size</span></div>
+        <div class="row"><label>Liver Echo</label><input id="input_liver_echo" placeholder="e.g. isoechoic"><span class="field-id">#input_liver_echo</span></div>
+        <div class="row"><label>Liver Shape</label><input id="input_liver_shape" placeholder="e.g. regular"><span class="field-id">#input_liver_shape</span></div>
+        <div class="row"><label>GB Size</label><input id="input_gallbladder_size" placeholder="e.g. 68x28mm"></div>
+        <div class="row"><label>GB Wall</label><input id="input_gallbladder_wall" placeholder="e.g. smooth, 2mm"></div>
+        <div class="row"><label>GB Content</label><input id="input_gallbladder_content" placeholder="e.g. no stone"><span class="field-id">#input_gallbladder_content</span></div>
+        <div class="row"><label>Pancreas</label><input id="input_pancreas" placeholder="e.g. normal"><span class="field-id">#input_pancreas</span></div>
+        <div class="row"><label>Spleen</label><input id="input_spleen" placeholder="e.g. 32mm"><span class="field-id">#input_spleen</span></div>
+        <div class="row"><label>Kidney Left</label><input id="input_kidney_left" placeholder="e.g. normal"><span class="field-id">#input_kidney_left</span></div>
+        <div class="row"><label>Kidney Right</label><input id="input_kidney_right" placeholder="e.g. normal"><span class="field-id">#input_kidney_right</span></div>
+      </div>
+    </div>
+
+    <!-- OB/GYN Tab -->
+    <div class="tab-content" id="tab-obgyn">
+      <div class="card-body">
+        <div class="row"><label>Uterus</label><input id="input_uterus" placeholder="e.g. 72x51x48mm, anteverted"></div>
+        <div class="row"><label>Endometrium</label><input id="input_endometrium" placeholder="e.g. 8mm"><span class="field-id">#input_endometrium</span></div>
+        <div class="row"><label>Ovary Left</label><input id="input_ovary_left" placeholder="e.g. 30x18mm"><span class="field-id">#input_ovary_left</span></div>
+        <div class="row"><label>Ovary Right</label><input id="input_ovary_right" placeholder="e.g. 28x16mm"><span class="field-id">#input_ovary_right</span></div>
+        <div class="row"><label>GS/BPD</label><input id="input_gestational" placeholder="e.g. GS 28x18mm, BPD 58mm"></div>
+        <div class="row"><label>Fetal HR</label><input id="input_fetal_hr" placeholder="e.g. 145 bpm"><span class="field-id">#input_fetal_hr</span></div>
+      </div>
+    </div>
+
+    <!-- Cardiac Tab -->
+    <div class="tab-content" id="tab-cardiac">
+      <div class="card-body">
+        <div class="row"><label>Chambers</label><input id="input_chambers" placeholder="e.g. normal range"><span class="field-id">#input_chambers</span></div>
+        <div class="row"><label>IVS/LVPW</label><input id="input_ivs_lvpw" placeholder="e.g. normal"><span class="field-id">#input_ivs_lvpw</span></div>
+        <div class="row"><label>Mitral Valve</label><input id="input_mitral" placeholder="e.g. mild regurgitation 1.2cm2"><span class="field-id">#input_mitral</span></div>
+        <div class="row"><label>Aortic Valve</label><input id="input_aortic" placeholder="e.g. normal"><span class="field-id">#input_aortic</span></div>
+        <div class="row"><label>Tricuspid</label><input id="input_tricuspid" placeholder="e.g. mild regurgitation"><span class="field-id">#input_tricuspid</span></div>
+        <div class="row"><label>Pericardium</label><input id="input_pericardium" placeholder="e.g. no effusion"><span class="field-id">#input_pericardium</span></div>
+        <div class="row"><label>EF</label><input id="input_ef" placeholder="e.g. 65%"><span class="field-id">#input_ef</span></div>
+      </div>
+    </div>
+
+    <!-- Breast Tab -->
+    <div class="tab-content" id="tab-breast">
+      <div class="card-body">
+        <div class="row"><label>Left Breast</label><textarea id="input_breast_left" placeholder="Describe left breast findings..."></textarea></div>
+        <div class="row"><label>Right Breast</label><textarea id="input_breast_right" placeholder="Describe right breast findings..."></textarea></div>
+        <div class="row"><label>BI-RADS</label><input id="input_bi_rads" placeholder="e.g. 2"><span class="field-id">#input_bi_rads</span></div>
+        <div class="row"><label>Axilla LN</label><input id="input_axilla" placeholder="e.g. no enlarged LN"><span class="field-id">#input_axilla</span></div>
+      </div>
+    </div>
+
+    <!-- Thyroid Tab -->
+    <div class="tab-content" id="tab-thyroid">
+      <div class="card-body">
+        <div class="row"><label>Left Lobe</label><input id="input_thyroid_left" placeholder="e.g. 45x16x15mm"><span class="field-id">#input_thyroid_left</span></div>
+        <div class="row"><label>Right Lobe</label><input id="input_thyroid_right" placeholder="e.g. 48x18x17mm"><span class="field-id">#input_thyroid_right</span></div>
+        <div class="row"><label>Isthmus</label><input id="input_isthmus" placeholder="e.g. 3mm"><span class="field-id">#input_isthmus</span></div>
+        <div class="row"><label>Nodules</label><textarea id="input_nodules" placeholder="Describe any nodules..."></textarea></div>
+        <div class="row"><label>TI-RADS</label><input id="input_tirads" placeholder="e.g. 3"><span class="field-id">#input_tirads</span></div>
+      </div>
+    </div>
+
+    <!-- Vascular Tab -->
+    <div class="tab-content" id="tab-vascular">
+      <div class="card-body">
+        <div class="row"><label>CCA IMT</label><input id="input_cca_imt" placeholder="e.g. 0.8mm"><span class="field-id">#input_cca_imt</span></div>
+        <div class="row"><label>CCA Plaque</label><input id="input_cca_plaque" placeholder="e.g. none"><span class="field-id">#input_cca_plaque</span></div>
+        <div class="row"><label>ICA</label><input id="input_ica" placeholder="e.g. normal"><span class="field-id">#input_ica</span></div>
+        <div class="row"><label>ECA</label><input id="input_eca" placeholder="e.g. normal"><span class="field-id">#input_eca</span></div>
+        <div class="row"><label>Vertebral A.</label><input id="input_vertebral" placeholder="e.g. normal"><span class="field-id">#input_vertebral</span></div>
+      </div>
+    </div>
+
+    <!-- Urology Tab -->
+    <div class="tab-content" id="tab-urology">
+      <div class="card-body">
+        <div class="row"><label>Prostate</label><input id="input_prostate" placeholder="e.g. 52x45x42mm"><span class="field-id">#input_prostate</span></div>
+        <div class="row"><label>Bladder</label><input id="input_bladder" placeholder="e.g. normal"><span class="field-id">#input_bladder</span></div>
+        <div class="row"><label>Residual Urine</label><input id="input_residual_urine" placeholder="e.g. 80ml"><span class="field-id">#input_residual_urine</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Full Report -->
+  <div class="card">
+    <h3>Structured Report</h3>
+    <div class="card-body">
+      <div class="row"><label>Study See</label><textarea id="study_see" style="min-height:80px" placeholder="Ultrasound findings will appear here..."></textarea></div>
+      <div class="row"><label>Study Hint</label><textarea id="study_hint" style="min-height:50px" placeholder="Diagnosis hints will appear here..."></textarea></div>
+      <div class="row"><label>Recommendation</label><input id="input_recommendation" placeholder="e.g. follow-up in 6 months"></div>
+      <div class="row"><label>Other Findings</label><textarea id="input_other_findings" placeholder="Other notable findings..."></textarea></div>
+    </div>
+  </div>
+
+  <!-- Test Buttons -->
+  <div class="card">
+    <h3>Quick Test</h3>
+    <div class="card-body">
+      <div class="row">
+        <button class="btn btn-primary" onclick="fillMockText('abdominal_normal')">Normal Abdomen</button>
+        <button class="btn btn-primary" onclick="fillMockText('fatty_liver')">Fatty Liver</button>
+        <button class="btn btn-primary" onclick="fillMockText('gallstone')">Gallstone</button>
+        <button class="btn btn-primary" onclick="fillMockText('early_pregnancy')">Early Pregnancy</button>
+        <button class="btn btn-primary" onclick="fillMockText('prostate')">Prostate Hyperplasia</button>
+        <button class="btn btn-outline" onclick="clearAll()">Clear All</button>
+      </div>
+      <div id="mockTextArea" style="margin-top:8px;font-size:11px;color:#64748b"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// Tab switching
+function switchTab() {
+  const exam = document.getElementById("exam_item").value;
+  document.getElementById("topExamType").textContent = exam || "No exam selected";
+
+  const tabMap = {
+    "腹部超声": "abdominal",
+    "泌尿前列腺": "urology",
+    "妇产超声": "obgyn",
+    "心脏超声": "cardiac",
+    "甲状腺超声": "thyroid",
+    "小器官超声": "breast",
+    "血管超声": "vascular",
+  };
+  const actTab = tabMap[exam] || "abdominal";
+  document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
+  document.getElementById("tab-" + actTab).classList.add("active");
+  document.querySelectorAll(".tab-bar button").forEach((el) => el.classList.remove("active"));
+  document.querySelector(`[data-tab="${actTab}"]`).classList.add("active");
+}
+
+document.querySelectorAll(".tab-bar button").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll(".tab-content").forEach((el) => el.classList.remove("active"));
+    document.getElementById("tab-" + tab).classList.add("active");
+    document.querySelectorAll(".tab-bar button").forEach((el) => el.classList.remove("active"));
+    btn.classList.add("active");
+  });
+});
+
+// Mock text filler
+const MOCK_TEXTS = {
+  abdominal_normal: "肝脏大小形态正常，包膜光滑，实质回声均匀。胆囊大小约68x28mm，壁光滑，腔内未见异常回声。胰腺形态大小正常。脾脏肋间厚32mm。双肾大小形态正常。",
+  fatty_liver: "肝脏形态饱满，回声增粗增强，肝肾反差明显，符合脂肪肝声像图改变。胆囊大小正常，壁上可见0.4x0.3cm高回声团。胰腺脾脏双肾未见异常。",
+  gallstone: "胆囊大小约70x30mm，壁厚3mm，粗糙，腔内见多个强回声团，其中一个约8x6mm，后伴声影，随体位移动。肝脏胰腺脾脏双肾未见异常。",
+  early_pregnancy: "子宫呈前位，宫腔内可见一孕囊大小约28x18mm，可见卵黄囊，胚芽长约5mm，可见原始心管搏动心率145次/分。双侧卵巢可见，黄体可见。",
+  prostate: "经腹前列腺超声检查：前列腺大小约52x45x42mm，形态饱满，突入膀胱约15mm，实质回声欠均匀，内可见多个点状强回声。排尿后膀胱残余尿约80ml。",
+};
+
+function fillMockText(type) {
+  const text = MOCK_TEXTS[type];
+  if (!text) return;
+  document.getElementById("study_see").value = text;
+  document.getElementById("mockTextArea").innerHTML = `<span class="badge badge-green">Filled</span> ${text.substring(0, 80)}...`;
+}
+
+function clearAll() {
+  document.querySelectorAll("input, textarea").forEach((el) => {
+    if (el.id !== "patient_id" && el.id !== "patient_name" && el.id !== "gender" && el.id !== "age" && el.id !== "exam_item" && el.id !== "department") {
+      el.value = "";
+    }
+  });
+  document.getElementById("mockTextArea").innerHTML = "";
+}
+
+// Init
+switchTab();
+</script>
+</body>
+</html>

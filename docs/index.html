@@ -7,13 +7,13 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --primary:#2563eb;--primary-light:#eff6ff;--danger:#dc2626;--danger-light:#fef2f2;
+  --primary:#059669;--primary-light:#ecfdf5;--danger:#dc2626;--danger-light:#fef2f2;
   --success:#16a34a;--success-light:#f0fdf4;--warn:#f59e0b;
   --bg:#f1f5f9;--surface:#ffffff;--border:#e2e8f0;--text:#0f172a;
   --text-secondary:#64748b;--text-muted:#94a3b8;--radius:6px;
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);line-height:1.5}
-.top-bar{background:linear-gradient(135deg,#1e3a5f 0%,#2563eb 100%);color:white;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
+.top-bar{background:linear-gradient(135deg,#064e3b 0%,#059669 100%);color:white;padding:8px 20px;display:flex;align-items:center;justify-content:space-between;box-shadow:0 2px 6px rgba(0,0,0,0.1)}
 .top-bar h1{font-size:15px;font-weight:600}
 .top-bar kbd{background:rgba(255,255,255,.15);border-radius:3px;padding:1px 5px;font-size:10px;margin:0 2px}
 .api-bar{padding:8px 16px;background:#fffbeb;border-bottom:1px solid #fde68a;display:flex;align-items:center;gap:8px;font-size:11px;flex-wrap:wrap}
@@ -32,7 +32,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .patient-item.active{background:var(--primary-light);border-left-color:var(--primary)}
 .patient-item .pi-name{font-weight:600}.patient-item .pi-exam{color:var(--primary);font-size:11px}
 .patient-item .badge{display:inline-block;padding:1px 5px;border-radius:6px;font-size:9px;margin-left:4px}
-.badge-wait{background:#dbeafe;color:#1e40af}.badge-done{background:#d1fae5;color:#065f46}
+.badge-wait{background:#d1fae5;color:#065f46}.badge-done{background:#d1fae5;color:#065f46}
 
 .main{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
 .current-pt{padding:6px 12px;background:var(--primary-light);font-size:12px;border-radius:var(--radius)}
@@ -70,7 +70,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 .action-row{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
 .btn{padding:5px 12px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:11px;font-weight:500;transition:all .15s;font-family:inherit}
 .btn:hover{background:#f1f5f9}
-.btn-primary{background:var(--primary);color:white;border-color:var(--primary)}.btn-primary:hover{background:#1d4ed8}
+.btn-primary{background:var(--primary);color:white;border-color:var(--primary)}.btn-primary:hover{background:#047857}
 .btn-danger{background:var(--danger);color:white;border-color:var(--danger)}.btn-danger:hover{background:#b91c1c}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 
@@ -88,15 +88,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 <body>
 
 <div class="top-bar">
-  <h1>超声报告语音结构化</h1>
+  <h1>超声报告语音结构化 <span style="font-size:10px;opacity:.7">绿版</span></h1>
   <span style="font-size:11px;opacity:.8"><kbd>Ctrl+R</kbd> 录音 <kbd>Ctrl+S</kbd> 保存 <kbd>Ctrl+Enter</kbd> 发送</span>
 </div>
 
-<div class="api-bar" id="apiBar">
+<div class="api-bar" id="apiBar" style="display:none">
   <span style="font-weight:600">DeepSeek Key:</span>
   <input id="apiKeyInput" type="password" placeholder="sk-...">
   <button onclick="saveApiKey()">保存</button>
-  <span id="apiStatus" style="font-size:10px;color:var(--text-muted)">请输入 API Key 后开始使用</span>
+  <span id="apiStatus" style="font-size:10px;color:var(--text-muted)">通过后端代理，无需输入</span>
 </div>
 
 <div class="app">
@@ -161,9 +161,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Micr
 
 <script>
 // ==================== Config ====================
-let DS_KEY = '';
-if (localStorage.dsKey) { DS_KEY = localStorage.dsKey; document.getElementById('apiKeyInput').value = DS_KEY; document.getElementById('apiStatus').textContent = 'API Key 已就绪 ✓'; document.getElementById('apiStatus').style.color = 'var(--success)'; }
-function saveApiKey(){ DS_KEY = document.getElementById('apiKeyInput').value.trim(); if(!DS_KEY)return; localStorage.dsKey = DS_KEY; document.getElementById('apiStatus').textContent = 'API Key 已就绪 ✓'; document.getElementById('apiStatus').style.color = 'var(--success)'; toast('API Key 已保存','success'); }
+// DS_KEY 不再需要：结构化请求通过后端 /api/structure 代理，Key 保存在服务端 .env
+let DS_KEY = 'proxy';  // sentinel值，表示通过后端代理
+if (localStorage.dsKey) { DS_KEY = localStorage.dsKey; document.getElementById('apiKeyInput').value = DS_KEY; document.getElementById('apiStatus').textContent = '通过后端代理 ✓'; document.getElementById('apiStatus').style.color = 'var(--success)'; }
+function saveApiKey(){ var k = document.getElementById('apiKeyInput').value.trim(); if(!k)return; DS_KEY = k; localStorage.dsKey = k; document.getElementById('apiStatus').textContent = 'API Key 已就绪 ✓'; document.getElementById('apiStatus').style.color = 'var(--success)'; toast('API Key 已保存','success'); }
 
 // ==================== Templates ====================
 const TEMPLATES = {
@@ -270,51 +271,29 @@ function stopRec(){
 }
 function setStatus(s,t){ const el=document.getElementById('st'); el.className='status-tag '+s; el.textContent = t||(s==='on'?'录音中':'就绪'); }
 
-// ==================== DeepSeek Structure ====================
+// ==================== Structure via Backend Proxy ====================
 async function doStructure(){
-  if(!DS_KEY){ toast('请先输入 DeepSeek API Key','error'); return; }
   const text = document.getElementById('rawText').value.trim();
   if(!text){ toast('请先完成语音识别','error'); return; }
   if(!S.sel){ toast('请先选择患者','error'); return; }
 
-  const tplKey = matchTpl(S.sel.exam_type);
-  const tpl = TEMPLATES[tplKey];
+  // 如果没有语音识别，允许手动输入文本
+  if(!text) {
+    // 尝试从 textarea 获取
+    text = document.getElementById('rawText').value.trim();
+  }
+  if(!text){ toast('请先完成语音识别或手动输入文本','error'); return; }
+
   setStatus('on','结构化提取中...'); document.getElementById('structBtn').disabled=true;
 
-  const systemPrompt = `你是资深超声科主任医师。将口语化的超声口述转换为规范化超声报告。
-
-检查类型: ${tpl.name}
-覆盖脏器: ${tpl.organs.join('、')}
-
-规则:
-1. 缺失的测量值填"___mm"占位，绝不编造数值
-2. 口语→标准术语（"肝有点大"→"肝脏形态饱满"，"胆囊没有"→"胆囊未见异常"）
-3. study_see 按脏器分段，每段格式: "脏器名: 描述。" 每个提及的脏器都必须出现（包括正常脏器）
-4. study_hint 每条一行，按临床重要性排序，只列阳性发现。全部正常时输出"X检查未见明显异常"
-5. 标注 ICD-10 编码+名称（格式："K76.0 脂肪肝"）
-6. patient_info 全部填 null
-7. 只输出 JSON
-
-输出格式:
-{
-  "patient_info":{"name":null,"gender":null,"age":null,"exam_id":null},
-  "exam_info":{"modality":"${tpl.name}","device":null,"exam_date":null},
-  "study_see":"脏器分段描述。例如:\\n肝脏: 形态大小正常，实质回声均匀。\\n胆囊: 大小正常，壁光滑，腔内未见异常回声。\\n",
-  "study_hint":[{"rank":1,"diagnosis":"疾病名","icd10":"编码 名称"}],
-  "recommendation":"建议"
-}`;
-
   try{
-    const r = await fetch('https://api.deepseek.com/v1/chat/completions', {
-      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+DS_KEY},
-      body:JSON.stringify({model:'deepseek-v4-flash',messages:[{role:'system',content:systemPrompt},{role:'user',content:'请将以下口述转换为规范化超声报告（注意：study_see 必须包含口述中提到的每一个脏器）：\\n\\n'+text}],temperature:0.1,max_tokens:4096})
+    const r = await fetch('/api/structure', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text:text, exam_type: (S.sel?S.sel.exam_type:'腹部超声'), patient_id: (S.sel?String(S.sel.id):null)})
     });
     const d = await r.json();
-    if(!r.ok) throw new Error(d.error?.message||'API 调用失败');
-    let content = d.choices[0].message.content;
-    content = content.replace(/```(?:json)?\s*|\s*```/g, '').trim();
-    if(content.startsWith('{')) content = content.substring(content.indexOf('{'), content.lastIndexOf('}')+1);
-    const report = JSON.parse(content);
+    if(!d.success) throw new Error(d.detail||'API 调用失败');
+    const report = d.report;
 
     (report.study_hint||[]).forEach(imp => {
       if(imp.icd10){ const code=imp.icd10.split(' ')[0]; const name=ICD10[code]; if(name&&!imp.icd10.includes(name)) imp.icd10=code+' '+name }

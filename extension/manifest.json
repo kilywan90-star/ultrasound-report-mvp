@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Ultrasound Voice AI",
+  "version": "1.0.0",
+  "description": "Ultrasound Report Voice-to-Structured AI — inject structured results into PACS",
+  "permissions": ["activeTab", "storage", "scripting"],
+  "host_permissions": ["http://localhost:8800/*", "https://47.109.151.238/*"],
+  "action": {
+    "default_title": "Ultrasound Voice AI",
+    "default_popup": "popup.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["content.js"],
+      "css": ["sidebar.css"],
+      "run_at": "document_end"
+    }
+  ]
+}

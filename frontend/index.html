@@ -10,7 +10,7 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,'PingFang SC','Microsoft YaHei',sans-serif;background:#f1f5f9;color:#0f172a;height:100vh;display:flex;flex-direction:column}
-.bar{background:#2563eb;color:white;padding:8px 16px;font-size:14px;display:flex;justify-content:space-between;flex-shrink:0}
+.bar{background:#059669;color:white;padding:8px 16px;font-size:14px;display:flex;justify-content:space-between;flex-shrink:0}
 .app{display:flex;flex:1;overflow:hidden}
 .side{width:240px;background:white;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;flex-shrink:0}
 .side h3{padding:10px 12px;font-size:13px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
@@ -18,12 +18,12 @@ body{font-family:Arial,'PingFang SC','Microsoft YaHei',sans-serif;background:#f1
 .qa input,.qa select{padding:4px 6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;width:100%;margin-bottom:4px}
 .qa .row{display:flex;gap:3px;margin-bottom:3px}
 .qa .row:last-child{margin-bottom:0}
-.qa button{padding:4px 10px;border:none;border-radius:4px;background:#2563eb;color:white;font-size:11px;cursor:pointer;white-space:nowrap}
+.qa button{padding:4px 10px;border:none;border-radius:4px;background:#059669;color:white;font-size:11px;cursor:pointer;white-space:nowrap}
 .plist{flex:1;overflow-y:auto}
 .pi{padding:8px 10px;border-bottom:1px solid #e2e8f0;cursor:pointer;font-size:12px;border-left:3px solid transparent}
 .pi:hover{background:#f8fafc}
-.pi.on{background:#eff6ff;border-left-color:#2563eb}
-.pi .n{font-weight:600}.pi .e{color:#2563eb;font-size:11px}.pi .s{font-size:9px;color:#64748b}
+.pi.on{background:#ecfdf5;border-left-color:#059669}
+.pi .n{font-weight:600}.pi .e{color:#059669;font-size:11px}.pi .s{font-size:9px;color:#64748b}
 .main{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px}
 .pn{background:white;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden}
 .pn h4{padding:8px 12px;background:#f8fafc;font-size:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0}
@@ -37,22 +37,22 @@ body{font-family:Arial,'PingFang SC','Microsoft YaHei',sans-serif;background:#f1
 .tag{font-size:10px;padding:2px 6px;border-radius:8px;font-weight:500}
 .tag.idle{background:#f1f5f9;color:#64748b}.tag.on{background:#fef2f2;color:#dc2626}.tag.ok{background:#f0fdf4;color:#16a34a}
 textarea.txt{width:100%;min-height:60px;max-height:140px;padding:6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;resize:vertical;font-family:inherit;background:#fafbfc}
-textarea.txt:focus{outline:none;border-color:#2563eb}
+textarea.txt:focus{outline:none;border-color:#059669}
 .ed{width:100%;min-height:80px;max-height:280px;padding:6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;line-height:1.7;overflow-y:auto;background:#fafbfc}
-.ed:focus{outline:none;border-color:#2563eb}
+.ed:focus{outline:none;border-color:#059669}
 .rpt-html b.vc,.rpt-html b.voice{color:#16a34a;background:#f0fdf4;padding:0 3px;border-radius:2px;font-weight:700}.rpt-html b.unfill,.rpt-html b.uf,.rpt-html i.unfill{color:#92400e;font-weight:700;border-bottom:2px solid #d97706;background:#fffbeb;padding:0 3px;border-radius:2px;font-style:normal}
 .rpt-sec{margin:10px 0;padding:6px 0;border-bottom:1px solid #f1f5f9}
 .rpt-sec:last-child{border-bottom:none}
-.rpt-label{color:#1e40af;font-size:13px;display:block;margin-bottom:4px}
+.rpt-label{color:#065f46;font-size:13px;display:block;margin-bottom:4px}
 .cards{display:flex;flex-wrap:wrap;gap:4px}
 .hcard{border:1px solid #e2e8f0;border-radius:4px;padding:6px 8px;min-width:180px;flex:1;max-width:280px;background:#f8fafc;border-left:3px solid #16a34a}
 .hcard.off{opacity:.3;border-left-color:#dc2626}
 .hcard .hh{display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;font-size:11px}
 .btn-del{font-size:9px;padding:1px 5px;border-radius:3px;border:1px solid #dc2626;color:#dc2626;background:white;cursor:pointer}.btn-del:hover{background:#dc2626;color:white}
-.btn-res{font-size:9px;padding:1px 5px;border-radius:3px;border:1px solid #2563eb;color:#2563eb;background:white;cursor:pointer;display:none}.btn-res:hover{background:#2563eb;color:white}
+.btn-res{font-size:9px;padding:1px 5px;border-radius:3px;border:1px solid #059669;color:#059669;background:white;cursor:pointer;display:none}.btn-res:hover{background:#059669;color:white}
 .btns{display:flex;gap:5px;margin-top:6px;flex-wrap:wrap}
 .btn{padding:5px 10px;border-radius:4px;border:1px solid #e2e8f0;background:white;cursor:pointer;font-size:11px}.btn:hover{background:#f1f5f9}
-.btn-p{background:#2563eb;color:white;border-color:#2563eb}.btn-p:hover{background:#1d4ed8}
+.btn-p{background:#059669;color:white;border-color:#059669}.btn-p:hover{background:#047857}
 .btn-d{background:#dc2626;color:white;border-color:#dc2626}.btn-d:hover{background:#b91c1c}
 .btn:disabled{opacity:.4;cursor:not-allowed}
 .preview{font-size:11px;line-height:1.6;padding:10px;border:1px solid #e2e8f0;border-radius:4px;background:#fafbfc;min-height:80px;max-height:260px;overflow-y:auto}
@@ -64,7 +64,7 @@ textarea.txt:focus{outline:none;border-color:#2563eb}
 </head>
 <body>
 
-<div class="bar"><span>超声报告语音结构化 <span style="font-size:10px;color:#93c5fd;font-weight:400">v3.0-ABCDEF</span></span><span style="font-size:10px">Ctrl+R录音 Ctrl+S保存 Ctrl+Enter发送</span></div>
+<div class="bar"><span>超声报告语音结构化 <span style="font-size:10px;color:#93c5fd;font-weight:400">v3.0-ABCDEF 超声绿版</span></span><span style="font-size:10px">Ctrl+R录音 Ctrl+S保存 Ctrl+Enter发送</span></div>
 
 <div class="app">
 <aside class="side">
@@ -77,7 +77,7 @@ textarea.txt:focus{outline:none;border-color:#2563eb}
 </aside>
 
 <main class="main" style="flex-direction:row;gap:8px;padding:8px">
-  <div style="padding:5px 10px;background:#eff6ff;border-radius:4px;font-size:12px;display:none" id="cp"></div>
+  <div style="padding:5px 10px;background:#ecfdf5;border-radius:4px;font-size:12px;display:none" id="cp"></div>
 
   <!-- 左列: 语音录入 + 识别文本 -->
   <div class="pn" id="pn1" style="flex:1.5;min-width:360px">
@@ -89,67 +89,44 @@ textarea.txt:focus{outline:none;border-color:#2563eb}
         <span style="font-size:10px;color:#64748b" id="fustatus"></span>
       </div>
       <!-- 意图识别: 显示当前使用的模板名称 -->
-      <div id="intent_bar" style="padding:6px 10px;background:#eff6ff;border-radius:4px;margin-bottom:4px;font-size:11px;">
-        <span style="color:#2563eb;font-weight:600">模板:</span>
-        <select id="intent_sel" onchange="onTemplateChange()" style="font-size:11px;padding:2px 4px;border:1px solid #2563eb;border-radius:3px;max-width:160px;margin-left:4px"><option value="">自动选择...</option></select>
-        <span style="color:#1e40af;font-weight:600" id="intent_name" title="当前模板">-</span>
-        <span style="color:#64748b;font-size:10px" id="intent_conf"></span>
-        <button class="btn" onclick="toggleTemplatePreview()" style="font-size:10px;padding:2px 6px;margin-left:6px" title="查看/复制模板内容">预览</button>
+      <div id="intent_bar" style="padding:6px 10px;background:#ecfdf5;border-radius:4px;margin-bottom:4px;font-size:11px;position:relative">
+        <span style="color:#059669;font-weight:600">模板:</span>
+        <span id="intent_badge" onclick="toggleTop3Candidates()" title="点击切换备选模板" style="display:none;cursor:pointer;padding:2px 8px;border-radius:4px;font-weight:600;margin-left:4px;font-size:11px;transition:all 0.2s">-</span>
+        <span id="intent_conf" style="color:#64748b;font-size:10px;margin-left:4px"></span>
+        <span id="top3_popup" style="display:none;position:absolute;left:50px;top:28px;background:white;border:1px solid #059669;border-radius:4px;padding:4px 0;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,0.1);min-width:220px"></span>
+        <button class="btn" onclick="toggleTemplatePreview()" style="font-size:10px;padding:2px 6px;margin-left:6px" title="查看/复制模板内容">编辑模板</button>
       </div>
       <!-- 模板预览面板 -->
-      <div id="template_preview_panel" style="display:none;margin-top:0;margin-bottom:6px;padding:8px;border:1px solid #2563eb;border-radius:4px;background:#fafbff;max-height:200px;overflow-y:auto">
+      <div id="template_preview_panel" style="display:none;margin-top:0;margin-bottom:6px;padding:8px;border:1px solid #059669;border-radius:4px;background:#fafbff;max-height:350px;overflow-y:auto">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-          <span style="font-size:10px;font-weight:600;color:#2563eb" id="tpl_preview_name">模板预览</span>
+          <span style="font-size:10px;font-weight:600;color:#059669" id="tpl_preview_name">模板预览</span>
           <div>
-            <button class="btn" onclick="copyTemplateText()" style="font-size:9px;padding:2px 6px" title="复制模板原文">复制模板</button>
-            <button class="btn" onclick="copyFilledText()" style="font-size:9px;padding:2px 6px;margin-left:4px" title="复制填充后内容">复制填充</button>
+            <button class="btn" onclick="saveTemplateEdit()" style="font-size:9px;padding:2px 6px;background:#059669;color:white;border-color:#059669" title="保存修改后的模板">保存模板</button>
+            <button class="btn" onclick="copyTemplateText()" style="font-size:9px;padding:2px 6px;margin-left:4px" title="复制模板原文">复制</button>
             <button class="btn" onclick="document.getElementById('template_preview_panel').style.display='none'" style="font-size:9px;padding:2px 6px;margin-left:4px">关闭</button>
           </div>
         </div>
-        <pre id="tpl_preview_content" style="font-size:10px;line-height:1.5;white-space:pre-wrap;word-break:break-all;margin:0;color:#374151"></pre>
+        <textarea id="tpl_preview_editor" style="width:100%;min-height:120px;max-height:220px;font-size:11px;line-height:1.6;padding:6px;border:1px solid #e2e8f0;border-radius:4px;resize:vertical;font-family:inherit;background:white;white-space:pre-wrap;word-break:break-all" placeholder="模板内容..."></textarea>
       </div>
       <div id="raw" style="font-size:11px;color:#64748b;margin-bottom:4px;min-height:18px;word-break:break-all"></div>
       <textarea class="txt" id="rt" placeholder="识别文本显示在此处..." style="width:100%;min-height:120px;flex:1;resize:none;font-size:12px"></textarea>
-      <div class="btns" style="margin-top:6px"><button class="btn" id="pb" onclick="togglePause()" disabled>暂停</button><button class="btn btn-p" id="tb" onclick="doTrans()" disabled>转写</button><button class="btn btn-p" id="sb" onclick="doStruct()">结构化提取</button><button class="btn" onclick="doStructFixed()" style="font-size:11px;padding:5px 10px">固定模板填充</button><span id="method_badge" style="display:none;font-size:10px;padding:2px 8px;border-radius:8px;color:white;margin-left:6px"></span><span id="confidence_badge" style="display:none;font-size:10px;padding:2px 6px;margin-left:4px;font-weight:600"></span></div>
+      <div class="btns" style="margin-top:6px"><button class="btn" id="pb" onclick="togglePause()" disabled>暂停</button><button class="btn btn-p" id="tb" onclick="doTrans()" disabled>转写</button><button class="btn btn-p" id="sb" onclick="doStruct()">结构化提取</button><span id="method_badge" style="display:none;font-size:10px;padding:2px 8px;border-radius:8px;color:white;margin-left:6px"></span><span id="confidence_badge" style="display:none;font-size:10px;padding:2px 6px;margin-left:4px;font-weight:600"></span></div>
       <!-- v3 ABCDEF: 六路来源对比面板 -->
-      <div id="sources_panel" style="display:none;margin-top:6px;padding:6px;border:1px solid #e2e8f0;border-radius:4px;background:#fafbfc;max-height:300px;overflow-y:auto">
+      <div id="sources_panel" style="display:none;margin-top:6px;padding:6px;border:1px solid #e2e8f0;border-radius:4px;background:#fafbfc;max-height:340px;overflow-y:auto">
         <div style="font-size:11px;font-weight:600;color:#7c3aed;margin-bottom:4px;cursor:pointer" onclick="var b=this.nextElementSibling;b.style.display=b.style.display==='none'?'block':'none'">ABCDEF 六路来源对比 <span id="template_name_display" style="display:none;background:#ede9fe;padding:1px 6px;border-radius:4px;margin-left:8px;font-size:10px"></span> &#9660;</div>
         <div style="display:block">
           <table style="width:100%;font-size:10px;border-collapse:collapse">
-            <tr style="background:#f1f5f9"><th style="padding:2px 4px;text-align:left;width:12%">路</th><th style="padding:2px 4px;text-align:left;width:50%">超声所见</th><th style="padding:2px 4px;text-align:left;width:38%">超声提示</th></tr>
-            <tr><td style="padding:2px 4px;color:#64748b;font-weight:600">A-ASR</td><td style="padding:2px 4px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#64748b" id="src_a_text" colspan="2">-</td></tr>
-            <tr id="src_b_row"><td style="padding:2px 4px;color:#2563eb;font-weight:600">B-LLM</td><td style="padding:2px 4px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="src_b_see">-</td><td style="padding:2px 4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="src_b_hint">-</td></tr>
-            <tr id="src_c_row"><td style="padding:2px 4px;color:#16a34a;font-weight:600">C-Regex</td><td style="padding:2px 4px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="src_c_see">-</td><td style="padding:2px 4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="src_c_hint">-</td></tr>
-            <tr id="src_d_row"><td style="padding:2px 4px;color:#059669;font-weight:600">D-增强</td><td style="padding:2px 4px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="src_d_see">-</td><td style="padding:2px 4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="src_d_hint">-</td></tr>
-            <tr id="src_e_row"><td style="padding:2px 4px;color:#f59e0b;font-weight:600">E-模板</td><td style="padding:2px 4px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" id="src_e_filled">-</td><td style="padding:2px 4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px" id="src_e_tpl">-</td></tr>
+            <tr style="background:#f1f5f9"><th style="padding:2px 4px;text-align:left;width:10%">路</th><th style="padding:2px 4px;text-align:left;width:40%">输出/状态</th><th style="padding:2px 4px;text-align:left;width:50%">超声提示</th></tr>
+            <tr><td style="padding:2px 4px;color:#64748b;font-weight:600">A-ASR</td><td style="padding:2px 4px;font-size:10px;color:#94a3b8" id="src_a_status" colspan="2">未调用语音识别API</td></tr>
+            <tr id="src_b_row"><td style="padding:2px 4px;color:#7c3aed;font-weight:600">B-LLM</td><td style="padding:2px 4px;font-size:10px;color:#94a3b8" id="src_b_status" colspan="2">未调用大模型API</td></tr>
+            <tr id="src_c_row"><td style="padding:2px 4px;color:#16a34a;font-weight:600">C-Regex</td><td style="padding:2px 4px;font-size:10px;color:#94a3b8" id="src_c_status" colspan="2">未调用正则引擎</td></tr>
+            <tr id="src_d_row"><td style="padding:2px 4px;color:#0d9488;font-weight:600">D-增强</td><td style="padding:2px 4px;font-size:10px;color:#94a3b8" id="src_d_status" colspan="2">未调用增强处理</td></tr>
+            <tr id="src_e_row"><td style="padding:2px 4px;color:#f59e0b;font-weight:600">E-模板</td><td style="padding:2px 4px;font-size:10px;color:#94a3b8" id="src_e_status" colspan="2">未调用模板引擎</td></tr>
           </table>
           <div id="src_conflicts" style="margin-top:4px;font-size:10px"></div>
         </div>
       </div>
-      <!-- P0-3: 固定模板填入栏 -->
-      <div style="margin-top:6px;padding:4px 0;border-top:1px solid #e2e8f0">
-        <div style="font-size:10px;color:#64748b;display:flex;align-items:center;gap:4px;margin-bottom:3px">
-          固定模板: <span style="font-size:9px;color:#94a3b8">(可选, 粘贴自定义模板, 留空使用系统默认)</span>
-          <button class="btn" onclick="clearCustomTemplate()" style="font-size:9px;padding:1px 5px">清除</button>
-        </div>
-        <textarea id="ct" placeholder="粘贴固定模板...&#10;例: 肝脏：{liver} 胆囊：{gall}" style="width:100%;min-height:36px;max-height:60px;font-size:10px;padding:3px 5px;border:1px solid #e2e8f0;border-radius:3px;resize:vertical;font-family:inherit;background:#fafbfc" oninput="onCustomTemplateChange()"></textarea>
-      </div>
-      <!-- 测试文本快速填入 -->
-      <div style="margin-top:8px;padding:6px 0;border-top:1px solid #e2e8f0">
-        <div style="font-size:10px;color:#64748b;margin-bottom:4px">快速测试:</div>
-        <div style="display:flex;flex-wrap:wrap;gap:3px">
-          <button class="btn" onclick="fillTest(0)" style="font-size:10px;padding:2px 6px">正常体检</button>
-          <button class="btn" onclick="fillTest(1)" style="font-size:10px;padding:2px 6px">脂肪肝</button>
-          <button class="btn" onclick="fillTest(2)" style="font-size:10px;padding:2px 6px">早孕</button>
-          <button class="btn" onclick="fillTest(3)" style="font-size:10px;padding:2px 6px">心脏</button>
-          <button class="btn" onclick="fillTest(4)" style="font-size:10px;padding:2px 6px">甲状腺</button>
-          <button class="btn" onclick="fillTest(5)" style="font-size:10px;padding:2px 6px">前列腺</button>
-          <button class="btn" onclick="fillTest(6)" style="font-size:10px;padding:2px 6px">中孕</button>
-          <button class="btn" onclick="fillTest(7)" style="font-size:10px;padding:2px 6px">乳腺</button>
-          <button class="btn" onclick="fillTest(8)" style="font-size:10px;padding:2px 6px">颈动脉</button>
-          <button class="btn" onclick="fillTest(9)" style="font-size:10px;padding:2px 6px">TCD</button>
-        </div>
-      </div>
+
     </div>
   </div>
 
@@ -159,7 +136,7 @@ textarea.txt:focus{outline:none;border-color:#2563eb}
     <div class="b" style="display:flex;flex-direction:column">
       <label style="font-size:11px;font-weight:600;color:#64748b">超声所见（可直接编辑）:</label>
       <div class="ed" contenteditable="true" id="se" oninput="onEdit()" style="flex:1;min-height:120px"></div>
-      <div style="margin-top:6px"><h4 style="font-size:11px;color:#2563eb;margin-bottom:3px">超声提示（可删除/恢复）</h4><div class="cards" id="hc"></div></div>
+      <div style="margin-top:6px"><h4 style="font-size:11px;color:#059669;margin-bottom:3px">超声提示（可删除/恢复）</h4><div class="cards" id="hc"></div></div>
       <label style="font-size:11px;color:#64748b">建议:</label><div contenteditable="true" id="rc" style="font-size:11px;padding:4px;border:1px solid #e2e8f0;border-radius:4px;margin-top:2px;min-height:28px" oninput="onEdit()"></div>
       <div class="btns"><button class="btn btn-p" onclick="doSave()" id="svb" disabled>保存草稿</button><button class="btn" onclick="doUpdatePreview()" id="upb" disabled>刷新预览</button><button class="btn btn-d" onclick="doSend()" id="sdb" disabled>发送至PACS</button></div>
     </div>
@@ -182,10 +159,10 @@ var S={sel:null,dels:new Set(),rpt:null,ac:[],ab:null,rec:false,mr:null,paused:f
 async function lq(){try{var r=await fetch('/api/patients/queue');var d=await r.json();rl(d.patients||[])}catch(e){}}
 function rl(pts){
   var el=document.getElementById('pl');
-  if(!pts.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#64748b;font-size:11px">暂�~W�等候患者</div>';return}
+  if(!pts.length){el.innerHTML='<div style="text-align:center;padding:20px;color:#64748b;font-size:11px">暂无等候患者</div>';return}
   el.innerHTML=pts.map(function(p){
     var a=S.sel&&S.sel.id===p.id?' on':'';var st=p.status||'等候';var sc=st==='已完成'?'bdg-d':'bdg-w';
-    return '<div class="pi'+a+'" onclick="sp('+p.id+')"><div><span class="n">'+e(p.name)+'</span> '+e(p.gender)+' '+p.age+'岁<span class="tag" style="background:'+(st==='已完成'?'#d1fae5':'#dbeafe')+';color:'+(st==='已完成'?'#065f46':'#1e40af')+';font-size:9px;margin-left:3px">'+st+'</span></div><div class="e">'+e(p.exam_type)+(p.exam_part?' / '+e(p.exam_part):'')+'</div></div>'
+    return '<div class="pi'+a+'" onclick="sp('+p.id+')"><div><span class="n">'+e(p.name)+'</span> '+e(p.gender)+' '+p.age+'岁<span class="tag" style="background:'+(st==='已完成'?'#d1fae5':'#d1fae5')+';color:'+(st==='已完成'?'#065f46':'#065f46')+';font-size:9px;margin-left:3px">'+st+'</span></div><div class="e">'+e(p.exam_type)+(p.exam_part?' / '+e(p.exam_part):'')+'</div></div>'
   }).join('')}
 function addPt(){var n=document.getElementById('qn').value.trim(),g=document.getElementById('qg').value,a=parseInt(document.getElementById('qa').value),e=document.getElementById('qe').value.trim();if(!n||!g||!a||!e){t('请填写完整','e');return}
   fetch('/api/patients/quick-add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,gender:g,age:a,exam_type:e})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail,'e');return}document.getElementById('qn').value='';document.getElementById('qa').value='';document.getElementById('qe').value='';lq();sp(d.patient.id);t('已添加: '+n,'s')}).catch(function(e){t(e.message,'e')})}
@@ -307,16 +284,16 @@ var patientId=(S.sel?String(S.sel.id):null);
 setSt('o','提取中...');document.getElementById('sb').disabled=true;
 
 // 先展示ASR原文(即时)
-document.getElementById('src_a_text').textContent=text.substring(0,300);
+document.getElementById('src_a_status').innerHTML='<span style="color:#64748b">输入文本（未经过ASR API）</span> <span style="font-size:9px">'+e(text.substring(0,120))+'</span>';
 document.getElementById('sources_panel').style.display='block';
 
 // 渐进标记: B/C正在进行
-document.getElementById('src_b_see').textContent='处理中...';
-document.getElementById('src_c_see').textContent='处理中...';
-document.getElementById('src_d_see').textContent='等待中...';
+document.getElementById('src_b_status').innerHTML='<span style="color:#f59e0b">处理中...</span>';
+document.getElementById('src_c_status').innerHTML='<span style="color:#f59e0b">处理中...</span>';
+document.getElementById('src_d_status').innerHTML='<span style="color:#94a3b8">等待中...</span>';
 
 fetch('/api/structure',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,exam_type:examType,patient_id:patientId})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail||'失败','e');setSt('idle');document.getElementById('sb').disabled=false;return}
-  S.rpt=d.report;S.dels=new Set();S.sources=d.sources||null;S.method=d.method||'';
+  S.rpt=d.report;S.dels=new Set();S.sources=d.sources||null;S.method=d.method||'';S._top3=d.top3||(d.sources?d.sources.candidates||null:null);
   document.getElementById('se').innerHTML=d.report.study_see||'';renderHints(d.report);
   document.getElementById('rc').textContent=d.report.recommendation||'';up();ukc();
   document.getElementById('svb').disabled=false;document.getElementById('sdb').disabled=false;document.getElementById('upb').disabled=false;
@@ -332,7 +309,7 @@ function showMethodBadge(d){
   var method=d.method||'';var badge=document.getElementById('method_badge');
   if(!badge)return;
   var labels={'abcdef_v3':'ABCDEF v3','rule_fallback':'规则引擎兜底','fetal_template':'胎儿模板','regex_fill':'规则引擎'};
-  var colors={'abcdef_v3':'#7c3aed','rule_fallback':'#f59e0b','fetal_template':'#16a34a','regex_fill':'#2563eb'};
+  var colors={'abcdef_v3':'#7c3aed','rule_fallback':'#f59e0b','fetal_template':'#16a34a','regex_fill':'#059669'};
   badge.textContent=labels[method]||method;badge.style.background=colors[method]||'#64748b';badge.style.display='inline-block';
   var conf=document.getElementById('confidence_badge');
   if(conf&&d.confidence!==undefined){
@@ -349,24 +326,36 @@ function showABCDEFPanel(d){
   if(!d.sources){panel.style.display='none';return}
   panel.style.display='block';
   var src=d.sources;
-  // A路
-  document.getElementById('src_a_text').textContent=(src.A_asr||'').substring(0, 300);
+  // 格式化助手: study_see摘要 + study_hint列表
+  function fmtSeeHint(obj, maxLen){
+    if(!obj) return ['',''];
+    var see=(obj.study_see||'').replace(/<[^>]+>/g,'').substring(0,maxLen||200);
+    var hints=(obj.study_hint||[]).map(function(h){return (h.rank||'')+'. '+h.diagnosis}).join('; ');
+    return [see, hints];
+  }
+  // A路: ASR原始文本(文本框中已有) + 是否调用过ASR API
+  var aRaw=src.A_asr||'';
+  if(aRaw){
+    document.getElementById('src_a_status').innerHTML='<span style="color:#16a34a">已调用ASR</span> <span style="color:#64748b;font-size:9px">'+e(aRaw.substring(0,150))+'</span>';
+  } else {
+    document.getElementById('src_a_status').innerHTML='<span style="color:#94a3b8">未调用语音识别API（直接输入文本）</span>';
+  }
   // B路
   var b=src.B_free_llm;
-  if(b){document.getElementById('src_b_see').textContent=(b.study_see||'').substring(0,250);document.getElementById('src_b_hint').textContent=(b.study_hint||[]).map(function(h){return h.diagnosis||''}).join('; ');document.getElementById('src_b_row').style.display=''}
-  else{document.getElementById('src_b_row').style.display='none'}
+  if(b){var sf=fmtSeeHint(b,180); document.getElementById('src_b_status').innerHTML='<span style="color:#7c3aed">已调用LLM</span> <span style="color:#64748b;font-size:9px">'+e(sf[0])+'</span><br><span style="color:#059669;font-size:9px">'+e(sf[1])+'</span>'; document.getElementById('src_b_row').style.display=''}
+  else{document.getElementById('src_b_status').innerHTML='<span style="color:#94a3b8">未调用大模型API（规则引擎直接处理）</span>';}
   // C路
   var c=src.C_regex;
-  if(c){document.getElementById('src_c_see').textContent=(c.study_see||'').substring(0,250);document.getElementById('src_c_hint').textContent=(c.study_hint||[]).map(function(h){return h.diagnosis||''}).join('; ');document.getElementById('src_c_row').style.display=''}
-  else{document.getElementById('src_c_row').style.display='none'}
+  if(c){var sf=fmtSeeHint(c,180); document.getElementById('src_c_status').innerHTML='<span style="color:#16a34a">已调用正则引擎</span> <span style="color:#64748b;font-size:9px">'+e(sf[0])+'</span><br><span style="color:#059669;font-size:9px">'+e(sf[1])+'</span>'; document.getElementById('src_c_row').style.display=''}
+  else{document.getElementById('src_c_status').innerHTML='<span style="color:#94a3b8">未调用正则引擎</span>';}
   // D路
   var dd=src.D_enhanced;
-  if(dd){document.getElementById('src_d_see').textContent=(dd.study_see||'').substring(0,250);document.getElementById('src_d_hint').textContent=(dd.study_hint||[]).map(function(h){return h.diagnosis||''}).join('; ');document.getElementById('src_d_row').style.display=''}
-  else{document.getElementById('src_d_row').style.display='none'}
+  if(dd){var sf=fmtSeeHint(dd,180); document.getElementById('src_d_status').innerHTML='<span style="color:#0d9488">已调用增强处理</span> <span style="color:#64748b;font-size:9px">'+e(sf[0])+'</span><br><span style="color:#059669;font-size:9px">'+e(sf[1])+'</span>'; document.getElementById('src_d_row').style.display=''}
+  else{document.getElementById('src_d_status').innerHTML='<span style="color:#94a3b8">未调用增强处理</span>';}
   // E路
-  var e=src.E_template;
-  if(e){document.getElementById('src_e_tpl').textContent=e.template_name||'';document.getElementById('src_e_filled').textContent=(e.filled||'').substring(0,250);document.getElementById('src_e_row').style.display=''}
-  else{document.getElementById('src_e_row').style.display='none'}
+  var ee=src.E_template;
+  if(ee){document.getElementById('src_e_status').innerHTML='<span style="color:#f59e0b">已匹配模板: '+e(ee.template_name||'')+'</span><br><span style="color:#64748b;font-size:9px">'+e((ee.filled||'').replace(/<[^>]+>/g,'').substring(0,200))+'</span>'; document.getElementById('src_e_row').style.display=''}
+  else{document.getElementById('src_e_status').innerHTML='<span style="color:#94a3b8">未匹配到模板</span>';}
   // 冲突
   var conflicts=d.conflicts||[];var confDiv=document.getElementById('src_conflicts');
   if(conflicts.length){
@@ -400,82 +389,66 @@ document.getElementById('rt').addEventListener('input', function(){
 });
 
 function showIntent(ft){
-  var catMap={'abdomen':'腹部','obgyn':'妇产','cardiac':'心脏','thyroid_breast':'甲状腺乳腺','thyroid':'甲状腺乳腺','vascular':'血管','urology':'泌尿前列腺','musculoskeletal':'骨骼肌肉','other':'其他','腹部':'腹部','妇产':'妇产','心脏':'心脏','甲状腺乳腺':'甲状腺乳腺','甲状腺乳腺':'甲状腺乳腺','血管':'血管','泌尿前列腺':'泌尿前列腺'};
-  var raw=ft.category||ft.template_used||'未知';
-  var cat=catMap[raw]||raw;
-  document.getElementById('intent_name').textContent=cat;
-  document.getElementById('intent_conf').textContent='(置信度 '+(ft.confidence?Math.round(ft.confidence*100)+'%':'--')+')';
-  if(ft.all_tags){ALL_TAGS_CACHE=ft.all_tags;ALL_TAGS_LOADED=true;populateTemplateSelect()}
-}
+  var badge=document.getElementById('intent_badge');
+  var conf=document.getElementById('intent_conf');
+  var tpl=ft.template_used||'';
+  var pct=ft.confidence?Math.round(ft.confidence*100):0;
+  if(tpl){
+    badge.textContent=tpl;
+    badge.style.display='inline-block';
+    badge.style.background=pct>=90?'#d1fae5':'#fef3c7';
+    badge.style.color=pct>=90?'#065f46':'#92400e';
+    conf.textContent=pct+'%';
+    conf.style.color=pct>=90?'#059669':'#f59e0b';
+  }
+  if(ft.top3_candidates)S._top3=ft.top3_candidates;
+  if(ft.all_tags){ALL_TAGS_CACHE=ft.all_tags;ALL_TAGS_LOADED=true}
 // 填充模板选择下拉框(默认展示)
-function populateTemplateSelect(){
-  var sel=document.getElementById('intent_sel');
-  sel.innerHTML='<option value="">自动选择...</option>';
-  // 优先从ALL_TAGS_CACHE加载(fixed-template/tags API)
-  if(ALL_TAGS_CACHE){
-    for(var cat in ALL_TAGS_CACHE){
-      var og=document.createElement('optgroup');
-      og.label=cat;
-      ALL_TAGS_CACHE[cat].forEach(function(tag){
-        var o=document.createElement('option');
-        o.value=cat;o.textContent=tag;og.appendChild(o);
-      });
-      sel.appendChild(og);
-    }
-    return;
-  }
-  // Fallback: 硬编码常见模板选项
-  var defaults={'腹部':['正常腹部','脂肪肝','肝囊肿','胆囊结石','胆囊息肉','肾结石','肾囊肿'],'妇产':['早孕','中孕','子宫肌瘤','卵巢囊肿','正常妇科'],'心脏':['正常心脏','二尖瓣反流','心包积液'],'甲状腺乳腺':['正常甲状腺','甲状腺结节','正常乳腺','乳腺增生'],'血管':['正常颈动脉','颈动脉斑块'],'泌尿':['正常前列腺','前列腺增生']};
-  for(var cat in defaults){
-    var og=document.createElement('optgroup');
-    og.label=cat;
-    defaults[cat].forEach(function(tag){var o=document.createElement('option');o.value=cat;o.textContent=tag;og.appendChild(o)});
-    sel.appendChild(og);
-  }
-}
-// 页面加载时填充模板下拉框
+// populateTemplateSelect removed - Direction C
 setTimeout(populateTemplateSelect, 500);
 setTimeout(loadAllTags, 1000);
-function onTemplateChange(){
-  var sel=document.getElementById('intent_sel');
-  var cat=sel.value;
-  if(cat){
-    document.getElementById('intent_name').textContent=cat;
-    document.getElementById('intent_conf').textContent='(手动选择)';
-    S.ftCategory=cat;
-    sel.style.display='none';
-    t('已切换到: '+cat,'s');
-    // P0-2: 切换模板后自动重新填充
-    var text=document.getElementById('rt').value.trim();
-    if(text&&text.length>=10){
-      doStructFixed(); // 重新调用新模板填充
-    }
+function toggleTop3Candidates(){
+  var popup=document.getElementById('top3_popup');
+  if(popup.style.display==='block'){popup.style.display='none';return}
+  if(!S._top3||!S._top3.length){t('请先完成语音输入','e');return}
+  var h='';
+  for(var i=0;i<S._top3.length;i++){
+    var c=S._top3[i];
+    var bg=c.pct>=90?'#d1fae5':'#fef3c7';
+    h+='<div onclick="selectAlternativeTemplate('+i+')" style="padding:4px 8px;cursor:pointer;font-size:11px;background:'+bg+';border-bottom:1px solid #e2e8f0" onmouseover="this.style.background=\'#f0fdf4\'" onmouseout="this.style.background=\''+bg+'\'">'+e(c.name)+' <span style="color:#64748b;font-size:10px">'+c.pct+'%</span></div>';
   }
+  popup.innerHTML=h;
+  popup.style.display='block';
+  setTimeout(function(){
+    document.addEventListener('click',function closePopup(e){
+      if(!popup.contains(e.target)){popup.style.display='none';document.removeEventListener('click',closePopup)}
+    })
+  },100)
+}
+function selectAlternativeTemplate(idx){
+  document.getElementById('top3_popup').style.display='none';
+  if(!S._top3||idx>=S._top3.length)return;
+  var tpl=S._top3[idx];
+  document.getElementById('intent_badge').textContent=tpl.name;
+  document.getElementById('intent_badge').style.background=tpl.pct>=90?'#d1fae5':'#fef3c7';
+  document.getElementById('intent_conf').textContent='';
+  S.ftCategory=tpl.name;
+  toggleTemplatePreview();
+  var text=document.getElementById('rt').value.trim();
+  if(text&&text.length>=10)doStruct();
+  t('已切换: '+tpl.name,'s')
 }
 
-function doStructFixed(){
-  var text=document.getElementById('rt').value.trim();
-  if(!text){t('请先输入内容','e');return}
-  var cat=S.ftCategory||document.getElementById('intent_name').textContent||'腹部';
-  document.getElementById('sb').disabled=true;setSt('o','填充中...');
-  fetch('/api/fixed-template/structure',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,fixed_template:S.customTemplate||''})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail||'失败','e');setSt('idle');document.getElementById('sb').disabled=false;return}
-    document.getElementById('se').innerHTML=d.filled_template||'';
-    document.getElementById('hc').innerHTML='';document.getElementById('rc').textContent='';up();
-    document.getElementById('svb').disabled=false;document.getElementById('sdb').disabled=false;
-    document.getElementById('sb').disabled=false;setSt('k','完成');
-    showIntent(d);
-  }).catch(function(e){t('失败','e');setSt('idle');document.getElementById('sb').disabled=false})}
-
 // ==================== 原结构化函数(带意图并行) ====================
-function renderHints(rpt){var hc=document.getElementById('hc');hc.innerHTML='';(rpt.study_hint||[]).forEach(function(h,i){var d=document.createElement('div');d.className='hcard';d.innerHTML='<div class="hh"><span style="font-weight:600;color:#2563eb">'+h.rank+'. '+e(h.diagnosis||'')+'</span><span style="font-size:9px;color:#64748b">'+(h.icd10?e(h.icd10):'')+'</span><button class="btn-del" onclick="dh(this,\''+h.id+'\')">✕ 删除</button><button class="btn-res" onclick="eh(this,\''+h.id+'\')">↩ 恢复</button></div>';hc.appendChild(d)})}
+function renderHints(rpt){var hc=document.getElementById('hc');hc.innerHTML='';(rpt.study_hint||[]).forEach(function(h,i){var d=document.createElement('div');d.className='hcard';d.innerHTML='<div class="hh"><span style="font-weight:600;color:#059669">'+h.rank+'. '+e(h.diagnosis||'')+'</span><span style="font-size:9px;color:#64748b">'+(h.icd10?e(h.icd10):'')+'</span><button class="btn-del" onclick="dh(this,\''+h.id+'\')">✕ 删除</button><button class="btn-res" onclick="eh(this,\''+h.id+'\')">↩ 恢复</button></div>';hc.appendChild(d)})}
 function dh(btn,id){S.dels.add(id);btn.closest('.hcard').classList.add('off');btn.style.display='none';btn.nextElementSibling.style.display='inline-block';up();ukc()}
 function eh(btn,id){S.dels.delete(id);btn.closest('.hcard').classList.remove('off');btn.style.display='none';btn.previousElementSibling.style.display='';up();ukc()}
 function ukc(){var t=(S.rpt?S.rpt.study_hint||[]:[]).length;document.getElementById('kc').textContent=t-S.dels.size}
 function up(){var pv=document.getElementById('pv');var see=document.getElementById('se').innerText.trim();var hints=(S.rpt?S.rpt.study_hint||[]:[]).filter(function(h){return !S.dels.has(h.id)});var rec=document.getElementById('rc').textContent.trim();
   if(!see&&!hints.length){pv.innerHTML='<p style=\"color:#64748b;text-align:center;padding:20px\">内容为空</p>';return}
-  var h='<div style=\"font-weight:600;color:#2563eb;margin:6px 0 3px;border-bottom:1px solid #e2e8f0;font-size:12px\">超声所见</div><pre style=\"white-space:pre-wrap;font-family:inherit;line-height:1.7;margin:0\">'+e(see)+'</pre>';
-  if(hints.length){h+='<div style=\"font-weight:600;color:#2563eb;margin:8px 0 3px;border-bottom:1px solid #e2e8f0;font-size:12px\">超声提示</div>';hints.forEach(function(x){h+='<div style=\"margin:3px 0;padding:3px 6px;background:white;border-radius:3px\"><b>'+x.rank+'.</b> '+e(x.diagnosis||'')+' '+(x.icd10?'<span style=\"color:#64748b;font-size:10px\">('+e(x.icd10)+')</span>':'')+'</div>'})}
-  if(rec)h+='<div style=\"font-weight:600;color:#2563eb;margin:8px 0 3px;border-bottom:1px solid #e2e8f0;font-size:12px\">建议</div><p>'+e(rec)+'</p>';pv.innerHTML=h}
+  var h='<div style=\"font-weight:600;color:#059669;margin:6px 0 3px;border-bottom:1px solid #e2e8f0;font-size:12px\">超声所见</div><pre style=\"white-space:pre-wrap;font-family:inherit;line-height:1.7;margin:0\">'+e(see)+'</pre>';
+  if(hints.length){h+='<div style=\"font-weight:600;color:#059669;margin:8px 0 3px;border-bottom:1px solid #e2e8f0;font-size:12px\">超声提示</div>';hints.forEach(function(x){h+='<div style=\"margin:3px 0;padding:3px 6px;background:white;border-radius:3px\"><b>'+x.rank+'.</b> '+e(x.diagnosis||'')+' '+(x.icd10?'<span style=\"color:#64748b;font-size:10px\">('+e(x.icd10)+')</span>':'')+'</div>'})}
+  if(rec)h+='<div style=\"font-weight:600;color:#059669;margin:8px 0 3px;border-bottom:1px solid #e2e8f0;font-size:12px\">建议</div><p>'+e(rec)+'</p>';pv.innerHTML=h}
 
 // ==================== 保存/发送 ====================
 function onEdit(){document.getElementById('upb').disabled=false}
@@ -490,23 +463,6 @@ function e(s){if(s===null||s===undefined)return'';return String(s).replace(/[<>&
 function t(m,c){var ct=document.getElementById('toasts');var d=document.createElement('div');d.className='toast '+(c||'s');d.textContent=m;ct.appendChild(d);setTimeout(function(){d.remove()},3500)}
 
 // ==================== P0-3: 自定义模板管理 ====================
-function onCustomTemplateChange(){
-  var v=document.getElementById('ct').value.trim();
-  S.customTemplate=v||'';
-  // 输入固定模板后自动触发意图识别
-  if(v&&v.length>=20){
-    var text=document.getElementById('rt').value.trim();
-    if(text&&text.length>=10){
-      clearTimeout(S._ctDebounce);
-      S._ctDebounce=setTimeout(function(){doStructFixed()},500);
-    }
-  }
-}
-function clearCustomTemplate(){
-  document.getElementById('ct').value='';
-  S.customTemplate='';
-  t('已清除自定义模板，使用系统默认','s');
-}
 // 模板预览 复制功能
 var TPL_PREVIEW_TEXT='';
 var TPL_FILLED_TEXT='';
@@ -514,29 +470,32 @@ function toggleTemplatePreview(){
   var panel=document.getElementById('template_preview_panel');
   if(panel.style.display==='block'){panel.style.display='none';return}
   var tplName=document.getElementById('intent_name').textContent||'';
-  // 从 sources 或 template_name_display 获取实际模板名
   var tplUsed=document.getElementById('template_name_display').textContent||tplName;
-  if(!tplUsed||tplUsed==='-'){t('请先完成结构化或从下拉框选择模板','e');return}
-  document.getElementById('tpl_preview_name').textContent='模板: '+tplUsed;
-  // 优先显示已填充内容, 其次显示超声所见原文
+  document.getElementById('tpl_preview_name').textContent='模板: '+(tplUsed||'未选择');
+  // 填充编辑区：优先已保存模板，其次当前填充结果
   var see=document.getElementById('se').innerText||'';
   var filled=(see||'').trim();
-  var content='';
-  if(TPL_PREVIEW_TEXT){content=TPL_PREVIEW_TEXT;}
-  else if(filled){content='(当前填充结果)\n\n'+filled;}
-  else{content='(暂无模板内容, 请先完成结构化提取)';}
-  document.getElementById('tpl_preview_content').textContent=content;
+  var txt='';
+  if(TPL_PREVIEW_TEXT){txt=TPL_PREVIEW_TEXT;}
+  else if(filled&&filled!=='(当前填充结果)'){txt='(当前填充结果)\n\n'+filled;}
+  else{txt='';}
+  if(!txt.trim()){
+    txt='(选择模板后将在此处显示模板内容，可直接编辑修改)';
+  }
+  document.getElementById('tpl_preview_editor').value=txt;
   panel.style.display='block';
 }
-function copyTemplateText(){
-  var txt=TPL_PREVIEW_TEXT||document.getElementById('tpl_preview_content').textContent||'';
-  if(!txt.trim()){t('暂无可复制的模板内容','e');return}
-  navigator.clipboard.writeText(txt).then(function(){t('模板已复制到剪贴板','s')}).catch(function(){t('复制失败，请手动选择','e')});
+
+function saveTemplateEdit(){
+  var txt=document.getElementById('tpl_preview_editor').value.trim();
+  if(!txt){t('模板内容不能为空','e');return}
+  TPL_PREVIEW_TEXT=txt;
+  t('模板已保存，后续结构化将以新模板为准','s');
 }
-function copyFilledText(){
-  var txt=document.getElementById('se').innerText||'';
-  if(!txt.trim()){t('暂无可复制的填充内容','e');return}
-  navigator.clipboard.writeText(txt).then(function(){t('填充内容已复制到剪贴板','s')}).catch(function(){t('复制失败，请手动选择','e')});
+function copyTemplateText(){
+  var txt=document.getElementById('tpl_preview_editor').value.trim()||TPL_PREVIEW_TEXT||'';
+  if(!txt){t('暂无可复制的模板内容','e');return}
+  navigator.clipboard.writeText(txt).then(function(){t('模板已复制到剪贴板','s')}).catch(function(){t('复制失败，请手动选择','e')});
 }
 // 结构化完成后更新模板预览内容
 function updateTemplatePreviewText(rawInfo1){
@@ -545,38 +504,6 @@ function updateTemplatePreviewText(rawInfo1){
 document.addEventListener('keydown',function(e){if(e.ctrlKey&&e.key==='r'){e.preventDefault();toggleRec()}if(e.ctrlKey&&e.key==='s'){e.preventDefault();doSave()}if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();doSend()}if(e.key==='Escape'){e.preventDefault();if(S.sel)rs()}})
 lq();document.getElementById('qn').focus()
 
-// ==================== 测试文本 ====================
-var TEST_TEXTS=[
-  "肝脏大小形态正常，包膜光滑，边缘锐利，实质回声均匀。胆囊大小正常，囊壁光滑，腔内未见异常回声。胰腺形态大小正常，回声均匀。脾脏位置及大小正常。双肾大小形态正常，包膜光滑，实质回声均匀，集合系未见分离。未见异常血流信号。",
-  "肝脏体积稍增大，实质回声增强、增粗，肝肾反差明显，血管走行显示不清，符合脂肪肝声像图改变。胆囊大小正常，囊壁上见一约0.4x0.3cm的高回声团，附壁，后方无声影，不随体位移动，考虑胆囊息肉。胰腺、脾脏、双肾未见明显异常。超声提示: 1.脂肪肝 2.胆囊息肉 K82.8",
-  "子宫呈前位，宫体大小约7.2x5.1x4.8cm，宫腔内可见一孕囊，大小约2.8x1.8cm，可见卵黄囊，胚芽长约0.5cm，可见原始心管搏动，心率约145次/分。双侧卵巢可见，黄体可见。盆腔未见积液。超声提示: 宫内早孕，约孕6周，胚胎存活。",
-  "各房室内径正常范围。室间隔与左室壁厚度正常，静息状态下左室壁运动协调。二尖瓣回声稍增强，关闭时可见少量反流信号，反流面积约1.2平方厘米。三尖瓣可见少量反流。主动脉瓣、肺动脉瓣形态结构未见明显异常。心包腔内未见积液征象。超声提示: 1.二尖瓣少量反流 I34.0 2.三尖瓣少量反流 I07.1",
-  "甲状腺左叶大小约4.5x1.6x1.5cm，右叶大小约4.8x1.8x1.7cm，峡部厚约0.3cm。双侧叶内均可见多个低回声结节，左侧最大约0.6x0.4cm，右侧最大约0.8x0.5cm，边界清晰，形态规则，未见明显钙化。CDFI:结节内未见明显血流信号。双侧颈部未见肿大淋巴结。超声提示: 1.甲状腺双侧叶多发结节，TI-RADS 3类 2.建议6-12个月复查",
-  "经腹前列腺超声检查: 前列腺大小约5.2x4.5x4.2cm，形态饱满，突入膀胱约1.5cm，被膜光滑连续。实质回声欠均匀，内可见多个点状强回声，考虑钙化灶。CDFI:前列腺内未见异常血流信号。排尿后膀胱内残余尿量约80ml。超声提示: 1.前列腺增生伴钙化 N40 2.膀胱残余尿量增多 R33",
-  "双顶径约5.8cm，头围约22.1cm，腹围约19.8cm，股骨长约4.2cm，相当于22周。肱骨长约3.9cm，相当于22周。小脑横径约2.5cm，胎儿体重约480克。羊水最大深度4.5cm，羊水指数12.8cm。脐动脉S/D=2.8，RI=0.62，PI=1.05。胎心率145次/分。胎盘附着子宫后壁，I级。超声提示: 宫内妊娠，单活胎，中孕期，约22周。",
-  "双侧乳腺皮肤皮下组织各层次结构清晰，未见异常。双侧乳腺腺体增厚，回声不均匀，呈片状低回声区，未见明确占位性病变。双侧腋窝及乳腺周围未见长大的淋巴结。CDFI:未见异常的血流信号。超声提示: 双侧乳腺增生样改变 N60.1，BI-RADS 2类。",
-  "双侧颈总动脉内径正常，内膜中层厚度约1.2mm。左侧颈总动脉分叉处后壁可见一约1.2x0.3cm的低回声斑块，右侧颈总动脉未见明显斑块。双侧颈内动脉、颈外动脉内径未见异常。双侧椎动脉颅外段走行及管径未见异常。多普勒检查见血流速度及频谱未见明显异常。超声提示: 1.左侧颈动脉粥样硬化斑块形成 I70.0 2.建议定期复查。",
-  "经颞窗探查: 双侧大脑中动脉、大脑前动脉、大脑后动脉血流方向正常，频谱形态正常。双侧椎动脉及基底动脉血流方向正常，血流速度未见明显增快或减慢。未见异常血流信号。超声提示: 经颅多普勒超声检查未见明显异常。"
-];
-var TEST_EXAM_TYPES=["腹部超声","腹部超声","妇产超声","心脏超声","甲状腺超声","腹部超声","妇产超声","甲状腺超声","血管超声","脑血管超声"];
-
-function fillTest(i){
-  if(i<0||i>=TEST_TEXTS.length)return;
-  document.getElementById('rt').value=TEST_TEXTS[i];
-  document.getElementById('sb').disabled=false;
-  var exam=TEST_EXAM_TYPES[i];
-  // 同时设置检查类型下拉框
-  var sel=document.getElementById('qe');
-  if(sel){
-    for(var j=0;j<sel.options.length;j++){
-      if(sel.options[j].value===exam||sel.options[j].text===exam){sel.value=sel.options[j].value;break}
-    }
-  }
-  document.getElementById('rt').focus();
-  t('已填入: '+exam+' 测试文本','s');
-  // 自动触发 ABCDEF 结构化
-  doStruct();
-}
 </script>
 </body>
 </html>
