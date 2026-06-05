@@ -5,35 +5,43 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>错误反馈 — 超声报告语音结构化</title>
 <style>
+:root{--nav-bg:#0f172a;--nav-text:#94a3b8;--bg:#f1f5f9;--card-bg:#fff;--text:#1e293b;--text-muted:#64748b;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.06);--green:#059669;--blue:#3b82f6;--red:#dc2626;--amber:#d97706}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1e293b}
-nav{background:#0f172a;color:white;padding:0 16px;height:48px;display:flex;align-items:center;gap:16px;font-size:13px}
-nav h1{font-size:15px}
-nav a{color:#94a3b8;text-decoration:none;font-size:12px}
-nav a:hover,nav a.active{color:white}
-main{max-width:800px;margin:16px auto;padding:0 12px}
-.card{background:white;border-radius:10px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:12px}
-.card h3{font-size:15px;margin-bottom:14px}
-label{display:block;font-size:12px;color:#64748b;margin:8px 0 4px}
-input,textarea,select{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+nav{background:var(--nav-bg);padding:0 20px;height:52px;display:flex;align-items:center;gap:24px}
+nav .brand{font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.3px}
+nav .brand span{font-size:10px;color:var(--nav-text);font-weight:400;margin-left:6px}
+nav a{font-size:13px;color:var(--nav-text);text-decoration:none;font-weight:500;padding:6px 10px;border-radius:6px;transition:all .15s}
+nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+nav a.active{color:#fff;background:var(--green)}
+main{max-width:800px;margin:24px auto;padding:0 20px}
+.card{background:var(--card-bg);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{font-size:17px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.card h2::before{content:'';width:4px;height:16px;background:var(--green);border-radius:2px}
+label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin:10px 0 4px;text-transform:uppercase;letter-spacing:.3px}
+input,textarea,select{width:100%;padding:10px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit;transition:border .15s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
 textarea{resize:vertical;min-height:80px}
-.btn{padding:10px 24px;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer}
-.btn-primary{background:#3b82f6;color:white}
-.btn-success{background:#16a34a;color:white}
-.msg{padding:10px;border-radius:6px;margin-top:10px;font-size:13px;display:none}
-.msg.success{background:#dcfce7;color:#16a34a;border:1px solid #86efac;display:block}
-.msg.error{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;display:block}
-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
-th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0}
-th{background:#f8fafc;color:#64748b;font-weight:500}
+.btn{padding:10px 24px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#2563eb}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{background:#047857}
+.msg{padding:10px 14px;border-radius:8px;margin-top:10px;font-size:13px;display:none}
+.msg.s{background:#dcfce7;color:#16a34a;border:1px solid #86efac;display:block}
+.msg.e{background:#fee2e2;color:#dc2626;border:1px solid #fca5a5;display:block}
+table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+th{text-align:left;padding:9px 10px;background:#f8fafc;color:var(--text-muted);font-weight:600;font-size:11px;border-bottom:2px solid #e2e8f0}
+td{padding:9px 10px;border-bottom:1px solid #f1f5f9}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.badge-minor{background:#dbeafe;color:#1d4ed8}.badge-moderate{background:#fef3c7;color:#d97706}.badge-critical{background:#fee2e2;color:#dc2626}
 </style>
 </head>
 <body>
 
 <nav>
-  <h1>超声报告语音结构化</h1>
-  <a href="/">主站</a>
+  <div class="brand">UltraSonic AI<span>v4.2</span></div>
+  <a href="/">工作站</a>
   <a href="/developer.html">开发者</a>
+  <a href="/plans.html">套餐</a>
   <a href="/admin.html">管理</a>
   <a href="/dashboard.html">看板</a>
   <a href="/trace_logs.html">日志</a>
@@ -42,130 +50,40 @@ th{background:#f8fafc;color:#64748b;font-weight:500}
 
 <main>
   <div class="card">
-    <h3>报告错误反馈 — 帮助改进AI精度</h3>
-    <label>Request ID (选填 — 从日志页面复制)</label>
-    <input id="requestId" placeholder="如: abc123def456">
-
-    <label>原始输入文本 *</label>
-    <textarea id="rawInput" placeholder="粘贴医生口述的原始文本..."></textarea>
-
-    <label>AI输出 (超声所见) *</label>
-    <textarea id="aiOutput" placeholder="粘贴AI生成的超声所见..." style="background:#fffbeb"></textarea>
-
-    <label>期望的正确输出 (医生修改后) *</label>
-    <textarea id="expectedOutput" placeholder="粘贴医生修改后的正确文本..."></textarea>
-
-    <label>错误类型 *</label>
-    <select id="errorType">
-      <option value="">请选择</option>
-      <option>模板匹配错误</option>
-      <option>ICD-10编码错误</option>
-      <option>数值提取错误</option>
-      <option>方言理解错误</option>
-      <option>改口未识别</option>
-      <option>双患者串音未拦截</option>
-      <option>阳性直充遗漏</option>
-      <option>BI-RADS/TI-RADS分级错误</option>
-      <option>尺寸规整化错误</option>
-      <option>部位路由错误</option>
-      <option>其他</option>
-    </select>
-
-    <label>严重程度 *</label>
-    <select id="severity">
-      <option value="minor">轻微 — 不影响诊断</option>
-      <option value="moderate" selected>中等 — 可能导致误判</option>
-      <option value="critical">严重 — 会引发医疗风险</option>
-    </select>
-
-    <label>详细描述 (可选 — 帮助AI工程师定位根因)</label>
-    <textarea id="description" placeholder="请描述错在哪里、正确的应该是什么、什么情况下发生的..."></textarea>
-
-    <label>复现是否容易</label>
-    <select id="reproducible">
-      <option value="yes">是 — 同一输入大概率复现</option>
-      <option value="sometimes">偶尔 — 时好时坏</option>
-      <option value="no">否 — 只出现一次</option>
-    </select>
-
-    <div style="margin-top:12px;display:flex;gap:8px">
-      <button class="btn btn-primary" onclick="submitReport()">提交反馈</button>
-      <button class="btn" style="background:#e2e8f0" onclick="resetForm()">清空</button>
+    <h2>报告错误反馈</h2>
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px">提交错误数据帮助改进 AI 精度。每条反馈都会进入 PDCA 自学习引擎。</p>
+    <label>Request ID (选填)</label><input id="requestId" placeholder="从日志页面复制">
+    <label>原始输入文本 *</label><textarea id="rawInput" placeholder="医生口述的原始文本"></textarea>
+    <label>AI 输出 — 超声所见 *</label><textarea id="aiOutput" placeholder="AI 生成的超声所见" style="background:#fffbeb"></textarea>
+    <label>期望的正确输出 *</label><textarea id="expectedOutput" placeholder="医生修改后的正确文本"></textarea>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+      <div><label>错误类型 *</label><select id="errorType"><option value="">请选择</option><option>模板匹配错误</option><option>ICD-10 编码错误</option><option>数值提取错误</option><option>方言理解错误</option><option>改口未识别</option><option>双患者串音未拦截</option><option>阳性直充遗漏</option><option>BI-RADS/TI-RADS 分级错误</option><option>尺寸规整化错误</option><option>部位路由错误</option><option>其他</option></select></div>
+      <div><label>严重程度 *</label><select id="severity"><option value="minor">轻微</option><option value="moderate" selected>中等</option><option value="critical">严重</option></select></div>
+    </div>
+    <label>详细描述</label><textarea id="description" placeholder="描述错在哪里、期望是什么..."></textarea>
+    <label>复现概率</label><select id="reproducible"><option value="yes">大概率复现</option><option value="sometimes">偶尔</option><option value="no">仅一次</option></select>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn btn-success" onclick="submitReport()">提交反馈</button>
+      <button class="btn" style="background:#e2e8f0;color:var(--text)" onclick="resetForm()">清空</button>
     </div>
     <div class="msg" id="msgBox"></div>
   </div>
-
   <div class="card">
-    <h3>最近反馈记录</h3>
-    <table id="reportTable">
-      <tr><th>时间</th><th>错误类型</th><th>严重程度</th><th>描述</th><th>状态</th></tr>
-    </table>
+    <h2>最近反馈</h2>
+    <table id="reportTable"><tr><th>时间</th><th>错误类型</th><th>严重程度</th><th>描述</th><th>状态</th></tr></table>
   </div>
 </main>
 
 <script>
-const BASE = 'http://47.109.151.238:80';
-
-function showMsg(type, text) {
-  const box = document.getElementById('msgBox');
-  box.className = 'msg ' + type;
-  box.textContent = text;
-  setTimeout(() => box.className = 'msg', 5000);
+const BASE='http://47.109.151.238:80';
+function msg(t,s){const b=document.getElementById('msgBox');b.className='msg '+(s?'s':'e');b.textContent=t;setTimeout(()=>b.className='msg',4000)}
+async function submitReport(){
+  const ra=document.getElementById('rawInput').value.trim(),ai=document.getElementById('aiOutput').value.trim(),ex=document.getElementById('expectedOutput').value.trim(),et=document.getElementById('errorType').value;
+  if(!ra||!ai||!ex||!et)return msg('请填写必填字段',0);
+  try{const r=await fetch(BASE+'/api/admin/error-reports',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({request_id:document.getElementById('requestId').value.trim()||null,raw_input:ra,ai_output:ai,expected_output:ex,error_type:et,severity:document.getElementById('severity').value,description:document.getElementById('description').value.trim(),reproducible:document.getElementById('reproducible').value})});const d=await r.json();if(d.success){msg('提交成功, 感谢帮助改进 AI',1);resetForm();loadRecent()}else msg(d.msg||'失败',0)}catch(e){msg('网络错误',0)}
 }
-
-async function submitReport() {
-  const rawInput = document.getElementById('rawInput').value.trim();
-  const aiOutput = document.getElementById('aiOutput').value.trim();
-  const expected = document.getElementById('expectedOutput').value.trim();
-  const errorType = document.getElementById('errorType').value;
-  if (!rawInput||!aiOutput||!expected||!errorType) { showMsg('error','请填写必填字段(原始输入/AI输出/期望输出/错误类型)'); return; }
-
-  const data = {
-    request_id: document.getElementById('requestId').value.trim()||null,
-    raw_input: rawInput, ai_output: aiOutput, expected_output: expected,
-    error_type: errorType,
-    severity: document.getElementById('severity').value,
-    description: document.getElementById('description').value.trim(),
-    reproducible: document.getElementById('reproducible').value,
-  };
-
-  try {
-    const r = await fetch(BASE+'/api/admin/error-reports', {
-      method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data)
-    });
-    const d = await r.json();
-    if (d.success) { showMsg('success','反馈已提交! 感谢帮助改进AI精度。'); resetForm(); loadRecent(); }
-    else { showMsg('error', d.msg||'提交失败'); }
-  } catch(e) { showMsg('error','网络错误: '+e.message); }
-}
-
-function resetForm() {
-  document.getElementById('requestId').value='';
-  document.getElementById('rawInput').value='';
-  document.getElementById('aiOutput').value='';
-  document.getElementById('expectedOutput').value='';
-  document.getElementById('errorType').value='';
-  document.getElementById('description').value='';
-}
-
-async function loadRecent() {
-  try {
-    const r = await fetch(BASE+'/api/admin/error-reports?limit=20');
-    const d = await r.json();
-    const table = document.getElementById('reportTable');
-    table.innerHTML = '<tr><th>时间</th><th>错误类型</th><th>严重程度</th><th>描述</th><th>状态</th></tr>';
-    (d.reports||[]).forEach(r => {
-      table.innerHTML += `<tr>
-        <td>${(r.created_at||'').substring(0,16)}</td>
-        <td>${r.error_type||'-'}</td>
-        <td>${r.severity||'-'}</td>
-        <td>${(r.description||'').substring(0,60)}</td>
-        <td>${r.status||'待处理'}</td>
-      </tr>`;
-    });
-  } catch(e) {}
-}
-
+function resetForm(){['requestId','rawInput','aiOutput','expectedOutput','description'].forEach(id=>document.getElementById(id).value='');document.getElementById('errorType').value='';}
+async function loadRecent(){try{const r=await fetch(BASE+'/api/admin/error-reports?limit=20');const d=await r.json();document.getElementById('reportTable').innerHTML='<tr><th>时间</th><th>错误类型</th><th>严重程度</th><th>描述</th><th>状态</th></tr>';(d.reports||[]).forEach(r=>{const b='badge-'+(r.severity||'moderate');document.getElementById('reportTable').innerHTML+=`<tr><td>${(r.created_at||'').slice(0,16)}</td><td>${r.error_type||'-'}</td><td><span class="badge ${b}">${r.severity||'-'}</span></td><td>${(r.description||'').slice(0,50)}</td><td>${r.status||'待处理'}</td></tr>`})}catch(e){}}
 loadRecent();
 </script>
 </body>

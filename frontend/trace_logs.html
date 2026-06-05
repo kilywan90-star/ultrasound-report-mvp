@@ -5,41 +5,47 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>全链路日志 — 超声报告语音结构化</title>
 <style>
+:root{--nav-bg:#0f172a;--nav-text:#94a3b8;--bg:#f1f5f9;--card-bg:#fff;--text:#1e293b;--text-muted:#64748b;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.06);--green:#059669;--blue:#3b82f6;--red:#dc2626;--amber:#f59e0b}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1e293b}
-nav{background:#0f172a;color:white;padding:0 16px;height:48px;display:flex;align-items:center;gap:16px;font-size:13px}
-nav h1{font-size:15px}
-nav a{color:#94a3b8;text-decoration:none;font-size:12px}
-nav a:hover,nav a.active{color:white}
-main{max-width:1600px;margin:16px auto;padding:0 12px}
-.card{background:white;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:12px}
-.card h3{font-size:14px;margin-bottom:10px}
-.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;align-items:center}
-.filters input,.filters select{padding:6px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:12px}
-.filters button{padding:6px 16px;border:none;border-radius:6px;background:#3b82f6;color:white;cursor:pointer;font-size:12px}
-table{width:100%;border-collapse:collapse;font-size:11px}
-th,td{padding:6px 8px;text-align:left;border-bottom:1px solid #e2e8f0}
-th{background:#f8fafc;color:#64748b;font-weight:500;white-space:nowrap}
-td{max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+nav{background:var(--nav-bg);padding:0 20px;height:52px;display:flex;align-items:center;gap:24px}
+nav .brand{font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.3px}
+nav .brand span{font-size:10px;color:var(--nav-text);font-weight:400;margin-left:6px}
+nav a{font-size:13px;color:var(--nav-text);text-decoration:none;font-weight:500;padding:6px 10px;border-radius:6px;transition:all .15s}
+nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+nav a.active{color:#fff;background:var(--green)}
+main{max-width:1600px;margin:24px auto;padding:0 20px}
+.card{background:var(--card-bg);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{font-size:15px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.card h2::before{content:'';width:4px;height:14px;background:var(--green);border-radius:2px}
+.filters{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px;align-items:center}
+.filters input,.filters select{padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:12px;background:#fff}
+.filters input:focus,.filters select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#2563eb}
+.btn-outline{border:1px solid #d1d5db;background:#fff;color:var(--text)}.btn-outline:hover{background:#f8fafc}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:9px 10px;background:#f8fafc;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;border-bottom:2px solid #e2e8f0;white-space:nowrap}
+td{padding:9px 10px;border-bottom:1px solid #f1f5f9;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 tr:hover{background:#f8fafc}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.badge-valid{background:#dcfce7;color:#16a34a}.badge-mixed{background:#fef3c7;color:#d97706}.badge-noise{background:#fee2e2;color:#dc2626}
 .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}
 .modal.show{display:flex}
-.modal>div{background:white;border-radius:12px;padding:20px;max-width:700px;width:90%;max-height:80vh;overflow-y:auto}
-.modal h3{font-size:15px;margin-bottom:10px}
-.modal pre{background:#1e293b;color:#e2e8f0;padding:10px;border-radius:6px;font-size:11px;white-space:pre-wrap;max-height:200px;overflow-y:auto}
-.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:12px;margin:8px 0}
-.detail-grid b{color:#64748b;font-weight:500}
-.btn-sm{padding:4px 12px;font-size:11px;border:none;border-radius:4px;cursor:pointer}
-.btn-outline{border:1px solid #d1d5db;background:white}
-.btn-outline:hover{background:#f8fafc}
+.modal>div{background:#fff;border-radius:var(--radius);padding:24px;max-width:700px;width:90%;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+.modal h3{font-size:16px;font-weight:700;margin-bottom:16px}
+.modal pre{background:#1e293b;color:#e2e8f0;padding:12px;border-radius:8px;font-size:11px;white-space:pre-wrap;max-height:180px;overflow-y:auto;line-height:1.5}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:6px 16px;font-size:12px;margin:8px 0}
+.grid2 b{color:var(--text-muted);font-weight:500}
 </style>
 </head>
 <body>
 
 <nav>
-  <h1>超声报告语音结构化</h1>
-  <a href="/">主站</a>
+  <div class="brand">UltraSonic AI<span>v4.2</span></div>
+  <a href="/">工作站</a>
   <a href="/developer.html">开发者</a>
+  <a href="/plans.html">套餐</a>
   <a href="/admin.html">管理</a>
   <a href="/dashboard.html">看板</a>
   <a href="/trace_logs.html" class="active">日志</a>
@@ -48,18 +54,18 @@ tr:hover{background:#f8fafc}
 
 <main>
   <div class="card">
-    <h3>全链路追踪日志</h3>
+    <h2>全链路追踪日志</h2>
     <div class="filters">
       <input id="fPatient" placeholder="患者ID" style="width:100px">
-      <input id="fDate" type="date" style="width:130px">
-      <select id="fStatus" style="width:100px"><option value="">全部状态</option><option>valid</option><option>dual_mixed</option><option>noise</option></select>
+      <input id="fDate" type="date" style="width:135px">
+      <select id="fStatus" style="width:110px"><option value="">全部状态</option><option>valid</option><option>dual_mixed</option><option>noise</option></select>
       <select id="fLimit" style="width:80px"><option value="50">50条</option><option value="100" selected>100条</option><option value="200">200条</option></select>
-      <button onclick="loadLogs()">查询</button>
-      <button onclick="exportCSV()" class="btn-sm btn-outline" style="margin-left:auto">导出CSV</button>
+      <button class="btn btn-primary" onclick="loadLogs()">查询</button>
+      <button class="btn btn-outline" onclick="exportCSV()" style="margin-left:auto">导出 CSV</button>
     </div>
     <div style="overflow-x:auto">
       <table id="logTable">
-        <tr><th>时间</th><th>患者ID</th><th>姓名</th><th>医院</th><th>授权人</th><th>部位</th><th>模板</th><th>耗时ms</th><th>ICD-10</th><th>状态</th><th>操作</th></tr>
+        <tr><th>时间</th><th>患者ID</th><th>姓名</th><th>医院</th><th>授权人</th><th>部位</th><th>模板</th><th>耗时</th><th>ICD-10</th><th>状态</th><th>操作</th></tr>
       </table>
     </div>
   </div>
@@ -67,99 +73,47 @@ tr:hover{background:#f8fafc}
 
 <div class="modal" id="detailModal">
   <div>
-    <h3>日志详情 <button class="btn-sm btn-outline" onclick="document.getElementById('detailModal').classList.remove('show')" style="float:right">关闭</button></h3>
+    <h3>日志详情 <button class="btn btn-outline" onclick="document.getElementById('detailModal').classList.remove('show')" style="float:right;font-size:11px">关闭</button></h3>
     <div id="detailContent"></div>
   </div>
 </div>
 
 <script>
-const BASE = 'http://47.109.151.238:80';
-let allData = [];
-
-async function loadLogs() {
-  const patient = document.getElementById('fPatient').value;
-  const date = document.getElementById('fDate').value;
-  const status = document.getElementById('fStatus').value;
-  const limit = document.getElementById('fLimit').value;
-
-  let url = BASE+'/api/admin/trace-logs?limit='+limit;
-  if (patient) url += '&patient_id='+encodeURIComponent(patient);
-  if (date) url += '&date='+date;
-  if (status) url += '&status='+status;
-
-  try {
-    const r = await fetch(url);
-    const d = await r.json();
-    allData = d.logs || [];
-    const table = document.getElementById('logTable');
-    table.innerHTML = '<tr><th>时间</th><th>患者ID</th><th>姓名</th><th>医院</th><th>授权人</th><th>部位</th><th>模板</th><th>耗时ms</th><th>ICD-10</th><th>状态</th><th>操作</th></tr>';
-    if (allData.length === 0) {
-      table.innerHTML += '<tr><td colspan="11" style="text-align:center;padding:20px">暂无数据 — api_trace_logs 表为空。调用API后数据会自动填充。</td></tr>';
-    }
-    allData.forEach(log => {
-      table.innerHTML += `<tr>
-        <td>${(log.created_at||'').substring(0,16)}</td>
-        <td>${log.patient_id||'-'}</td>
-        <td>${log.name||'-'}</td>
-        <td>${log.hospital_name||'-'}</td>
-        <td>${log.authorized_user||'-'}</td>
-        <td>${log.exam_part||'-'}</td>
-        <td>${log.template_matched||'-'}</td>
-        <td>${log.elapsed_ms||0}</td>
-        <td>${(log.study_hint_icd10||'').substring(0,20)}</td>
-        <td>${log.audio_status||'valid'}</td>
-        <td><button class="btn-sm btn-outline" onclick="showDetail('${log.request_id}')">详情</button></td>
-      </tr>`;
+const BASE='http://47.109.151.238:80';let allData=[];
+async function loadLogs(){
+  const p=document.getElementById('fPatient').value,d=document.getElementById('fDate').value,s=document.getElementById('fStatus').value,l=document.getElementById('fLimit').value;
+  let u=BASE+'/api/admin/trace-logs?limit='+l;if(p)u+='&patient_id='+p;if(d)u+='&date='+d;if(s)u+='&status='+s;
+  try{const r=await fetch(u);const dd=await r.json();allData=dd.logs||[];
+    document.getElementById('logTable').innerHTML='<tr><th>时间</th><th>患者ID</th><th>姓名</th><th>医院</th><th>授权人</th><th>部位</th><th>模板</th><th>耗时</th><th>ICD-10</th><th>状态</th><th>操作</th></tr>';
+    if(!allData.length){document.getElementById('logTable').innerHTML+='<tr><td colspan="11" style="text-align:center;padding:30px;color:var(--text-muted)">暂无数据</td></tr>';return}
+    allData.forEach(l=>{
+      const badge=l.audio_status==='valid'?'badge-valid':l.audio_status==='dual_mixed'?'badge-mixed':'badge-noise';
+      document.getElementById('logTable').innerHTML+=`<tr><td>${(l.created_at||'').slice(0,16)}</td><td>${l.patient_id||'-'}</td><td>${l.name||'-'}</td><td>${l.hospital_name||'-'}</td><td>${l.authorized_user||'-'}</td><td>${l.exam_part||'-'}</td><td>${l.template_matched||'-'}</td><td>${l.elapsed_ms||0}ms</td><td>${(l.study_hint_icd10||'').slice(0,18)}</td><td><span class="badge ${badge}">${l.audio_status}</span></td><td><button class="btn btn-outline" style="font-size:10px;padding:3px 8px" onclick="showDetail('${l.request_id}')">详情</button></td></tr>`;
     });
-  } catch(e) { console.error(e); }
+  }catch(e){}
 }
-
-function showDetail(rid) {
-  const log = allData.find(l => l.request_id === rid);
-  if (!log) return;
-  document.getElementById('detailContent').innerHTML = `
-    <div class="detail-grid">
-      <div><b>患者ID:</b> ${log.patient_id||'-'}</div><div><b>姓名:</b> ${log.name||'-'}</div>
-      <div><b>性别:</b> ${log.gender||'-'}</div><div><b>年龄:</b> ${log.age||'-'}</div>
-      <div><b>检查部位:</b> ${log.exam_part||'-'}</div><div><b>医院:</b> ${log.hospital_name||'-'}</div>
-      <div><b>授权人:</b> ${log.authorized_user||'-'}</div><div><b>API Key:</b> ${log.authorized_api||'-'}</div>
-      <div><b>声控指令:</b> ${log.voice_cmd_hit||'-'}</div><div><b>双患者串音:</b> ${log.dual_mixed_hit||'-'}</div>
-      <div><b>部位路由:</b> ${log.body_part_route||'-'}</div><div><b>方言检测:</b> ${log.dialect_found||'-'}</div>
-      <div><b>改口检测:</b> ${log.erase_found||'-'}</div><div><b>模板匹配:</b> ${log.template_matched||'-'}</div>
-      <div><b>处理方法:</b> ${log.method||'-'}</div><div><b>耗时:</b> ${log.elapsed_ms||0}ms</div>
-      <div><b>置信度:</b> ${log.confidence||'-'}</div><div><b>LLM模型:</b> ${log.llm_model||'-'}</div>
-      <div><b>音频时长:</b> ${log.audio_duration||0}s</div><div><b>音频大小:</b> ${log.audio_file_size||0}</div>
-      <div><b>HTTP状态:</b> ${log.http_code||200}</div><div><b>计费:</b> ¥${log.billing_amount||0}</div>
-      <div><b>音频路径1:</b> ${log.audio_path_1||'-'}</div><div><b>音频路径2:</b> ${log.audio_path_2||'-'}</div>
-    </div>
-    <p><b>原始输入 (${log.raw_input_len||0}字符):</b></p>
-    <pre>${log.raw_input||''}</pre>
-    <p><b>超声所见:</b></p>
-    <pre>${log.study_see||''}</pre>
-    <p><b>超声提示+ICD-10:</b></p>
-    <pre>${log.study_hint||''}
-ICD-10: ${log.study_hint_icd10||''}</pre>
-    <p><b>建议:</b> ${log.recommendation||''}</p>
-    <p><b>大白话:</b> ${log.patient_note||''}</p>
-    <p><b>提示词规则:</b> ${log.prompt_rules||''}</p>
-  `;
+function showDetail(rid){
+  const l=allData.find(x=>x.request_id===rid);if(!l)return;
+  document.getElementById('detailContent').innerHTML=`
+    <div class="grid2"><div><b>患者:</b> ${l.name||'-'} ${l.gender||''} ${l.age||''}岁</div><div><b>医院:</b> ${l.hospital_name||'-'}</div>
+    <div><b>授权:</b> ${l.authorized_user||'-'} (${l.authorized_api||''})</div><div><b>检查:</b> ${l.exam_part||'-'}</div>
+    <div><b>模板:</b> ${l.template_matched||'-'}</div><div><b>方法:</b> ${l.method||'-'}</div>
+    <div><b>耗时:</b> ${l.elapsed_ms||0}ms</div><div><b>置信度:</b> ${(l.confidence||0).toFixed(2)}</div>
+    <div><b>音频时长:</b> ${l.audio_duration||0}s</div><div><b>LLM:</b> ${l.llm_model||'-'}</div>
+    <div><b>声控指令:</b> ${l.voice_cmd_hit||'-'}</div><div><b>串音检测:</b> ${l.dual_mixed_hit||'-'}</div>
+    <div><b>方言:</b> ${l.dialect_found||'-'}</div><div><b>改口:</b> ${l.erase_found||'-'}</div></div>
+    <p style="margin-top:8px"><b>原始输入 (${l.raw_input_len||0}字符):</b></p><pre>${l.raw_input||''}</pre>
+    <p><b>超声所见:</b></p><pre>${l.study_see||''}</pre>
+    <p><b>提示 + ICD-10:</b> ${l.study_hint_icd10||''}</p>
+    <p><b>建议:</b> ${l.recommendation||''}</p>
+    <p><b>大白话:</b> ${l.patient_note||''}</p>`;
   document.getElementById('detailModal').classList.add('show');
 }
-
-function exportCSV() {
-  if (!allData.length) return alert('无数据');
-  const headers = ['时间','患者ID','姓名','性别','年龄','检查部位','医院','授权人','APIKey','原始输入','模板','方法','耗时','置信度','ICD10','状态','建议'];
-  const csv = [headers.join(',')];
-  allData.forEach(l => csv.push([
-    l.created_at||'',l.patient_id||'',l.name||'',l.gender||'',l.age||'',l.exam_part||'',
-    l.hospital_name||'',l.authorized_user||'',l.authorized_api||'',(l.raw_input||'').replace(/,/g,'，'),
-    l.template_matched||'',l.method||'',l.elapsed_ms||0,l.confidence||'',
-    l.study_hint_icd10||'',l.audio_status||'',(l.recommendation||'').replace(/,/g,'，')
-  ].join(',')));
-  const blob = new Blob(['﻿'+csv.join('\n')], {type:'text/csv;charset=utf-8'});
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'trace_logs_'+new Date().toISOString().substring(0,10)+'.csv'; a.click();
+function exportCSV(){
+  if(!allData.length)return;const h=['时间','患者ID','姓名','性别','年龄','检查部位','医院','授权人','APIKey','模板','方法','耗时','置信度','ICD10','状态'];const csv=[h.join(',')];
+  allData.forEach(l=>csv.push([l.created_at,l.patient_id,l.name,l.gender,l.age,l.exam_part,l.hospital_name,l.authorized_user,l.authorized_api,l.template_matched,l.method,l.elapsed_ms,l.confidence,l.study_hint_icd10,l.audio_status].map(v=>(''+v).replace(/,/g,'，')).join(',')));
+  const b=new Blob(['﻿'+csv.join('\n')],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='trace_'+new Date().toISOString().slice(0,10)+'.csv';a.click();
 }
-
 loadLogs();
 </script>
 </body>

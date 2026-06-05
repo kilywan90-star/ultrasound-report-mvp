@@ -3,204 +3,109 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>超声报告语音结构化 API — 开发者门户</title>
+<title>开发者门户 — 超声报告语音结构化 API</title>
 <style>
+:root{--nav-bg:#0f172a;--nav-text:#94a3b8;--bg:#f1f5f9;--card-bg:#fff;--text:#1e293b;--text-muted:#64748b;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.06);--green:#059669;--blue:#3b82f6;--red:#dc2626;--amber:#f59e0b}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1e293b}
-nav{background:#0f172a;color:white;padding:0 16px;height:48px;display:flex;align-items:center;gap:24px;font-size:13px}
-nav h1{font-size:15px}
-nav a{color:#94a3b8;text-decoration:none}
-nav a:hover{color:white}
-main{max-width:960px;margin:20px auto;padding:0 12px}
-.card{background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);padding:20px;margin-bottom:16px}
-.card h2{font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
-.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
-.badge.post{background:#dbeafe;color:#1d4ed8}.badge.get{background:#dcfce7;color:#16a34a}
-.curl-box{background:#1e293b;color:#e2e8f0;padding:12px 14px;border-radius:8px;font-family:Menlo,monospace;font-size:12px;overflow-x:auto;white-space:pre-wrap;margin:8px 0;line-height:1.5}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+nav{background:var(--nav-bg);padding:0 20px;height:52px;display:flex;align-items:center;gap:24px}
+nav .brand{font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.3px}
+nav .brand span{font-size:10px;color:var(--nav-text);font-weight:400;margin-left:6px}
+nav a{font-size:13px;color:var(--nav-text);text-decoration:none;font-weight:500;padding:6px 10px;border-radius:6px;transition:all .15s}
+nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
+nav a.active{color:#fff;background:var(--green)}
+main{max-width:960px;margin:24px auto;padding:0 20px}
+.card{background:var(--card-bg);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{font-size:17px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card h2::before{content:'';width:4px;height:16px;background:var(--green);border-radius:2px}
+.key-box{background:#1e293b;color:#e2e8f0;padding:14px 18px;border-radius:10px;font-family:'SF Mono',Menlo,monospace;font-size:13px;display:flex;align-items:center;justify-content:space-between}
+.key-box button{padding:6px 16px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-size:12px;font-weight:600;cursor:pointer}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #e2e8f0}
-th{color:#64748b;font-weight:500;font-size:12px}
-.plan-tags{display:flex;gap:10px;margin-top:12px}
-.plan-tag{border:2px solid #e2e8f0;border-radius:10px;padding:14px;flex:1;cursor:pointer;text-align:center;transition:.2s}
-.plan-tag:hover{border-color:#3b82f6}
-.plan-tag.active{border-color:#3b82f6;background:#eff6ff}
-.plan-tag .name{font-weight:600;font-size:14px}
-.plan-tag .price{font-size:22px;font-weight:700;color:#1e40af;margin:4px 0}
-.plan-tag .quota{font-size:12px;color:#64748b}
-.plan-tag .overage{font-size:11px;color:#94a3b8}
-.btn{display:inline-block;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;border:none;transition:.15s}
-.btn-primary{background:#3b82f6;color:white}.btn-primary:hover{background:#2563eb}
-.btn-success{background:#16a34a;color:white}.btn-success:hover{background:#15803d}
-.btn-outline{border:1px solid #d1d5db;background:white;color:#374151}.btn-outline:hover{background:#f9fafb}
-.btn-sm{padding:4px 12px;font-size:12px}
-.qr-box{text-align:center;padding:20px;background:#f8fafc;border-radius:8px;margin:12px 0}
-.qr-box img{width:180px;height:180px;border:1px solid #e2e8f0;border-radius:8px}
-.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}
-.modal.show{display:flex}
-.modal>div{background:white;border-radius:12px;padding:24px;max-width:420px;width:90%}
-.modal h3{font-size:16px;margin-bottom:12px}
-.modal label{display:block;font-size:13px;color:#64748b;margin-bottom:4px}
-.modal input,.modal select{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;margin-bottom:10px}
-.step{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:13px}
-.step-num{width:24px;height:24px;border-radius:50%;background:#3b82f6;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+th{text-align:left;padding:9px 10px;background:#f8fafc;color:var(--text-muted);font-weight:600;font-size:11px;border-bottom:2px solid #e2e8f0}
+td{padding:10px;border-bottom:1px solid #f1f5f9}
+.curl{background:#1e293b;color:#e2e8f0;padding:14px 16px;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:12px;overflow-x:auto;white-space:pre-wrap;line-height:1.6;margin:10px 0}
+.badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
+.badge-post{background:#dbeafe;color:#1d4ed8}.badge-get{background:#dcfce7;color:#16a34a}
+.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#2563eb}
+.btn-outline{border:1px solid #d1d5db;background:#fff;color:var(--text)}.btn-outline:hover{background:#f8fafc}
+.flex{display:flex;gap:10px;flex-wrap:wrap}
+input,textarea,select{padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit}
+textarea{resize:vertical;min-height:60px}
+label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);margin:8px 0 4px;text-transform:uppercase}
 </style>
 </head>
 <body>
 
 <nav>
-  <h1>超声报告语音结构化 API</h1>
-  <a href="#">开发者门户</a>
-  <a href="/plans.html">套餐购买</a>
-  <a href="/admin.html">管理后台</a>
-  <span style="margin-left:auto;font-size:11px;color:#94a3b8" id="navVersion">v4.1.0</span>
+  <div class="brand">UltraSonic AI<span>v4.2</span></div>
+  <a href="/">工作站</a>
+  <a href="/developer.html" class="active">开发者</a>
+  <a href="/plans.html">套餐</a>
+  <a href="/admin.html">管理</a>
+  <a href="/dashboard.html">看板</a>
+  <a href="/trace_logs.html">日志</a>
+  <a href="/error_report.html">纠错</a>
 </nav>
 
 <main>
-  <!-- API Key -->
   <div class="card">
     <h2>您的 API Key</h2>
-    <div class="curl-box">
-      <span id="apiKeyDisplay">点击「注册」获取免费 Key</span>
-      <button class="btn btn-sm btn-outline" onclick="copyKey()" style="float:right">复制</button>
-    </div>
-    <div style="margin-top:8px;display:flex;gap:8px">
-      <button class="btn btn-primary btn-sm" onclick="showSignup()">注册</button>
-      <button class="btn btn-outline btn-sm" onclick="localStorage.clear();location.reload()">切换账号</button>
-    </div>
+    <div class="key-box"><span id="apiKeyDisplay">点击下方注册按钮获取</span><button onclick="copyKey()">复制</button></div>
+    <div class="flex" style="margin-top:10px"><button class="btn btn-primary" onclick="showSignup()">注册免费 Key</button><button class="btn btn-outline" onclick="localStorage.clear();location.reload()">切换账号</button></div>
   </div>
 
-  <!-- 用量 -->
   <div class="card">
     <h2>本月用量</h2>
     <table>
-      <tr><th>套餐</th><td id="usagePlan">-</td><th>调用次数</th><td id="usageCalls">-</td></tr>
-      <tr><th>配额</th><td id="usageQuota">-</td><th>剩余</th><td id="usageRemaining">-</td></tr>
-      <tr><th>本月费用</th><td id="usageBilled">-</td><th>ASR时长</th><td id="usageAsr">-</td></tr>
+      <tr><th>套餐</th><td id="usagePlan">-</td><th>调用次数</th><td id="usageCalls">-</td><th>配额</th><td id="usageQuota">-</td></tr>
+      <tr><th>剩余</th><td id="usageRemaining">-</td><th>本月费用</th><td id="usageBilled">-</td><th>ASR时长</th><td id="usageAsr">-</td></tr>
     </table>
+    <div style="margin-top:8px;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden"><div id="usageBar" style="height:100%;background:var(--green);border-radius:3px;width:0%;transition:width .3s"></div></div>
   </div>
 
-  <!-- 快速测试 -->
   <div class="card">
     <h2>快速测试</h2>
-    <p style="font-size:12px;color:#64748b;margin-bottom:8px">输入口述文本, 点"生成报告"</p>
-    <textarea id="testText" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;resize:vertical" rows="2" placeholder="肝脏大小形态正常, 胆囊壁光滑, 未见异常..."></textarea>
-    <select id="testExam" style="margin:8px 0;padding:4px 8px;border:1px solid #d1d5db;border-radius:4px;font-size:12px">
-      <option>腹部超声</option><option>乳腺超声</option><option>甲状腺超声</option><option>产科超声</option><option>心脏超声</option><option>泌尿超声</option><option>妇科超声</option>
-    </select>
-    <br>
-    <button class="btn btn-primary btn-sm" onclick="testStructure()">生成报告</button>
-    <div id="testResult" style="margin-top:8px;font-size:12px"></div>
+    <textarea id="testText" rows="2" placeholder="肝脏大小形态正常，胆囊壁光滑，未见异常..."></textarea>
+    <div class="flex" style="margin-top:8px;align-items:center">
+      <select id="testExam"><option>腹部超声</option><option>乳腺超声</option><option>甲状腺超声</option><option>产科超声</option><option>心脏超声</option><option>泌尿超声</option><option>妇科超声</option></select>
+      <button class="btn btn-primary" onclick="testStructure()">生成报告</button>
+    </div>
+    <div id="testResult" style="margin-top:8px;font-size:12px;white-space:pre-wrap"></div>
   </div>
 
-  <!-- API 文档 -->
   <div class="card">
     <h2>API 参考</h2>
-    <h3 style="margin:12px 0 6px;font-size:13px"><span class="badge post">POST</span> /v1/structure — 文本→报告</h3>
-    <div class="curl-box">curl -X POST http://47.109.151.238/v1/structure \
+    <p style="font-size:12px;color:var(--text-muted);margin-bottom:8px"><span class="badge badge-post">POST</span> /v1/structure — 文本 → 结构化报告</p>
+    <div class="curl">curl -X POST http://47.109.151.238/v1/structure \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer &lt;KEY&gt;" \
-  -d '{"text":"...","patient_context":{"patient_id":"必传","gender":"男","age":45,"exam_type":"腹部超声"}}'</div>
-
-    <h3 style="margin:12px 0 6px;font-size:13px"><span class="badge post">POST</span> /v1/transcribe — 语音→报告</h3>
-    <div class="curl-box">curl -X POST http://47.109.151.238/v1/transcribe \
+  -d '{"text":"肝脏大小正常...","patient_context":{"patient_id":"必填","gender":"男","age":45,"exam_type":"腹部超声"}}'</div>
+    <p style="font-size:12px;color:var(--text-muted);margin:16px 0 8px"><span class="badge badge-post">POST</span> /v1/transcribe — 语音 → 结构化报告</p>
+    <div class="curl">curl -X POST http://47.109.151.238/v1/transcribe \
   -H "Authorization: Bearer &lt;KEY&gt;" \
   -F "audio_file=@recording.webm" \
-  -F 'patient_context={"patient_id":"必传","gender":"女","age":38,"exam_type":"乳腺超声"}'</div>
-
-    <p style="font-size:12px;margin-top:8px"><a href="http://47.109.151.238:8800/docs" target="_blank">Swagger 交互文档</a></p>
+  -F 'patient_context={"patient_id":"必填","gender":"女","age":38,"exam_type":"乳腺超声"}'</div>
+    <p style="margin-top:10px;font-size:12px"><a href="http://47.109.151.238:8800/docs" target="_blank" style="color:var(--blue);font-weight:600">Swagger 交互文档 →</a></p>
   </div>
 </main>
 
-<div class="modal" id="signupModal">
-  <div>
-    <h3>注册 API Key</h3>
-    <label>医院/公司名称</label>
-    <input id="signupName" placeholder="XX医院超声科">
-    <label>联系邮箱</label>
-    <input id="signupEmail" type="email" placeholder="your@hospital.cn">
-    <label>联系人 (可选)</label>
-    <input id="signupContact" placeholder="张医生">
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn btn-primary" onclick="doSignup()">立即注册</button>
-      <button class="btn btn-outline" onclick="document.getElementById('signupModal').classList.remove('show')">取消</button>
-    </div>
-  </div>
-</div>
+<div class="modal" id="signupModal"><div>
+  <h3>注册 API Key</h3><label>医院/公司</label><input id="signupName"><label>邮箱</label><input id="signupEmail" type="email"><label>联系人</label><input id="signupContact">
+  <div class="flex" style="margin-top:12px"><button class="btn btn-primary" onclick="doSignup()">注册</button><button class="btn btn-outline" onclick="document.getElementById('signupModal').classList.remove('show')">取消</button></div>
+</div></div>
 
 <script>
-const BASE = 'http://47.109.151.238:80';
-
-function getKey() { return localStorage.getItem('dev_api_key')||''; }
-function setKey(k) { localStorage.setItem('dev_api_key',k); }
-
-async function init() {
-  const key = getKey();
-  if (!key) { return; }
-  document.getElementById('apiKeyDisplay').textContent = key;
-  try {
-    const r = await fetch(BASE+'/v1/usage', { headers: { 'Authorization': 'Bearer '+key } });
-    const d = await r.json();
-    document.getElementById('usagePlan').textContent = d.tenant.plan_name;
-    document.getElementById('usageCalls').textContent = d.usage.total_calls;
-    document.getElementById('usageQuota').textContent = d.usage.monthly_quota;
-    document.getElementById('usageRemaining').textContent = d.usage.remaining;
-    document.getElementById('usageBilled').textContent = '¥'+d.usage.total_billed.toFixed(2);
-    document.getElementById('usageAsr').textContent = d.usage.total_asr_seconds.toFixed(1)+'s';
-  } catch(e) { console.error(e); }
+const BASE='http://47.109.151.238:80';function getKey(){return localStorage.getItem('dev_api_key')||''}function setKey(k){localStorage.setItem('dev_api_key',k)}
+async function init(){const k=getKey();if(!k)return;document.getElementById('apiKeyDisplay').textContent=k;
+  try{const r=await fetch(BASE+'/v1/usage',{headers:{'Authorization':'Bearer '+k}});const d=await r.json();document.getElementById('usagePlan').textContent=d.tenant.plan_name;document.getElementById('usageCalls').textContent=d.usage.total_calls;document.getElementById('usageQuota').textContent=d.usage.monthly_quota;document.getElementById('usageRemaining').textContent=d.usage.remaining;document.getElementById('usageBilled').textContent='¥'+d.usage.total_billed.toFixed(2);document.getElementById('usageAsr').textContent=d.usage.total_asr_seconds.toFixed(1)+'s';const pct=d.usage.monthly_quota>0?Math.min(100,d.usage.total_calls/d.usage.monthly_quota*100):0;const bar=document.getElementById('usageBar');bar.style.width=pct+'%';bar.style.background=pct>80?var(--red):pct>60?var(--amber):var(--green)}catch(e){}
 }
-
-function showSignup() {
-  document.getElementById('signupModal').classList.add('show');
-}
-
-async function doSignup() {
-  const name = document.getElementById('signupName').value.trim();
-  const email = document.getElementById('signupEmail').value.trim();
-  const contact = document.getElementById('signupContact').value.trim();
-  if (!name||!email) { alert('名称和邮箱必填'); return; }
-  try {
-    const r = await fetch(BASE+'/v1/signup', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name,email,contact:contact||undefined})
-    });
-    const d = await r.json();
-    if (d.api_key) {
-      setKey(d.api_key);
-      document.getElementById('apiKeyDisplay').textContent = d.api_key;
-      document.getElementById('signupModal').classList.remove('show');
-      init();
-    }
-  } catch(e) { alert('注册失败: '+e); }
-}
-
-function copyKey() {
-  const k = getKey();
-  if (k) { navigator.clipboard.writeText(k); alert('已复制'); }
-}
-
-async function testStructure() {
-  const key = getKey(); if(!key) { alert('请先注册'); return; }
-  const text = document.getElementById('testText').value.trim();
-  if(!text) { alert('请输入口述文本'); return; }
-  const exam = document.getElementById('testExam').value;
-  try {
-    const r = await fetch(BASE+'/v1/structure', {
-      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
-      body: JSON.stringify({text, patient_context:{patient_id:'web-test-'+Date.now(), gender:'男', age:45, exam_type:exam}})
-    });
-    const d = await r.json();
-    if (d.data && d.data.study_see) {
-      document.getElementById('testResult').innerHTML =
-        '<b>结构化报告:</b><br>'+d.data.study_see+'<br><br><b>提示:</b> '+
-        (d.data.study_hint||[]).map(h=>h.diagnosis+' ['+(h.icd10||'')+']').join(', ') +
-        '<br><small>模板:'+d.data.template_used+' | 方法:'+d.data.method+' | '+(d.data.elapsed_ms||0)+'ms</small>';
-    } else {
-      document.getElementById('testResult').textContent = '错误: '+d.msg;
-    }
-  } catch(e) { document.getElementById('testResult').textContent = '网络错误: '+e; }
-}
-
+function showSignup(){document.getElementById('signupModal').classList.add('show')}
+async function doSignup(){const n=document.getElementById('signupName').value.trim(),e=document.getElementById('signupEmail').value.trim(),c=document.getElementById('signupContact').value.trim();if(!n||!e)return alert('必填');const r=await fetch(BASE+'/v1/signup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:n,email:e,contact:c||undefined})});const d=await r.json();if(d.api_key){setKey(d.api_key);document.getElementById('apiKeyDisplay').textContent=d.api_key;document.getElementById('signupModal').classList.remove('show');init()}}
+function copyKey(){const k=getKey();if(k){navigator.clipboard.writeText(k);alert('已复制')}}
+async function testStructure(){const k=getKey();if(!k)return alert('请先注册');const t=document.getElementById('testText').value.trim();if(!t)return alert('输入文本');const e=document.getElementById('testExam').value;try{const r=await fetch(BASE+'/v1/structure',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+k},body:JSON.stringify({text:t,patient_context:{patient_id:'web-'+Date.now(),gender:'男',age:45,exam_type:e}})});const d=await r.json();if(d.data){document.getElementById('testResult').innerHTML='<b>报告:</b><br>'+d.data.study_see+'<br><br><b>提示:</b> '+(d.data.study_hint||[]).map(h=>h.diagnosis+' ['+(h.icd10||'')+']').join(', ')+'<br><small>'+d.data.template_used+' | '+d.data.method+' | '+(d.data.elapsed_ms||0)+'ms</small>'}else document.getElementById('testResult').textContent='错误: '+d.msg}catch(e){document.getElementById('testResult').textContent='网络错误: '+e}}
 init();
 </script>
+<style>.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}.modal.show{display:flex}.modal>div{background:#fff;border-radius:12px;padding:24px;max-width:400px;width:90%}.modal h3{font-size:16px;margin-bottom:12px}</style>
 </body>
 </html>
