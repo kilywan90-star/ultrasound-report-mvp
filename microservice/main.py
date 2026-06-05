@@ -68,10 +68,9 @@ app = FastAPI(
 ALLOWED_AUDIO_EXTENSIONS = {'.webm', '.wav', '.mp3', '.m4a', '.ogg', '.flac', '.opus'}
 
 # ── 音频限制 ──
-MAX_AUDIO_SIZE_BYTES = 50 * 1024 * 1024  # 50MB (硬上限, 拒绝超大文件)
-MAX_AUDIO_DURATION_SECONDS = 120          # 2分钟 (超过则拒绝, 防止产检40分钟录音)
-AUDIO_DURATION_GRACE_SECONDS = 30         # 前30秒不计费 (口述一句话 "肝脏大小正常" 免费)
-AUDIO_COST_PER_SECOND = 0.001             # 每音频秒成本 (DashScope ASR 单价)
+MAX_AUDIO_SIZE_BYTES = 50 * 1024 * 1024  # 50MB (硬上限，拒绝超大文件)
+MAX_AUDIO_DURATION_SECONDS = 120          # 2分钟 (超过则拒绝，防止产检40分钟录音)
+AUDIO_DURATION_GRACE_SECONDS = 30         # 前30秒免费
 
 # ── 幂等性缓存 (10 分钟 TTL, 简单内存实现) ──
 _idempotency_cache: dict[str, dict] = {}
