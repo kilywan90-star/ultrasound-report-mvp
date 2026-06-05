@@ -546,8 +546,10 @@ async def structure(
     # 语音指令拦截 (不调用LLM, 不收费, 直接返回命令)
     voice_commands = {
         "清空重来": "CLEAR",
+        "确认保存": "SAVE",
         "保存报告": "SAVE",
         "下一项": "NEXT",
+        "跳到下一项": "NEXT",
         "打印报告": "PRINT",
     }
     raw_stripped = req.text.strip()
