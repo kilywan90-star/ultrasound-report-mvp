@@ -5,9 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>开发者门户 — 超声报告语音结构化 API</title>
 <style>
-:root{--nav-bg:#0f172a;--nav-text:#94a3b8;--bg:#f1f5f9;--card-bg:#fff;--text:#1e293b;--text-muted:#64748b;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.06);--green:#059669;--blue:#3b82f6;--red:#dc2626;--amber:#f59e0b}
+:root{
+  --nav-bg:#0f172a;--nav-text:#94a3b8;--bg:#f1f5f9;--card-bg:#fff;--text:#1e293b;--text-muted:#64748b;
+  --radius:12px;--shadow:0 1px 3px rgba(0,0,0,.06);--shadow-hover:0 4px 12px rgba(0,0,0,.1);
+  --green:#059669;--green-hover:#047857;--blue:#3b82f6;--blue-hover:#2563eb;--red:#dc2626;--red-hover:#b91c1c;--amber:#f59e0b;
+}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text)}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 nav{background:var(--nav-bg);padding:0 20px;height:52px;display:flex;align-items:center;gap:24px}
 nav .brand{font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.3px}
 nav .brand span{font-size:10px;color:var(--nav-text);font-weight:400;margin-left:6px}
@@ -15,24 +19,38 @@ nav a{font-size:13px;color:var(--nav-text);text-decoration:none;font-weight:500;
 nav a:hover{color:#fff;background:rgba(255,255,255,.08)}
 nav a.active{color:#fff;background:var(--green)}
 main{max-width:960px;margin:24px auto;padding:0 20px}
-.card{background:var(--card-bg);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:14px}
-.card h2{font-size:17px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card{background:var(--card-bg);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);margin-bottom:14px;transition:box-shadow .2s}
+.card:hover{box-shadow:var(--shadow-hover)}
+.card h2{font-size:17px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px;color:var(--text)}
 .card h2::before{content:'';width:4px;height:16px;background:var(--green);border-radius:2px}
 .key-box{background:#1e293b;color:#e2e8f0;padding:14px 18px;border-radius:10px;font-family:'SF Mono',Menlo,monospace;font-size:13px;display:flex;align-items:center;justify-content:space-between}
-.key-box button{padding:6px 16px;border-radius:6px;border:none;background:var(--blue);color:#fff;font-size:12px;font-weight:600;cursor:pointer}
+.key-box button{padding:6px 16px;border-radius:8px;border:none;background:var(--blue);color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:all .15s}
+.key-box button:hover{background:var(--blue-hover);transform:translateY(-1px);box-shadow:0 2px 8px rgba(59,130,246,.3)}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{text-align:left;padding:9px 10px;background:#f8fafc;color:var(--text-muted);font-weight:600;font-size:11px;border-bottom:2px solid #e2e8f0}
+th{text-align:left;padding:9px 10px;background:#f8fafc;color:var(--text-muted);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.3px;border-bottom:2px solid #e2e8f0}
 td{padding:10px;border-bottom:1px solid #f1f5f9}
 .curl{background:#1e293b;color:#e2e8f0;padding:14px 16px;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:12px;overflow-x:auto;white-space:pre-wrap;line-height:1.6;margin:10px 0}
 .badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600}
 .badge-post{background:#dbeafe;color:#1d4ed8}.badge-get{background:#dcfce7;color:#16a34a}
-.btn{padding:8px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s}
-.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:#2563eb}
-.btn-outline{border:1px solid #d1d5db;background:#fff;color:var(--text)}.btn-outline:hover{background:#f8fafc}
-.flex{display:flex;gap:10px;flex-wrap:wrap}
-input,textarea,select{padding:8px 12px;border:1px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit}
+/* === Unified Button System === */
+.btn{padding:9px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .15s;display:inline-flex;align-items:center;gap:6px;letter-spacing:.2px}
+.btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.15)}
+.btn:active{transform:translateY(0);box-shadow:0 1px 2px rgba(0,0,0,.1)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-hover)}
+.btn-success{background:var(--green);color:#fff}.btn-success:hover{background:var(--green-hover)}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{background:var(--red-hover)}
+.btn-outline{border:1.5px solid #d1d5db;background:var(--card-bg);color:var(--text)}.btn-outline:hover{border-color:var(--blue);color:var(--blue);background:#eff6ff}
+.btn-ghost{background:transparent;color:var(--text-muted);box-shadow:none}.btn-ghost:hover{background:#f1f5f9;color:var(--text);transform:none;box-shadow:none}
+.btn-sm{padding:5px 14px;font-size:11px;border-radius:6px}
+.btn-lg{padding:12px 28px;font-size:15px}
+.flex{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+input,textarea,select{padding:9px 12px;border:1.5px solid #d1d5db;border-radius:8px;font-size:13px;font-family:inherit;background:var(--card-bg);transition:border .15s,box-shadow .15s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(59,130,246,.1)}
 textarea{resize:vertical;min-height:60px}
-label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);margin:8px 0 4px;text-transform:uppercase}
+label{display:block;font-size:11px;font-weight:600;color:var(--text-muted);margin:8px 0 4px;text-transform:uppercase;letter-spacing:.3px}
+.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.progress-bar .fill{height:100%;border-radius:3px;transition:width .4s ease,background .4s ease}
 </style>
 </head>
 <body>
