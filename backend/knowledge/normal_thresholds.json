@@ -1,0 +1,150 @@
+{
+  "description": "超声脏器正常测值阈值规则库 — 自动数值校验，超出阈值自动标注异常",
+  "version": "2025临床常用",
+  "rules": {
+    "甲状腺峡部": {
+      "normal_max": 3,
+      "unit": "mm",
+      "rule": ">3mm: 峡部增厚"
+    },
+    "甲状腺侧叶前后径": {
+      "normal_range": [10, 15],
+      "unit": "mm",
+      "rule": ">15mm: 甲状腺侧叶增厚"
+    },
+    "胆总管": {
+      "normal_max": 6,
+      "unit": "mm",
+      "rule": ">6mm: 胆总管扩张"
+    },
+    "门静脉": {
+      "normal_max": 13,
+      "unit": "mm",
+      "rule": ">13mm: 门静脉增宽"
+    },
+    "胰管": {
+      "normal_max": 2,
+      "unit": "mm",
+      "rule": ">2mm: 胰管扩张"
+    },
+    "肾皮质厚度": {
+      "normal_min": 12,
+      "unit": "mm",
+      "rule": "<12mm: 肾皮质变薄"
+    },
+    "胆囊壁": {
+      "normal_max": 3,
+      "unit": "mm",
+      "rule": ">3mm: 胆囊壁增厚"
+    },
+    "宫颈厚度": {
+      "normal_range": [20, 25],
+      "unit": "mm",
+      "rule": ">30mm: 宫颈肥大"
+    },
+    "脾脏厚度": {
+      "normal_range": [30, 40],
+      "unit": "mm",
+      "rule": ">40mm: 脾脏肿大"
+    },
+    "肝脏斜径": {
+      "normal_range": [120, 140],
+      "unit": "mm",
+      "rule": ">140mm: 肝脏肿大"
+    },
+    "肾脏长径": {
+      "normal_range": [90, 110],
+      "unit": "mm",
+      "rule": "<90mm: 肾脏缩小; >110mm: 肾脏肿大"
+    },
+    "输尿管上段内径": {
+      "normal_max": 3,
+      "unit": "mm",
+      "rule": ">3mm: 输尿管扩张"
+    },
+    "子宫内膜厚度_育龄期": {
+      "normal_range": [5, 12],
+      "unit": "mm",
+      "rule": "<5mm: 内膜变薄; >12mm: 内膜增厚",
+      "phase": "育龄期"
+    },
+    "子宫内膜厚度_绝经后": {
+      "normal_max": 5,
+      "unit": "mm",
+      "rule": ">5mm: 绝经后内膜增厚,需排查内膜病变",
+      "phase": "绝经后"
+    },
+    "卵巢大小_育龄期": {
+      "normal_size": [40, 30, 20],
+      "unit": "mm",
+      "rule": ">40×30×20mm: 卵巢增大",
+      "phase": "育龄期"
+    },
+    "前列腺大小_成年": {
+      "normal_size": [40, 30, 20],
+      "unit": "mm",
+      "rule": ">40×30×20mm: 前列腺增生",
+      "phase": "成年男性"
+    },
+    "睾丸长径": {
+      "normal_range": [35, 50],
+      "unit": "mm",
+      "rule": "<35mm: 睾丸缩小; >50mm: 睾丸增大"
+    },
+    "附睾头厚度": {
+      "normal_max": 10,
+      "unit": "mm",
+      "rule": ">10mm: 附睾头增大"
+    },
+    "颈总动脉内中膜厚度": {
+      "normal_max": 1.0,
+      "unit": "mm",
+      "rule": "≥1.0mm: IMT增厚; ≥1.5mm: 动脉粥样硬化斑块"
+    },
+    "室间隔厚度": {
+      "normal_range": [6, 11],
+      "unit": "mm",
+      "rule": ">11mm: 室间隔增厚"
+    },
+    "左室后壁厚度": {
+      "normal_range": [6, 11],
+      "unit": "mm",
+      "rule": ">11mm: 左室后壁增厚"
+    },
+    "左房内径": {
+      "normal_max": 40,
+      "unit": "mm",
+      "rule": ">40mm: 左房增大"
+    },
+    "左室舒张末内径": {
+      "normal_max": 55,
+      "unit": "mm",
+      "rule": ">55mm(男)/>50mm(女): 左室增大"
+    },
+    "右房内径": {
+      "normal_max": 35,
+      "unit": "mm",
+      "rule": ">35mm: 右房增大"
+    },
+    "右室内径": {
+      "normal_max": 25,
+      "unit": "mm",
+      "rule": ">25mm: 右室增大"
+    },
+    "主动脉根部内径": {
+      "normal_max": 35,
+      "unit": "mm",
+      "rule": ">35mm: 主动脉根部增宽"
+    },
+    "肺动脉主干内径": {
+      "normal_max": 28,
+      "unit": "mm",
+      "rule": ">28mm: 肺动脉增宽"
+    },
+    "射血分数_EF": {
+      "normal_min": 55,
+      "unit": "%",
+      "rule": "40-54%: EF减低(轻度); 30-39%: EF减低(中度); <30%: EF减低(重度)"
+    }
+  }
+}

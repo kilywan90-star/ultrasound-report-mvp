@@ -1,0 +1,154 @@
+{
+  "BI-RADS": {
+    "description": "乳腺影像报告和数据系统 (Breast Imaging Reporting and Data System)",
+    "version": "v2025",
+    "grades": {
+      "1": {
+        "keywords": ["一类", "1类", "全正常", "没得包块", "阴性"],
+        "name": "BI-RADS 1",
+        "malignancy_risk": "0%",
+        "description": "阴性，无异常发现",
+        "follow_up": "常规体检"
+      },
+      "2": {
+        "keywords": ["二类", "2类", "囊肿", "纯液性", "良性钙化"],
+        "name": "BI-RADS 2",
+        "malignancy_risk": "0%",
+        "description": "明确良性发现",
+        "follow_up": "年度体检"
+      },
+      "3": {
+        "keywords": ["三类", "3类", "良性", "问题不大", "定期体检", "定期复查"],
+        "name": "BI-RADS 3",
+        "malignancy_risk": "<2%",
+        "description": "良性可能大",
+        "follow_up": "6-12月复查彩超"
+      },
+      "4a": {
+        "keywords": ["四a", "4a", "有点可疑", "三个月复查", "低度可疑"],
+        "name": "BI-RADS 4a",
+        "malignancy_risk": "2%-10%",
+        "description": "低度可疑恶性",
+        "follow_up": "3月复查/建议钼靶"
+      },
+      "4b": {
+        "keywords": ["四b", "4b", "边界差", "建议穿刺", "中度可疑"],
+        "name": "BI-RADS 4b",
+        "malignancy_risk": "10%-50%",
+        "description": "中度可疑恶性",
+        "follow_up": "穿刺活检"
+      },
+      "4c": {
+        "keywords": ["四c", "4c", "毛刺", "血流丰富", "高度可疑"],
+        "name": "BI-RADS 4c",
+        "malignancy_risk": "50%-95%",
+        "description": "高度可疑恶性",
+        "follow_up": "尽快活检"
+      },
+      "5": {
+        "keywords": ["五类", "5类", "高度怀疑癌", "基本确定恶性"],
+        "name": "BI-RADS 5",
+        "malignancy_risk": ">95%",
+        "description": "高度提示恶性",
+        "follow_up": "住院穿刺/手术"
+      },
+      "0": {
+        "keywords": ["0类", "零类", "看不清", "评估不完全"],
+        "name": "BI-RADS 0",
+        "malignancy_risk": "N/A",
+        "description": "评估不完全，需进一步影像学检查",
+        "follow_up": "补充钼靶/MRI检查"
+      }
+    }
+  },
+  "TI-RADS": {
+    "description": "甲状腺影像报告和数据系统 (Thyroid Imaging Reporting and Data System)",
+    "version": "C-TIRADS 2020 (中国版)",
+    "scoring": {
+      "malignant_features": {
+        "+1_each": ["极低回声", "实性成分", "微钙化", "边缘模糊", "边缘不规则/甲状腺外侵犯", "垂直位(纵横比>1)"],
+        "description": "每个恶性特征+1分"
+      },
+      "benign_features": {
+        "-1": ["彗星尾伪像"],
+        "description": "良性特征-1分"
+      }
+    },
+    "grades": {
+      "1": {
+        "keywords": ["一类", "1类", "无结节"],
+        "name": "TI-RADS 1",
+        "malignancy_risk": "0%",
+        "fnab_threshold": "无需处理"
+      },
+      "2": {
+        "keywords": ["二类", "2类", "囊肿", "海绵状"],
+        "name": "TI-RADS 2",
+        "score": "-1",
+        "malignancy_risk": "0%",
+        "fnab_threshold": "无需FNAB"
+      },
+      "3": {
+        "keywords": ["三类", "3类", "实性小结", "无钙化", "低回声小结节"],
+        "name": "TI-RADS 3",
+        "score": "0",
+        "malignancy_risk": "<2%",
+        "description": "良性可能",
+        "follow_up": "6-12月复查"
+      },
+      "4a": {
+        "keywords": ["四a", "4a", "少量点状钙化", "低度可疑甲"],
+        "name": "TI-RADS 4a",
+        "score": "1",
+        "malignancy_risk": "2%-10%",
+        "description": "低度可疑恶性",
+        "follow_up": "3月随访",
+        "fnab_threshold": ">15mm建议FNAB"
+      },
+      "4b": {
+        "keywords": ["四b", "4b", "砂砾钙化", "边界毛糙", "中度可疑甲"],
+        "name": "TI-RADS 4b",
+        "score": "2",
+        "malignancy_risk": "10%-50%",
+        "description": "中度可疑恶性",
+        "follow_up": "穿刺活检",
+        "fnab_threshold": ">10mm建议FNAB"
+      },
+      "4c": {
+        "keywords": ["四c", "4c", "极低回声+微钙化", "高度可疑甲"],
+        "name": "TI-RADS 4c",
+        "score": "3-4",
+        "malignancy_risk": "50%-90%",
+        "description": "高度可疑恶性",
+        "follow_up": "穿刺病理",
+        "fnab_threshold": ">10mm建议FNAB(特殊位置>5mm)"
+      },
+      "5": {
+        "keywords": ["五类", "5类", "多个恶性特征"],
+        "name": "TI-RADS 5",
+        "score": "5",
+        "malignancy_risk": ">90%",
+        "description": "高度提示恶性",
+        "follow_up": "穿刺病理/手术",
+        "fnab_threshold": ">10mm建议FNAB(特殊位置>5mm)"
+      }
+    }
+  },
+  "LI-RADS": {
+    "description": "肝脏影像报告和数据系统 (Liver Imaging Reporting and Data System)",
+    "keywords": ["肝内占位", "高危结节", "肝脏病灶", "肝结节"],
+    "note": "肝脏病灶分级，按动脉期强化/廓清/包膜等征象评估"
+  },
+  "PI-RADS": {
+    "description": "前列腺影像报告和数据系统 (Prostate Imaging Reporting and Data System)",
+    "keywords": ["前列腺外周带异常", "前列腺结节", "前列腺占位"],
+    "version": "v2.1",
+    "grades": {
+      "1": "极低风险(临床有意义癌可能性极低)",
+      "2": "低风险(临床有意义癌可能性低)",
+      "3": "中等风险(临床有意义癌可能性中等)",
+      "4": "高风险(临床有意义癌可能性高)",
+      "5": "极高风险(临床有意义癌可能性极高)"
+    }
+  }
+}
