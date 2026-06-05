@@ -806,6 +806,75 @@ async def asr_quality(
         return error_response(500, f"质量评估失败: {str(e)[:100]}", rid)
 
 
+# ── MCP Tool: 小智机器人音频转录 (base64 audio) ──
+
+class McpTranscribeRequest(BaseModel):
+    audio_base64: str = Field(..., min_length=1, description="base64编码的音频 (webm/wav/mp3)")
+    patient_id: str = Field(..., min_length=1, max_length=64, description="病历号")
+    gender: str = Field(default="", max_length=2, description="男/女")
+    age: int = Field(default=0, ge=0, le=150, description="年龄")
+    exam_type: str = Field(default="腹部超声", max_length=50, description="检查类型")
+    name: str = Field(default="", max_length=20, description="患者姓名(可选)")
+
+
+@app.post("/v1/mcp/transcribe")
+async def mcp_transcribe(req: McpTranscribeRequest):
+    """MCP tool: 接收base64音频 → 转码 → ASR → 结构化 → 返回报告
+    供小智ESP32机器人通过MCP协议调用
+    """
+    import base64, tempfile, os as _os
+    rid = _uuid.uuid4().hex[:12]
+    logger.info({"phase": "mcp_transcribe", "patient_id": req.patient_id, "audio_len": len(req.audio_base64)})
+
+    # 解码base64音频
+    try:
+        audio_bytes = base64.b64decode(req.audio_base64)
+    except Exception as e:
+        return {"code": 400, "msg": f"base64解码失败: {str(e)[:100]}", "request_id": rid, "data": None}
+
+    if len(audio_bytes) < 400:
+        return {"code": 400, "msg": "音频数据过小 (可能为静音)", "request_id": rid, "data": None}
+
+    # 写入临时文件 (asr_client需要文件路径)
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(suffix=".webm", delete=False) as tmp:
+            tmp.write(audio_bytes)
+            tmp_path = tmp.name
+
+        ctx = PatientContext(
+            patient_id=req.patient_id, gender=req.gender, age=req.age,
+            exam_type=req.exam_type, name=req.name,
+        )
+
+        # 运行流水线
+        result = await run_pipeline(request_type="transcribe", audio_bytes=audio_bytes, patient_ctx=ctx)
+        result.request_id = rid
+
+        # MCP 标准响应格式
+        return {
+            "code": 200,
+            "msg": "success",
+            "request_id": rid,
+            "patient_id": req.patient_id,
+            "template": result.template_used,
+            "method": result.method,
+            "elapsed_ms": result.elapsed_ms,
+            "confidence": result.confidence,
+            "study_see": result.study_see,
+            "study_hint": [{"rank": h.rank, "diagnosis": h.diagnosis, "icd10": h.icd10} for h in result.study_hint],
+            "recommendation": result.recommendation,
+            "warnings": result.warnings,
+        }
+    except Exception as e:
+        logger.error({"phase": "mcp_transcribe_error", "error": str(e)})
+        return {"code": 500, "msg": f"处理失败: {str(e)[:200]}", "request_id": rid, "data": None}
+    finally:
+        if tmp_path:
+            try: _os.unlink(tmp_path)
+            except OSError: pass
+
+
 # ── Startup ──
 
 if __name__ == "__main__":

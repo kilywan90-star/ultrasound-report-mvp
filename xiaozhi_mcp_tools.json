@@ -1,0 +1,62 @@
+{
+  "mcp_tools": [
+    {
+      "name": "ultrasound_transcribe",
+      "description": "超声医生口述→结构化报告。发送base64编码的音频,返回完整的超声所见+提示+建议+ICD-10编码。支持方言(湘/川/渝)。",
+      "version": "1.0.0",
+      "endpoint": "http://47.109.151.238:8800/v1/mcp/transcribe",
+      "method": "POST",
+      "content_type": "application/json",
+      "parameters": {
+        "audio_base64": {
+          "type": "string",
+          "required": true,
+          "description": "base64编码的音频数据 (webm/wav/mp3格式, 建议16kHz采样率)"
+        },
+        "patient_id": {
+          "type": "string",
+          "required": true,
+          "description": "患者病历号/唯一ID (一单一录, 无ID拒绝解析)"
+        },
+        "gender": {
+          "type": "string",
+          "required": true,
+          "enum": ["男", "女"],
+          "description": "患者性别"
+        },
+        "age": {
+          "type": "integer",
+          "required": true,
+          "minimum": 0,
+          "maximum": 150,
+          "description": "患者年龄"
+        },
+        "exam_type": {
+          "type": "string",
+          "required": true,
+          "description": "检查类型: 腹部超声/乳腺超声/甲状腺超声/产科超声/心脏超声/泌尿超声/妇科超声/血管超声",
+          "default": "腹部超声"
+        },
+        "name": {
+          "type": "string",
+          "required": false,
+          "description": "患者姓名 (可选, 建议脱敏)"
+        }
+      },
+      "response": {
+        "code": 200,
+        "msg": "success",
+        "template": "匹配到的超声模板名",
+        "method": "abcdef_v3 / b_llm",
+        "elapsed_ms": 1500,
+        "confidence": 0.85,
+        "study_see": "超声所见完整文本",
+        "study_hint": [
+          {"rank": 1, "diagnosis": "诊断名", "icd10": "ICD-10编码"}
+        ],
+        "recommendation": "建议文本"
+      },
+      "example_curl": "curl -X POST http://47.109.151.238:8800/v1/mcp/transcribe -H 'Content-Type: application/json' -d '{\"audio_base64\":\"...\",\"patient_id\":\"P001\",\"gender\":\"男\",\"age\":45,\"exam_type\":\"腹部超声\"}'"
+    }
+  ]
+}
