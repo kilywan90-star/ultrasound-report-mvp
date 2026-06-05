@@ -36,14 +36,14 @@ def check_rate_limit(tenant_id: int, plan_id: str, endpoint: str = "*") -> tuple
         _clean_window(ep_min, now - 60)
         _clean_window(ep_day, now - 86400)
 
-        # 获取限流配置: 端点 > 通配符 > 套餐默认
+        # 获取限流配置: 套餐默认值优先 (DB可能无记录，fallback到plan)
         try:
             rl = rate_limit_get(tenant_id, endpoint)
+            rpm_limit = rl.get("rpm", plan["rpm"])
+            rpd_limit = rl.get("rpd", plan["rpd"])
         except Exception:
-            rl = {"rpm": plan["rpm"], "rpd": plan["rpd"]}
-
-        rpm_limit = rl.get("rpm", plan["rpm"])
-        rpd_limit = rl.get("rpd", plan["rpd"])
+            rpm_limit = plan["rpm"]
+            rpd_limit = plan["rpd"]
 
         if len(ep_min) >= rpm_limit:
             retry = int(60 - (now - ep_min[0])) + 1
