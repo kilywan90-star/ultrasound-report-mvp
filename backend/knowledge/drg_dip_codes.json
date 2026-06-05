@@ -1,0 +1,46 @@
+{
+  "description": "医保DRG/DIP分组编码映射表 — 超声常见诊断→DRG分组→付费标准 (2025版)",
+  "version": "2025",
+  "source": "国家医疗保障局 CHS-DRG 1.1 版",
+  "mappings": {
+    "消化系统": {
+      "K76.0-脂肪肝": {"drg_group": "K76", "drg_name": "肝病", "payment_standard": 4500, "note": "单纯脂肪肝药物治疗"},
+      "K74.6-肝硬化": {"drg_group": "K74", "drg_name": "肝硬化及并发症", "payment_standard": 8500, "note": "含肝硬化代偿/失代偿期"},
+      "K80.0-胆囊结石伴急性胆囊炎": {"drg_group": "K80", "drg_name": "胆道手术", "payment_standard": 12000, "note": "腹腔镜胆囊切除术"},
+      "K80.2-胆囊结石": {"drg_group": "K80", "drg_name": "胆道手术", "payment_standard": 10000, "note": "择期胆囊切除术"},
+      "K81.1-慢性胆囊炎": {"drg_group": "K81", "drg_name": "胆囊炎", "payment_standard": 5500, "note": "保守治疗"}
+    },
+    "泌尿系统": {
+      "N20.0-肾结石": {"drg_group": "N20", "drg_name": "泌尿系结石", "payment_standard": 7500, "note": "含ESWL/输尿管镜碎石"},
+      "N20.1-输尿管结石": {"drg_group": "N20", "drg_name": "泌尿系结石", "payment_standard": 6500, "note": "输尿管镜碎石"},
+      "N13.3-肾积水": {"drg_group": "N13", "drg_name": "肾积水/梗阻性肾病", "payment_standard": 9000, "note": "含肾造瘘/支架置入"},
+      "N40-前列腺增生": {"drg_group": "N40", "drg_name": "前列腺手术", "payment_standard": 11000, "note": "TURP/激光前列腺切除"},
+      "N18.9-慢性肾病": {"drg_group": "N18", "drg_name": "慢性肾脏病", "payment_standard": 6000, "note": "保守治疗(血液净化除外)"}
+    },
+    "妇科": {
+      "D25.9-子宫肌瘤": {"drg_group": "D25", "drg_name": "子宫肌瘤手术", "payment_standard": 13500, "note": "子宫肌瘤剔除/全子宫切除"},
+      "N80.0-子宫腺肌症": {"drg_group": "N80", "drg_name": "子宫内膜异位症", "payment_standard": 10000, "note": "保守手术治疗"},
+      "N83.2-卵巢囊肿": {"drg_group": "N83", "drg_name": "卵巢囊肿手术", "payment_standard": 9500, "note": "腹腔镜卵巢囊肿剥除"},
+      "C56-卵巢癌": {"drg_group": "C56", "drg_name": "卵巢恶性肿瘤", "payment_standard": 25000, "note": "根治性手术+化疗"}
+    },
+    "心血管": {
+      "I50.9-心力衰竭": {"drg_group": "I50", "drg_name": "心力衰竭", "payment_standard": 8500, "note": "含急性/慢性心衰住院治疗"},
+      "I25.1-冠心病": {"drg_group": "I25", "drg_name": "冠心病", "payment_standard": 12000, "note": "含冠脉造影+药物支架植入"},
+      "I48.9-心房颤动": {"drg_group": "I48", "drg_name": "心律失常", "payment_standard": 8000, "note": "含射频消融/药物治疗"},
+      "I42.0-扩张型心肌病": {"drg_group": "I42", "drg_name": "心肌病", "payment_standard": 10000, "note": "含心脏再同步化治疗评估"}
+    },
+    "内分泌": {
+      "E04.1-甲状腺结节": {"drg_group": "E04", "drg_name": "甲状腺结节手术", "payment_standard": 9000, "note": "甲状腺叶/全切除术"},
+      "C73-甲状腺癌": {"drg_group": "C73", "drg_name": "甲状腺恶性肿瘤", "payment_standard": 15000, "note": "甲状腺癌根治术+淋巴结清扫"},
+      "E05.0-甲亢": {"drg_group": "E05", "drg_name": "甲状腺功能亢进", "payment_standard": 5000, "note": "含I-131同位素治疗"}
+    },
+    "乳腺": {
+      "N60.9-乳腺纤维腺瘤": {"drg_group": "N60", "drg_name": "乳腺良性病变手术", "payment_standard": 5500, "note": "乳腺肿瘤切除术"},
+      "C50.9-乳腺癌": {"drg_group": "C50", "drg_name": "乳腺恶性肿瘤", "payment_standard": 22000, "note": "乳腺癌改良根治术+化疗"}
+    },
+    "产科": {
+      "O00.9-异位妊娠": {"drg_group": "O00", "drg_name": "异位妊娠", "payment_standard": 7000, "note": "含药物/手术治疗"},
+      "O80-足月顺产": {"drg_group": "O80", "drg_name": "阴道分娩", "payment_standard": 6000, "note": "含侧切/会阴保护/新生儿处理"}
+    }
+  }
+}

@@ -1,0 +1,73 @@
+{
+  "description": "超声质控指标定义 — 用于质量仪表盘和科室管理",
+  "version": "2025",
+  "metrics": {
+    "report_timeliness": {
+      "name": "报告及时率",
+      "definition": "检查完成后30分钟内完成报告的比例",
+      "target": "≥95%",
+      "formula": "及时报告数 / 总报告数 × 100%",
+      "severity_thresholds": {"green": "≥95%", "yellow": "90%-94%", "red": "<90%"}
+    },
+    "positive_rate": {
+      "name": "阳性检出率",
+      "definition": "报告中检出阳性发现的比例",
+      "target": "30%-70%",
+      "formula": "阳性报告数 / 总报告数 × 100%",
+      "severity_thresholds": {"green": "30%-70%", "yellow": "20%-29%或71%-80%", "red": "<20%或>80%"},
+      "note": "过低=漏诊风险, 过高=过度诊断"
+    },
+    "diagnosis_concordance": {
+      "name": "诊断符合率",
+      "definition": "超声诊断与病理/手术结果符合的比例",
+      "target": "≥90%",
+      "formula": "符合诊断数 / 有病理对照的病例数 × 100%",
+      "severity_thresholds": {"green": "≥90%", "yellow": "80%-89%", "red": "<80%"}
+    },
+    "missed_diagnosis_rate": {
+      "name": "漏诊率",
+      "definition": "超声检查未能发现的重大病变比例",
+      "target": "<2%",
+      "severity_thresholds": {"green": "<2%", "yellow": "2%-5%", "red": ">5%"}
+    },
+    "report_completion_rate": {
+      "name": "报告完整率",
+      "definition": "结构化报告字段完整填充的比例",
+      "target": "≥98%",
+      "formula": "完整报告数 / 总报告数 × 100%",
+      "note": "完整=所见+提示+建议三段齐全, 无未填充占位符"
+    },
+    "icd10_coverage": {
+      "name": "ICD-10编码覆盖率",
+      "definition": "报告中使用标准ICD-10编码的比例",
+      "target": "≥90%",
+      "formula": "含ICD-10编码的报告 / 总报告数 × 100%"
+    },
+    "dual_mixed_rate": {
+      "name": "混录脏数据率",
+      "definition": "因操作不当导致的多患者混录音频比例",
+      "target": "<1%",
+      "formula": "DUAL_MIXED标记数 / 总请求数 × 100%",
+      "note": "操作流程合规指标"
+    },
+    "avg_reporting_time": {
+      "name": "人均报告时间",
+      "definition": "从开始口述到报告完成的平均耗时",
+      "target": "<3分钟",
+      "unit": "分钟"
+    },
+    "ai_confidence_avg": {
+      "name": "AI置信度均值",
+      "definition": "AI结构化报告的平均置信度",
+      "target": "≥85%",
+      "severity_thresholds": {"green": "≥85%", "yellow": "70%-84%", "red": "<70%"}
+    },
+    "feedback_rate": {
+      "name": "医生反馈修正率",
+      "definition": "医生修改AI报告的比例",
+      "target": "<15%",
+      "formula": "有修改反馈的记录数 / 总AI报告数 × 100%",
+      "note": "越低=AI越准确"
+    }
+  }
+}
