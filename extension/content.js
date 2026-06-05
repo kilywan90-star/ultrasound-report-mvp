@@ -301,6 +301,9 @@
           `所见: ${stripHtml(data.data.study_see||"").substring(0,150)}...\n提示: ${(data.data.study_hint||[]).map(h=>h.diagnosis).join(", ")}`
         );
         autoInject();
+      } else if (data.command) {
+        // Voice command macro
+        handleVoiceCommand(data.command);
       } else if (data.dual_mixed) {
         setStatus("connected", "混录脏数据");
         addLog("warn", `跨患者混录音频 — 不结构化不计费。${data.msg}`);
@@ -391,6 +394,37 @@
     }
     sendResponse({ ok: true });
   });
+
+  // ========== Voice Command Macros ==========
+  function handleVoiceCommand(cmd) {
+    switch (cmd) {
+      case "CLEAR":
+        document.querySelectorAll("input, textarea").forEach(el => {
+          if (el.closest("#ultrasound-ai-sidebar")) return;
+          el.value = "";
+          el.dispatchEvent(new Event("input", { bubbles: true }));
+        });
+        addLog("success", "语音指令: 已清空所有输入框");
+        break;
+      case "SAVE":
+        const saveBtn = document.getElementById("save_btn") || document.querySelector("[name='save']") || document.querySelector("button[type='submit']");
+        if (saveBtn) { saveBtn.click(); addLog("success", "语音指令: 已触发保存"); }
+        else addLog("warn", "语音指令: 未找到保存按钮");
+        break;
+      case "NEXT":
+        const inputs = [...document.querySelectorAll("input:not([type='hidden']), textarea")].filter(el => !el.closest("#ultrasound-ai-sidebar"));
+        const empty = inputs.find(el => !el.value.trim());
+        if (empty) { empty.focus(); addLog("info", "语音指令: 已跳转到下一个空输入框"); }
+        else addLog("info", "语音指令: 所有输入框已填满");
+        break;
+      case "PRINT":
+        window.print();
+        addLog("info", "语音指令: 已触发打印");
+        break;
+      default:
+        addLog("info", `未知语音指令: ${cmd}`);
+    }
+  }
 
   // ========== Init ==========
   setStatus("connected", "踩脚踏(F4)开始");

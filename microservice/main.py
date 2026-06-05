@@ -543,6 +543,25 @@ async def structure(
             f"文本过长 ({len(req.text)} 字符)。本接口用于单次口述结构化, "
             f"每次最多 5000 字符。如需处理整份报告请分段提交。", rid)
 
+    # 语音指令拦截 (不调用LLM, 不收费, 直接返回命令)
+    voice_commands = {
+        "清空重来": "CLEAR",
+        "保存报告": "SAVE",
+        "下一项": "NEXT",
+        "打印报告": "PRINT",
+    }
+    raw_stripped = req.text.strip()
+    for cmd_text, cmd_action in voice_commands.items():
+        if raw_stripped == cmd_text or raw_stripped.endswith(cmd_text):
+            logger.info({"phase": "voice_command", "command": cmd_action})
+            return {
+                "code": 200, "msg": f"语音指令: {cmd_action}",
+                "request_id": rid,
+                "command": cmd_action,
+                "data": None,
+                "billing": {"total_billed": 0.0},
+            }
+
     # Rate limit
     allowed, rl_msg = check_rate_limit(tenant["id"], tenant["plan"], endpoint="structure")
     if not allowed:
