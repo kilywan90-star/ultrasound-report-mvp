@@ -8,6 +8,9 @@ from .db import (
     usage_get_monthly, usage_get_all_monthly,
     rate_limit_get, rate_limit_set,
     tenant_get_by_key,
+    registration_list, order_list, order_total_revenue,
+    audio_file_list, audio_file_stats,
+    order_log,
 )
 from .auth import generate_api_key
 from .billing import PLANS, get_plan
@@ -168,14 +171,56 @@ async def upgrade_by_key(req: UpgradeRequest):
             "plan_name": PLANS[req.plan]["name"],
             "monthly_quota": PLANS[req.plan]["monthly_quota"],
         }
+
+    plan_before = t["plan"]
     result = tenant_update(t["id"], plan=req.plan)
+
+    # 记录订单
+    plan_info_target = PLANS[req.plan]
+    amount = plan_info_target.get("monthly_fee", 0)
+    try:
+        order_log(
+            tenant_id=t["id"], plan_before=plan_before, plan_after=req.plan,
+            amount=amount, status="completed",
+            note=f"自助升级: {plan_before} → {req.plan}",
+        )
+    except Exception as e:
+        import logging
+        logging.warning(f"order_log failed: {e}")
+
     plan_info = PLANS[req.plan]
     return {
         "success": True,
-        "msg": f"升级成功: {t['plan']} → {req.plan}",
+        "msg": f"升级成功: {plan_before} → {req.plan}",
         "plan": req.plan,
         "plan_name": plan_info["name"],
         "monthly_quota": plan_info["monthly_quota"],
         "monthly_fee": plan_info["monthly_fee"],
         "overage_price": plan_info["overage_price"],
     }
+
+
+# ── Registration Log ──
+
+@router.get("/registrations")
+async def list_registrations(days: int = 30):
+    rows = registration_list(days)
+    return {"success": True, "total": len(rows), "registrations": rows}
+
+
+# ── Order Log ──
+
+@router.get("/orders")
+async def list_orders(days: int = 90):
+    rows = order_list(days)
+    revenue = order_total_revenue(days)
+    return {"success": True, "total": len(rows), "revenue": round(revenue, 2), "orders": rows}
+
+
+# ── Audio File Index ──
+
+@router.get("/audio-files")
+async def list_audio_files(tenant_id: int = None, days: int = 30, limit: int = 100):
+    rows = audio_file_list(tenant_id=tenant_id, days=days, limit=limit)
+    stats = audio_file_stats()
+    return {"success": True, "total": len(rows), "stats": stats, "files": rows}

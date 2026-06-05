@@ -47,7 +47,10 @@ if str(_backend) not in sys.path:
     sys.path.insert(0, str(_backend))
 
 from api_platform.auth import ApiKeyAuth, verify_api_key, generate_api_key
-from api_platform.db import usage_record, usage_get_monthly, tenant_create
+from api_platform.db import (
+    usage_record, usage_get_monthly, tenant_create,
+    registration_log, order_log, audio_file_log,
+)
 from api_platform.billing import (
     calculate_transcribe_cost, calculate_structure_cost,
     get_billed_amount, check_quota, get_plan,
@@ -308,6 +311,18 @@ async def signup(req: SignupRequest, request: Request):
         email=req.email, contact=req.contact,
         api_key=api_key,
     )
+
+    # 记录注册日志 (IP + User-Agent)
+    try:
+        registration_log(
+            tenant_id=tenant["id"], name=req.name, email=req.email,
+            contact=req.contact,
+            ip=request.client.host if request.client else None,
+            ua=request.headers.get("user-agent", "")[:200],
+        )
+    except Exception:
+        pass
+
     return {
         "code": 200, "msg": "注册成功", "request_id": rid,
         "api_key": api_key, "plan": "free", "plan_name": "免费版", "monthly_quota": 100,
@@ -444,6 +459,16 @@ async def transcribe(
         try:
             audio_path = _save_audio_to_disk(audio_bytes, tenant["id"], ctx.patient_id, audio_file.filename)
             logger.info({"phase": "audio_saved", "path": audio_path, "size": len(audio_bytes)})
+            # 音频文件索引入库
+            try:
+                audio_file_log(
+                    tenant_id=tenant["id"], patient_id=ctx.patient_id,
+                    file_path=audio_path, file_name=audio_file.filename,
+                    file_size=len(audio_bytes), audio_duration=asr_seconds,
+                    asr_text=result.raw_text, report_id=rid,
+                )
+            except Exception:
+                pass
         except Exception as e:
             logger.warning({"phase": "audio_save_failed", "error": str(e)})
 
