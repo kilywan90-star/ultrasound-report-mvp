@@ -73,6 +73,33 @@ _idempotency_lock = Lock()
 _IDEMPOTENCY_MAX = 1000  # 最大缓存条目
 
 
+# ── 音频本地存储 ──
+AUDIO_STORE_DIR = Path(__file__).resolve().parent.parent / "audio_store"
+AUDIO_STORE_DIR.mkdir(exist_ok=True)
+
+
+def _save_audio_to_disk(audio_bytes: bytes, tenant_id: int, patient_id: str, filename: str) -> str:
+    """保存音频到本地磁盘，返回相对路径
+    目录结构: audio_store/{tenant_id}/{YYYY-MM}/{patient_id}_{timestamp}.webm
+    """
+    from datetime import datetime
+    now = datetime.now()
+    tenant_dir = AUDIO_STORE_DIR / str(tenant_id) / now.strftime("%Y-%m")
+    tenant_dir.mkdir(parents=True, exist_ok=True)
+    ext = Path(filename).suffix.lower() or ".webm"
+    ts = now.strftime("%H%M%S")
+    safe_pid = patient_id.replace("/", "_").replace("\\", "_")[:32]
+    fname = f"{safe_pid}_{ts}{ext}"
+    fpath = tenant_dir / fname
+    counter = 1
+    while fpath.exists():
+        fname = f"{safe_pid}_{ts}_{counter}{ext}"
+        fpath = tenant_dir / fname
+        counter += 1
+    fpath.write_bytes(audio_bytes)
+    return str(fpath.relative_to(AUDIO_STORE_DIR))
+
+
 def _get_request_id(request: Request) -> str:
     """从 header 或生成 request_id"""
     rid = request.headers.get("X-Request-ID", "")
@@ -352,6 +379,16 @@ async def transcribe(
     asr_seconds = result.duration if result.duration > 0 else len(audio_bytes) / 16000.0
     tokens_in = len(result.corrected_text) // 2 or 500
     tokens_out = len(result.study_see) // 2 or 300
+
+    # 保存音频到本地
+    audio_path = ""
+    if ctx and ctx.patient_id:
+        try:
+            audio_path = _save_audio_to_disk(audio_bytes, tenant["id"], ctx.patient_id, audio_file.filename)
+            logger.info({"phase": "audio_saved", "path": audio_path, "size": len(audio_bytes)})
+        except Exception as e:
+            logger.warning({"phase": "audio_save_failed", "error": str(e)})
+
     cost_info = calculate_transcribe_cost(asr_seconds, tokens_in, tokens_out)
     billed = get_billed_amount(tenant["plan"], monthly["total_calls"], is_transcribe=True)
     if billed < 0:
