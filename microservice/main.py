@@ -67,6 +67,12 @@ app = FastAPI(
 # ── 音频格式白名单 ──
 ALLOWED_AUDIO_EXTENSIONS = {'.webm', '.wav', '.mp3', '.m4a', '.ogg', '.flac', '.opus'}
 
+# ── 音频限制 ──
+MAX_AUDIO_SIZE_BYTES = 50 * 1024 * 1024  # 50MB (硬上限, 拒绝超大文件)
+MAX_AUDIO_DURATION_SECONDS = 120          # 2分钟 (超过则拒绝, 防止产检40分钟录音)
+AUDIO_DURATION_GRACE_SECONDS = 30         # 前30秒不计费 (口述一句话 "肝脏大小正常" 免费)
+AUDIO_COST_PER_SECOND = 0.001             # 每音频秒成本 (DashScope ASR 单价)
+
 # ── 幂等性缓存 (10 分钟 TTL, 简单内存实现) ──
 _idempotency_cache: dict[str, dict] = {}
 _idempotency_lock = Lock()
@@ -347,8 +353,28 @@ async def transcribe(
         return error_response(400, "缺少音频文件", rid)
     _validate_audio_format(audio_file.filename)
 
-    # Rate limit
-    allowed, rl_msg = check_rate_limit(tenant["id"], tenant["plan"], endpoint="transcribe")
+    # 读取音频
+    audio_bytes = await audio_file.read()
+    if not audio_bytes:
+        return error_response(400, "音频文件为空", rid)
+
+    # WebM 大小→时长估算 + 硬限制
+    # WebM 码率 ~32kbps (4KB/s), 2分钟 = 120s ≈ 480KB
+    # 普通口述 (30s) ≈ 120KB
+    # 产检 (40min) ≈ 9.6MB → 拒绝
+    audio_size_mb = len(audio_bytes) / (1024 * 1024)
+    estimated_duration = len(audio_bytes) / 4000   # 4KB/s WebM 码率估算
+    MAX_DURATION_SEC = 120                          # 2分钟硬限制
+
+    if estimated_duration > MAX_DURATION_SEC:
+        return error_response(400,
+            f"音频过长: 估算 {estimated_duration:.0f} 秒, 最大允许 {MAX_DURATION_SEC} 秒 (约{audio_size_mb:.1f}MB)。"
+            f"请使用手机/PACS端 分段录音后再上传。", rid)
+
+    if len(audio_bytes) > 50 * 1024 * 1024:
+        return error_response(400, "音频文件过大 (最大 50MB)", rid)
+
+    # Rate limit  ← 修复: 补回被覆盖的代码
     if not allowed:
         return error_response(429, rl_msg, rid)
 
@@ -364,8 +390,7 @@ async def transcribe(
     except HTTPException as e:
         return error_response(e.status_code, e.detail, rid)
 
-    # 读取音频
-    audio_bytes = await audio_file.read()
+    # 读取音频（只读一次）
     if not audio_bytes:
         return error_response(400, "音频文件为空", rid)
     if len(audio_bytes) > 50 * 1024 * 1024:
@@ -375,10 +400,25 @@ async def transcribe(
     result = await run_pipeline(request_type="transcribe", audio_bytes=audio_bytes, patient_ctx=ctx)
     result.request_id = rid
 
-    # 计费
-    asr_seconds = result.duration if result.duration > 0 else len(audio_bytes) / 16000.0
+    # 计费 (综合: 配额 + 语音时长阶梯)
+    # WebM 码率约 4KB/s, 用文件大小推算实际录音时长
+    audio_duration_by_size = len(audio_bytes) / 4000.0
+    asr_seconds = audio_duration_by_size if result.duration <= 0 else result.duration
     tokens_in = len(result.corrected_text) // 2 or 500
     tokens_out = len(result.study_see) // 2 or 300
+
+    # 语音超时费 (前 30 秒免费, 超时按秒阶梯计费)
+    audio_extra, grace_secs = get_audio_billed_amount(asr_seconds, tenant["plan"])
+    cost_info = calculate_transcribe_cost(asr_seconds, tokens_in, tokens_out)
+    billed = get_billed_amount(tenant["plan"], monthly["total_calls"], audio_extra=audio_extra)
+    if billed < 0:
+        return error_response(429, "免费版月度配额已用完，请升级套餐", rid)
+
+    usage_record(
+        tenant_id=tenant["id"], endpoint="transcribe",
+        tokens_in=tokens_in, tokens_out=tokens_out,
+        asr_seconds=asr_seconds, cost=cost_info["total"], billed=max(billed, 0.0),
+    )
 
     # 保存音频到本地
     audio_path = ""
@@ -389,20 +429,15 @@ async def transcribe(
         except Exception as e:
             logger.warning({"phase": "audio_save_failed", "error": str(e)})
 
-    cost_info = calculate_transcribe_cost(asr_seconds, tokens_in, tokens_out)
-    billed = get_billed_amount(tenant["plan"], monthly["total_calls"], is_transcribe=True)
-    if billed < 0:
-        return error_response(429, "免费版月度配额已用完，请升级套餐", rid)
-
-    usage_record(
-        tenant_id=tenant["id"], endpoint="transcribe",
-        tokens_in=tokens_in, tokens_out=tokens_out,
-        asr_seconds=asr_seconds, cost=cost_info["total"], billed=max(billed, 0.0),
-    )
-
     response_obj = {
         "code": 200, "msg": "degraded" if result.degraded else "success",
         "request_id": rid, "data": result.model_dump(),
+        "billing": {
+            "audio_duration": round(asr_seconds, 1),
+            "grace_seconds": grace_secs,
+            "audio_extra": audio_extra,
+            "total_billed": max(billed, 0.0),
+        },
     }
 
     if x_idempotency_key:
@@ -437,7 +472,21 @@ async def structure(
     if len(req.text) > 10000:
         return error_response(400, "text 字段过长 (最大 10000 字符)", rid)
 
-    # Rate limit
+    # WebM 大小→时长估算 + 硬限制
+    # WebM 码率 ~32kbps (4KB/s), 2分钟 = 120s ≈ 480KB
+    # 普通口述 (30s) ≈ 120KB
+    # 产检 (40min) ≈ 9.6MB → 拒绝
+    audio_size_mb = len(audio_bytes) / (1024 * 1024)
+    estimated_duration = len(audio_bytes) / 4000   # 4KB/s WebM 码率估算
+    MAX_DURATION_SEC = 120                          # 2分钟硬限制
+
+    if estimated_duration > MAX_DURATION_SEC:
+        return error_response(400,
+            f"音频过长: 估算 {estimated_duration:.0f} 秒, 最大允许 {MAX_DURATION_SEC} 秒 (约{audio_size_mb:.1f}MB)。"
+            f"请使用手机/PACS端 分段录音后再上传。", rid)
+
+    if len(audio_bytes) > 50 * 1024 * 1024:
+        return error_response(400, "音频文件过大 (最大 50MB)", rid)
     allowed, rl_msg = check_rate_limit(tenant["id"], tenant["plan"], endpoint="structure")
     if not allowed:
         return error_response(429, rl_msg, rid)
