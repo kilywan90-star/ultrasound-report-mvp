@@ -346,7 +346,7 @@ async def signup(req: SignupRequest, request: Request):
 async def health(request: Request):
     rid = _get_request_id(request)
     return {
-        "status": "ok", "version": "4.1.0", "request_id": rid,
+        "status": "ok", "version": "4.2.0", "request_id": rid,
         "asr_available": config.ServiceStatus.asr_available,
         "llm_available": config.ServiceStatus.llm_available,
     }
