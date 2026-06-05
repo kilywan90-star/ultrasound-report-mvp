@@ -88,6 +88,51 @@ def init_db():
         CREATE INDEX IF NOT EXISTS idx_api_reports_date ON api_reports(examdate);
         CREATE INDEX IF NOT EXISTS idx_api_reports_tenant ON api_reports(tenant_id);
         CREATE INDEX IF NOT EXISTS idx_api_reports_patient ON api_reports(OUTPATIENTNO);
+
+        -- 全链路追踪日志 (每次API调用的完整输入→每一步判断→输出)
+        CREATE TABLE IF NOT EXISTS api_trace_logs (
+            id              INTEGER PRIMARY KEY AUTOINCREMENT,
+            request_id      TEXT UNIQUE,              -- 请求唯一ID
+            patient_id      TEXT NOT NULL,            -- 患者ID
+            name            TEXT,                     -- 患者姓名
+            gender          TEXT,                     -- 性别
+            age             INTEGER,                  -- 年龄
+            exam_part       TEXT,                     -- 检查部位(exam_type)
+            raw_input       TEXT,                     -- 原始输入文本
+            raw_input_len   INTEGER,                  -- 原始输入字符数
+            voice_cmd_hit   TEXT,                     -- 声控指令命中(清空重来/保存报告等)
+            dual_mixed_hit  TEXT,                     -- 双患者串音关键词
+            body_part_route TEXT,                     -- 部位路由(类别→level2)
+            dialect_found   TEXT,                     -- 检测到的方言/改口词(JSON)
+            erase_found     TEXT,                     -- 检测到的改口纠错词(JSON)
+            template_matched TEXT,                    -- 匹配到的模板名
+            method          TEXT,                     -- 处理方法(b_llm/abcdef_v3等)
+            elapsed_ms      INTEGER,                  -- 处理耗时(毫秒)
+            confidence      REAL,                     -- AI置信度(0-1)
+            study_see       TEXT,                     -- 超声所见
+            study_hint      TEXT,                     -- 超声提示(JSON)
+            study_hint_icd10 TEXT,                    -- ICD-10编码列表(逗号分隔)
+            recommendation TEXT,                      -- 建议
+            patient_note    TEXT,                     -- 患者大白话
+            audio_status    TEXT DEFAULT 'valid',     -- 音频状态(valid/dual_mixed/noise)
+            dual_mixed      INTEGER DEFAULT 0,        -- 是否双患者混录(1=是)
+            llm_model       TEXT DEFAULT 'deepseek-chat/v4-flash', -- LLM模型
+            prompt_rules    TEXT,                     -- 使用的提示词规则
+            audio_path_1    TEXT,                     -- 语音文件路径1
+            audio_path_2    TEXT,                     -- 语音文件路径2
+            audio_path_3    TEXT,                     -- 语音文件路径3
+            audio_path_4    TEXT,                     -- 语音文件路径4
+            audio_path_5    TEXT,                     -- 语音文件路径5
+            http_code       INTEGER DEFAULT 200,      -- HTTP状态码
+            billing_amount  REAL DEFAULT 0,           -- 计费金额
+            tenant_id       INTEGER,                  -- 租户ID
+            created_at      TEXT NOT NULL DEFAULT (datetime('now','localtime')),
+            updated_at      TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_trace_patient ON api_trace_logs(patient_id);
+        CREATE INDEX IF NOT EXISTS idx_trace_date ON api_trace_logs(created_at);
+        CREATE INDEX IF NOT EXISTS idx_trace_tenant ON api_trace_logs(tenant_id);
     """)
     c.commit()
 
@@ -260,6 +305,64 @@ def api_report_list(days: int = 30, limit: int = 100) -> list[dict]:
     c = _conn()
     rows = c.execute(
         """SELECT * FROM api_reports
+           WHERE created_at >= datetime('now','localtime','-'||?||' days')
+           ORDER BY created_at DESC LIMIT ?""",
+        (days, limit),
+    ).fetchall()
+    return [dict(r) for r in rows]
+
+
+def api_trace_save(
+    request_id: str, patient_id: str, name: str, gender: str, age: int,
+    exam_part: str, raw_input: str,
+    voice_cmd_hit: str = None, dual_mixed_hit: str = None,
+    body_part_route: str = None, dialect_found: str = None,
+    erase_found: str = None, template_matched: str = None,
+    method: str = None, elapsed_ms: int = 0, confidence: float = 0.0,
+    study_see: str = None, study_hint: str = None,
+    study_hint_icd10: str = None, recommendation: str = None,
+    patient_note: str = None, audio_status: str = "valid",
+    dual_mixed: int = 0, llm_model: str = "deepseek-chat/v4-flash",
+    prompt_rules: str = None,
+    audio_path_1: str = None, audio_path_2: str = None,
+    audio_path_3: str = None, audio_path_4: str = None,
+    audio_path_5: str = None,
+    http_code: int = 200, billing_amount: float = 0.0,
+    tenant_id: int = None,
+) -> int:
+    c = _conn()
+    cur = c.execute(
+        """INSERT INTO api_trace_logs (
+            request_id, patient_id, name, gender, age, exam_part,
+            raw_input, raw_input_len, voice_cmd_hit, dual_mixed_hit,
+            body_part_route, dialect_found, erase_found,
+            template_matched, method, elapsed_ms, confidence,
+            study_see, study_hint, study_hint_icd10, recommendation,
+            patient_note, audio_status, dual_mixed, llm_model, prompt_rules,
+            audio_path_1, audio_path_2, audio_path_3, audio_path_4, audio_path_5,
+            http_code, billing_amount, tenant_id
+        ) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)""",
+        (
+            request_id, patient_id, name, gender, age, exam_part,
+            raw_input[:5000], len(raw_input or ""), voice_cmd_hit, dual_mixed_hit,
+            body_part_route, dialect_found and dialect_found[:500], erase_found and erase_found[:500],
+            template_matched, method, elapsed_ms, confidence,
+            study_see and study_see[:5000], study_hint and study_hint[:2000],
+            study_hint_icd10 and study_hint_icd10[:500], recommendation and recommendation[:2000],
+            patient_note and patient_note[:2000], audio_status, dual_mixed,
+            llm_model, prompt_rules and prompt_rules[:500],
+            audio_path_1, audio_path_2, audio_path_3, audio_path_4, audio_path_5,
+            http_code, billing_amount, tenant_id,
+        ),
+    )
+    c.commit()
+    return cur.lastrowid
+
+
+def api_trace_list(days: int = 30, limit: int = 100) -> list[dict]:
+    c = _conn()
+    rows = c.execute(
+        """SELECT * FROM api_trace_logs
            WHERE created_at >= datetime('now','localtime','-'||?||' days')
            ORDER BY created_at DESC LIMIT ?""",
         (days, limit),
