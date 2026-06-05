@@ -25,7 +25,7 @@ except ImportError:
     sys.exit(1)
 
 # ── 配置 ──
-MCP_URL = "wss://api.xiaozhi.me/mcp/?token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQ4MTQ4MiwiYWdlbnRJZCI6NjYyNTg0LCJlbmRwb2ludElkIjoiYWdlbnRfNjYyNTg0IiwicHVycG9zZSI6Im1jcC1lbmRwb2ludCIsImlhdCI6MTc4MDY5OTUwMywiZXhwIjoxODEyMjU3MTAzfQ.byUzrM--vGpVIPJyqW5G7QIPzBql8TjrBnL00HseYoAAig5iKj7G0o_WoPNU2WIN-S-zxiqz4wcqdLns45VO1Q"
+MCP_URL = "wss://api.xiaozhi.me/mcp/?token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjQ4MTQ4MiwiYWdlbnRJZCI6NjYyNTg0LCJlbmRwb2ludElkIjoiYWdlbnRfNjYyNTg0IiwicHVycG9zZSI6Im1jcC1lbmRwb2ludCIsImlhdCI6MTc4MDY5OTkyMCwiZXhwIjoxODEyMjU3NTIwfQ.Rx1XdL9Mu4MSSXaygBzCjPX-dN9DgkmJfal45EDtTiCqJu7CIdI0RaLkKLvRpkhV_y4lQxVBe9cOnxS5rgvNEA"
 API_BASE = "http://47.109.151.238:8800"
 
 # ── 工具定义 ──
