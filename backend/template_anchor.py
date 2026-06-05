@@ -63,8 +63,31 @@ def _load_csv():
 
 
 def match_exact_template(text: str, exam_type: str = "") -> list[dict]:
-    """精确匹配模板名: 363标签中按关键词打分, 返回top-5"""
+    """精确匹配模板名: 检查部位路由 + 363标签关键词打分, 返回top-5"""
     tags = _load_tags()
+
+    # P-2: 检查部位路由 (新) — 根据口语词限定模板搜索范围
+    body_part_scope = None
+    try:
+        with open(Path(__file__).parent / "knowledge" / "exam_part_routing.json", encoding='utf-8') as f:
+            routing = json.load(f)
+        for cat in routing.get("categories", []):
+            # 先试方言映射
+            dialect_ok = False
+            for dialect, standard in cat.get("dialect_map", {}).items():
+                if dialect in text:
+                    text = text.replace(dialect, standard)
+                    dialect_ok = True
+            # 再试路由关键词
+            for kw in cat.get("routing_keywords", []):
+                if kw in text:
+                    body_part_scope = cat.get("linked_template_level2")
+                    break
+            if body_part_scope:
+                break
+    except Exception:
+        pass
+
     scored = {}
 
     # P-1: 湘普方言清洗 — P0评分前先纠正同音错别字
@@ -105,8 +128,15 @@ def match_exact_template(text: str, exam_type: str = "") -> list[dict]:
                 scored[tpl_name] = max(scored.get(tpl_name, 0), score)
                 break
 
-    # P1: 标签名关键词精确匹配
+    # P1: 标签名关键词精确匹配 (限定在 body_part_scope 范围内)
     for name in tags["all_names"]:
+        # 如果已有部位路由, 限制标签搜索范围
+        if body_part_scope:
+            # 根据 level2 过滤: 乳腺/浅表/腹部/泌尿/妇科/心脏/血管/产科
+            tpl_info = tags.get("by_name", {}).get(name, {})
+            tpl_level2 = tpl_info.get("level2", "")
+            if tpl_level2 and tpl_level2 != body_part_scope:
+                continue
         if name in text and len(name) >= 2:
             bonus = 200 + len(name) * 10
             # 疾病词有证据加分
