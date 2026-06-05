@@ -576,9 +576,28 @@ async def structure(
         return error_response(429, quota_msg, rid)
 
     # 运行流水线
+    # 查历史报告 (随访对比上下文)
+    history_context = ""
+    try:
+        import sqlite3 as _sq
+        _conn_hist = _sq.connect("/opt/ultrasound-report-mvp/backend/ultrasound.db")
+        _conn_hist.row_factory = _sq.Row
+        _hist_rows = _conn_hist.execute(
+            "SELECT DESCRIBES, DIAGNOSIS, examdate FROM api_reports WHERE OUTPATIENTNO=? ORDER BY examdate DESC LIMIT 1",
+            (req.patient_context.patient_id,)
+        ).fetchall()
+        _conn_hist.close()
+        if _hist_rows:
+            _hr = dict(_hist_rows[0])
+            history_context = f"【上次检查 ({_hr.get('examdate','未知')})】所见: {_hr.get('DESCRIBES','')[:500]}. 提示: {_hr.get('DIAGNOSIS','')[:200]}"
+            logger.info({"phase": "history_found", "patient_id": req.patient_context.patient_id,
+                         "examdate": _hr.get('examdate')})
+    except Exception:
+        pass
+
     result = await run_pipeline(
         request_type="structure",
-        text=req.text.strip(),
+        text=(history_context + "\n【本次口述】" + req.text.strip()) if history_context else req.text.strip(),
         patient_ctx=req.patient_context,
     )
     result.request_id = rid
