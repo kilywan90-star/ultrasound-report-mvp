@@ -48,6 +48,18 @@ class PatientContext(BaseModel):
                                      description="可选: 申请科室")
     clinical_diag: Optional[str] = Field(default=None, max_length=200,
                                         description="可选: 临床诊断")
+    # 会话模式: append(追加) / replace(覆盖)
+    session_mode: Optional[str] = Field(default="replace",
+                                        description="同患者多段录音: append=追加合并 / replace=覆盖")
+
+    # 操作规范校验: 拒绝无 patient_id 的游离音频
+    @validator("patient_id")
+    def validate_patient_id(cls, v):
+        if not v or not v.strip():
+            raise ValueError("patient_id 不能为空 — 一单一录, 无就诊ID拒绝解析")
+        if len(v.strip()) < 1:
+            raise ValueError("patient_id 无效")
+        return v.strip()
 
     @validator("gender")
     def validate_gender(cls, v):
@@ -104,6 +116,10 @@ class StructureData(BaseModel):
     elapsed_ms: float = Field(default=0.0, description="处理耗时 (毫秒)")
     audit_id: Optional[str] = Field(default=None, description="审计日志 ID")
     request_id: Optional[str] = Field(default=None, description="请求唯一 ID")
+    # 工业级操作状况标记
+    audio_status: str = Field(default="valid", description="音频状态: valid/dual_mixed/noise/silent_timeout")
+    dual_mixed: bool = Field(default=False, description="是否检测到多患者混录 (脏数据)")
+    vad_triggered: bool = Field(default=False, description="VAD静音断流是否触发")
 
 
 class ApiResponse(BaseModel):

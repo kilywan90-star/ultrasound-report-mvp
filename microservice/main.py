@@ -67,10 +67,19 @@ setup_logger()
 app = FastAPI(
     title="Ultrasound AI API Platform",
     description="超声报告语音结构化 AI API — 为合作医院和第三方开发者提供语音→结构化报告服务",
-    version="4.1.0",
+    version="4.2.0",
     docs_url="/docs",
     redoc_url="/redoc",
 )
+
+# ── 工业级操作规范: 录音安全配置 ──
+AUDIO_MAX_DURATION_SECONDS = 360       # 单例绝对时长熔断 (6分钟)
+VAD_SILENCE_TIMEOUT_SECONDS = 45        # 连续静音超时自动暂停
+AUDIO_MIN_SPEECH_CHARS = 10             # 有效语音最少字符数 (低于此值=垃圾杂音)
+MULTI_PATIENT_CONFLICT_KEYWORDS = [     # 跨患者串音检测特征词
+    "下一个病人", "换人", "另外一床", "刚才那个", "前一个",
+    "就诊号", "病历号", "住院号", "叫号", "下一个",
+]
 
 # ── 音频格式白名单 ──
 ALLOWED_AUDIO_EXTENSIONS = {'.webm', '.wav', '.mp3', '.m4a', '.ogg', '.flac', '.opus'}
@@ -395,21 +404,30 @@ async def transcribe(
     if not audio_bytes:
         return error_response(400, "音频文件为空", rid)
 
-    # WebM 大小→时长估算 + 硬限制
-    # WebM 码率 ~32kbps (4KB/s), 2分钟 = 120s ≈ 480KB
-    # 普通口述 (30s) ≈ 120KB
-    # 产检 (40min) ≈ 9.6MB → 拒绝
+    # 工业级: 时长熔断 (6分钟) + VAD静音检测 (WEBM码率估算)
     audio_size_mb = len(audio_bytes) / (1024 * 1024)
     estimated_duration = len(audio_bytes) / 4000   # 4KB/s WebM 码率估算
-    MAX_DURATION_SEC = 120                          # 2分钟硬限制
+    MAX_DURATION_SEC = AUDIO_MAX_DURATION_SECONDS   # 360秒 (6分钟)
 
     if estimated_duration > MAX_DURATION_SEC:
         return error_response(400,
-            f"音频过长: 估算 {estimated_duration:.0f} 秒, 最大允许 {MAX_DURATION_SEC} 秒 (约{audio_size_mb:.1f}MB)。"
-            f"请使用手机/PACS端 分段录音后再上传。", rid)
+            f"音频时长熔断: 估算 {estimated_duration:.0f} 秒, 单例上限 {MAX_DURATION_SEC} 秒。"
+            f"请关闭录音后重新打开下一位患者。疑似跨患者串音, 此音频已标记为脏数据。", rid)
 
     if len(audio_bytes) > 50 * 1024 * 1024:
         return error_response(400, "音频文件过大 (最大 50MB)", rid)
+
+    # VAD 静音断流检测 (文件过小 = 只有噪音无有效语音)
+    if len(audio_bytes) < 4000:  # <1秒等效
+        result_vad = await run_pipeline(request_type="transcribe", audio_bytes=audio_bytes, patient_ctx=ctx)
+        result_vad.request_id = rid
+        result_vad.audio_status = "noise"
+        result_vad.is_valid = False
+        return {
+            "code": 200, "msg": "音频有效语音不足, 标记为垃圾杂音 (不计费)",
+            "request_id": rid, "data": result_vad.model_dump(),
+            "billing": {"total_billed": 0.0},
+        }
 
     # Rate limit  ← 修复: 补回被覆盖的代码
     if not allowed:
@@ -543,6 +561,24 @@ async def structure(
         patient_ctx=req.patient_context,
     )
     result.request_id = rid
+
+    # 双患者混录音频检测 (跨患者串音特征词)
+    text_lower = req.text.strip()
+    dual_hits = [kw for kw in MULTI_PATIENT_CONFLICT_KEYWORDS if kw in text_lower]
+    if dual_hits:
+        result.audio_status = "dual_mixed"
+        result.dual_mixed = True
+        result.study_see = ""
+        result.study_hint = []
+        result.is_valid = False
+        logger.warning({"phase": "dual_mixed_detected", "hits": dual_hits,
+                        "patient_id": req.patient_context.patient_id})
+        return {
+            "code": 200, "msg": f"检测到多患者混录特征词: {dual_hits}。此音频已标记为脏数据, 不结构化, 不计费。请人工裁剪后分段上传。",
+            "request_id": rid,
+            "data": result.model_dump(),
+            "billing": {"total_billed": 0.0},
+        }
 
     # 计费
     tokens_in = len(req.text) // 2 or 500
