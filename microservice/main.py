@@ -86,7 +86,21 @@ async def request_logger(request: Request, call_next):
 # Global exception handler
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
-    logger.error({"error": str(exc), "path": str(request.url)})
+    import traceback
+    body = None
+    try:
+        body = await request.body()
+        body = body[:500]
+    except Exception:
+        pass
+    logger.error({
+        "error": str(exc),
+        "path": str(request.url),
+        "method": request.method,
+        "content_type": request.headers.get("content-type", ""),
+        "body": body,
+        "traceback": traceback.format_exc()[-500:],
+    })
     return JSONResponse(
         status_code=500,
         content=ApiResponse(code=500, msg=f"内部错误: {str(exc)[:200]}").model_dump(),
