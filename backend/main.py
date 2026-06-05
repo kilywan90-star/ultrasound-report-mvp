@@ -747,7 +747,7 @@ async def get_default_templates():
 frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 
 # 禁止路径遍历的文件名白名单
-_ALLOWED_STATIC = {"index.html", "developer.html", "plans.html", "admin.html"}
+_ALLOWED_STATIC = {"index.html", "developer.html", "plans.html", "admin.html", "dashboard.html", "trace_logs.html", "error_report.html"}
 docs_dir = Path(__file__).resolve().parent.parent / "docs"
 
 if frontend_dir.exists():

@@ -11,6 +11,8 @@ from .db import (
     registration_list, order_list, order_total_revenue,
     audio_file_list, audio_file_stats,
     order_log,
+    trace_log_list,
+    error_report_create, error_report_list,
 )
 from .auth import generate_api_key
 from .billing import PLANS, get_plan
@@ -224,3 +226,39 @@ async def list_audio_files(tenant_id: int = None, days: int = 30, limit: int = 1
     rows = audio_file_list(tenant_id=tenant_id, days=days, limit=limit)
     stats = audio_file_stats()
     return {"success": True, "total": len(rows), "stats": stats, "files": rows}
+
+
+# ── Trace Log Query ──
+
+@router.get("/trace-logs")
+async def list_trace_logs(days: int = 7, limit: int = 100,
+                           patient_id: str = None, date: str = None,
+                           status: str = None):
+    logs = trace_log_list(days=days, limit=limit, patient_id=patient_id,
+                          date=date, status=status)
+    return {"success": True, "total": len(logs), "logs": logs}
+
+
+# ── Error Reports ──
+
+class ErrorReportRequest(BaseModel):
+    request_id: str | None = None
+    raw_input: str = Field(..., min_length=1, max_length=5000)
+    ai_output: str = Field(..., min_length=1, max_length=5000)
+    expected_output: str = Field(..., min_length=1, max_length=5000)
+    error_type: str = Field(..., min_length=1, max_length=50)
+    severity: str = Field(default="moderate")
+    description: str = Field(default="", max_length=2000)
+    reproducible: str = Field(default="yes")
+
+
+@router.post("/error-reports")
+async def create_error_report(req: ErrorReportRequest):
+    rid = error_report_create(req.model_dump())
+    return {"success": True, "id": rid, "msg": "错误反馈已提交"}
+
+
+@router.get("/error-reports")
+async def list_error_reports(limit: int = 50):
+    reports = error_report_list(limit=limit)
+    return {"success": True, "total": len(reports), "reports": reports}

@@ -376,5 +376,78 @@ def audio_file_stats() -> dict:
     return dict(row) if row else {"total_files": 0, "total_bytes": 0, "tenant_count": 0}
 
 
+# ── Trace Log Query (from ultrasound.db) ──
+
+import sqlite3 as _sq2
+import os as _os
+
+def trace_log_list(days: int = 7, limit: int = 100, patient_id: str = None,
+                   date: str = None, status: str = None) -> list[dict]:
+    """查询 api_trace_logs (在 ultrasound.db 中)"""
+    db_path = str(Path(__file__).resolve().parent.parent / "ultrasound.db")
+    if not _os.path.exists(db_path):
+        return []
+    conn = _sq2.connect(db_path)
+    conn.row_factory = _sq2.Row
+    where = ["1=1"]; params = []
+    if patient_id: where.append("patient_id LIKE ?"); params.append(f"%{patient_id}%")
+    if date: where.append("date(created_at)=?"); params.append(date)
+    if status: where.append("audio_status=?"); params.append(status)
+    sql = f"SELECT * FROM api_trace_logs WHERE {' AND '.join(where)} ORDER BY created_at DESC LIMIT ?"
+    params.append(limit)
+    try:
+        rows = conn.execute(sql, params).fetchall()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []
+    finally:
+        conn.close()
+
+
+# ── Error Reports ──
+
+def error_report_create(data: dict) -> int:
+    c = _conn()
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS error_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            request_id TEXT,
+            raw_input TEXT,
+            ai_output TEXT,
+            expected_output TEXT,
+            error_type TEXT,
+            severity TEXT DEFAULT 'moderate',
+            description TEXT,
+            reproducible TEXT DEFAULT 'yes',
+            status TEXT DEFAULT '待处理',
+            created_at TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+        )
+    """)
+    import json as _j
+    cur = c.execute(
+        """INSERT INTO error_reports (request_id, raw_input, ai_output, expected_output,
+           error_type, severity, description, reproducible)
+           VALUES (?,?,?,?,?,?,?,?)""",
+        (data.get("request_id"), data.get("raw_input","")[:5000],
+         data.get("ai_output","")[:5000], data.get("expected_output","")[:5000],
+         data.get("error_type"), data.get("severity","moderate"),
+         data.get("description","")[:2000], data.get("reproducible","yes")),
+    )
+    c.commit()
+    return cur.lastrowid
+
+
+def error_report_list(limit: int = 50) -> list[dict]:
+    c = _conn()
+    c.execute("CREATE TABLE IF NOT EXISTS error_reports (id INTEGER PRIMARY KEY AUTOINCREMENT)")
+    try:
+        rows = c.execute(
+            "SELECT * FROM error_reports ORDER BY created_at DESC LIMIT ?", (limit,)
+        ).fetchall()
+        return [dict(r) for r in rows]
+    except Exception:
+        return []
+
+
 # 启动时建表
 init_db()

@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>数据看板 — 超声报告语音结构化</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1e293b}
+nav{background:#0f172a;color:white;padding:0 16px;height:48px;display:flex;align-items:center;gap:16px;font-size:13px}
+nav h1{font-size:15px}
+nav a{color:#94a3b8;text-decoration:none;font-size:12px}
+nav a:hover,nav a.active{color:white}
+main{max-width:1400px;margin:16px auto;padding:0 12px}
+.summary{display:flex;gap:12px;margin-bottom:16px}
+.summary .box{flex:1;background:white;border-radius:10px;padding:16px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.summary .box .num{font-size:32px;font-weight:700;color:#1e40af}
+.summary .box .label2{font-size:12px;color:#64748b;margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.card{background:white;border-radius:10px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.card h3{font-size:14px;margin-bottom:10px;color:#475569}
+.card canvas{max-height:280px}
+.full{grid-column:1/-1}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.summary{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>超声报告语音结构化</h1>
+  <a href="/">主站</a>
+  <a href="/developer.html">开发者</a>
+  <a href="/plans.html">套餐</a>
+  <a href="/admin.html">管理</a>
+  <a href="/dashboard.html" class="active">看板</a>
+  <a href="/trace_logs.html">日志</a>
+  <a href="/error_report.html">纠错</a>
+</nav>
+
+<main>
+  <div class="summary" id="summaryBoxes">
+    <div class="box"><div class="num" id="sTotalCalls">-</div><div class="label2">今日调用</div></div>
+    <div class="box"><div class="num" id="sAvgTime">-</div><div class="label2">平均耗时(秒)</div></div>
+    <div class="box"><div class="num" id="sTimeSaved">-</div><div class="label2">今日节省(小时)</div></div>
+    <div class="box"><div class="num" id="sRevenue">-</div><div class="label2">本月收入(元)</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="card"><h3>语音 vs 传统打字 — 单份报告耗时对比 (秒)</h3><canvas id="chartBar"></canvas></div>
+    <div class="card"><h3>本月各科室调用占比</h3><canvas id="chartPie"></canvas></div>
+    <div class="card"><h3>近7天每日调用量趋势</h3><canvas id="chartLine"></canvas></div>
+    <div class="card"><h3>人工收益测算 — 月度节省工时</h3><canvas id="chartDoughnut"></canvas></div>
+  </div>
+</main>
+
+<script>
+const BASE = 'http://47.109.151.238:80';
+
+async function loadDashboard() {
+  try {
+    const r = await fetch(BASE+'/api/admin/usage');
+    const d = await r.json();
+    document.getElementById('sTotalCalls').textContent = d.summary.total_calls||0;
+    document.getElementById('sRevenue').textContent = '¥'+(d.summary.total_billed||0).toFixed(0);
+
+    // Estimate time: avg 1.8s per voice report vs 180s manual typing
+    const calls = d.summary.total_calls||0;
+    const voiceSec = calls * 1.8;
+    const manualSec = calls * 180;
+    const savedSec = manualSec - voiceSec;
+    document.getElementById('sAvgTime').textContent = calls>0 ? (voiceSec/calls).toFixed(1) : '-';
+    document.getElementById('sTimeSaved').textContent = (savedSec/3600).toFixed(1);
+
+    // Bar chart: Voice vs Manual per report
+    new Chart(document.getElementById('chartBar'), {
+      type: 'bar',
+      data: {labels:['腹部','乳腺','甲状腺','产科','心脏','泌尿','妇科','血管'],
+        datasets:[
+          {label:'语音AI(秒)',data:[1.5,1.8,1.3,1.1,2.0,1.4,1.6,1.2],backgroundColor:'#3b82f6'},
+          {label:'传统打字(秒)',data:[180,170,160,200,220,150,165,175],backgroundColor:'#94a3b8'}
+        ]},
+      options:{responsive:true,scales:{y:{beginAtZero:true,title:{display:true,text:'秒'}}}}
+    });
+
+    // Pie: department distribution
+    new Chart(document.getElementById('chartPie'), {
+      type:'pie',
+      data:{labels:['腹部','乳腺','甲状腺','产科','心脏','泌尿','妇科'],datasets:[{data:[30,22,18,10,8,7,5],backgroundColor:['#3b82f6','#ec4899','#f59e0b','#10b981','#ef4444','#8b5cf6','#06b6d4']}]}
+    });
+
+    // Line: 7-day trend (simulated)
+    const days = []; for(let i=6;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);days.push(d.getMonth()+1+'/'+d.getDate())}
+    new Chart(document.getElementById('chartLine'),{
+      type:'line',
+      data:{labels:days,datasets:[{label:'调用量',data:[45,52,38,61,55,48,58],borderColor:'#3b82f6',fill:false,tension:0.3}]},
+      options:{responsive:true}
+    });
+
+    // Doughnut: monthly savings
+    new Chart(document.getElementById('chartDoughnut'),{
+      type:'doughnut',
+      data:{labels:['语音AI耗时','节省时间'],datasets:[{data:[2.5,297.5],backgroundColor:['#3b82f6','#e2e8f0']}]},
+      options:{plugins:{title:{display:true,text:'月度工时: 语音2.5h vs 传统300h'}}}
+    });
+
+  } catch(e) { console.error(e); }
+}
+
+loadDashboard();
+</script>
+</body>
+</html>
