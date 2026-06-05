@@ -107,6 +107,9 @@ def init_db():
             erase_found     TEXT,                     -- 检测到的改口纠错词(JSON)
             template_matched TEXT,                    -- 匹配到的模板名
             method          TEXT,                     -- 处理方法(b_llm/abcdef_v3等)
+            hospital_name   TEXT,                     -- 医院名称(来自租户name)
+            authorized_user TEXT,                     -- 授权使用人(来自租户contact)
+            authorized_api  TEXT,                     -- 授权API Key(脱敏:仅存前8+后4)
             elapsed_ms      INTEGER,                  -- 处理耗时(毫秒)
             confidence      REAL,                     -- AI置信度(0-1)
             study_see       TEXT,                     -- 超声所见
