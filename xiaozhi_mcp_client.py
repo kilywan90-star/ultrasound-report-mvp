@@ -143,8 +143,12 @@ def process_audio(args: dict) -> dict:
 
 # ── 主循环 ──
 if __name__ == "__main__":
-    print("=" * 60)
-    print("  小智MCP客户端 — 超声报告工具")
+    import sys
+    # 强制 stdout 不缓冲, 实时看到日志
+    sys.stdout.reconfigure(line_buffering=True) if hasattr(sys.stdout, 'reconfigure') else None
+
+    print("=" * 60, flush=True)
+    print("  小智MCP客户端 — 超声报告工具", flush=True)
     print("=" * 60)
     print(f"  MCP: {MCP_URL[:60]}...")
     print(f"  API: {API_BASE}")
