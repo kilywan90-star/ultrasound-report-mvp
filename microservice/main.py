@@ -47,7 +47,7 @@ if str(_backend) not in sys.path:
     sys.path.insert(0, str(_backend))
 
 from api_platform.auth import ApiKeyAuth, verify_api_key, generate_api_key
-from api_platform.db import usage_record, usage_get_monthly, tenant_create, tenant_get_by_key as tenant_get_by_email
+from api_platform.db import usage_record, usage_get_monthly, tenant_create
 from api_platform.billing import (
     calculate_transcribe_cost, calculate_structure_cost,
     get_billed_amount, check_quota, get_plan,
@@ -264,6 +264,19 @@ def _validate_audio_format(filename: str) -> None:
         )
 
 
+def _try_get_by_email(email: str) -> dict | None:
+    """安全查询: 邮箱不存在返回 None 不抛异常"""
+    try:
+        from api_platform.db import tenant_get_by_key
+        # 直接查 API key 表不现实, 用 DB 直接查
+        from api_platform.db import _conn
+        c = _conn()
+        row = c.execute("SELECT * FROM api_tenants WHERE email=? AND is_active=1", (email,)).fetchone()
+        return dict(row) if row else None
+    except Exception:
+        return None
+
+
 # ── Public endpoints (no auth required) ──
 
 class SignupRequest(BaseModel):
@@ -276,7 +289,7 @@ class SignupRequest(BaseModel):
 async def signup(req: SignupRequest, request: Request):
     """开发者自助注册 — 免费版, 返回 API Key"""
     rid = _get_request_id(request)
-    existing = tenant_get_by_email(req.email)
+    existing = _try_get_by_email(req.email)
     if existing:
         return {
             "code": 200, "msg": "该邮箱已注册，返回已有 API Key",
@@ -471,21 +484,13 @@ async def structure(
     if len(req.text) > 10000:
         return error_response(400, "text 字段过长 (最大 10000 字符)", rid)
 
-    # WebM 大小→时长估算 + 硬限制
-    # WebM 码率 ~32kbps (4KB/s), 2分钟 = 120s ≈ 480KB
-    # 普通口述 (30s) ≈ 120KB
-    # 产检 (40min) ≈ 9.6MB → 拒绝
-    audio_size_mb = len(audio_bytes) / (1024 * 1024)
-    estimated_duration = len(audio_bytes) / 4000   # 4KB/s WebM 码率估算
-    MAX_DURATION_SEC = 120                          # 2分钟硬限制
-
-    if estimated_duration > MAX_DURATION_SEC:
+    # 文本过长检测 (>5000字符可能不是单次口述而是整份报告)
+    if len(req.text) > 5000:
         return error_response(400,
-            f"音频过长: 估算 {estimated_duration:.0f} 秒, 最大允许 {MAX_DURATION_SEC} 秒 (约{audio_size_mb:.1f}MB)。"
-            f"请使用手机/PACS端 分段录音后再上传。", rid)
+            f"文本过长 ({len(req.text)} 字符)。本接口用于单次口述结构化, "
+            f"每次最多 5000 字符。如需处理整份报告请分段提交。", rid)
 
-    if len(audio_bytes) > 50 * 1024 * 1024:
-        return error_response(400, "音频文件过大 (最大 50MB)", rid)
+    # Rate limit
     allowed, rl_msg = check_rate_limit(tenant["id"], tenant["plan"], endpoint="structure")
     if not allowed:
         return error_response(429, rl_msg, rid)
@@ -508,7 +513,7 @@ async def structure(
     tokens_in = len(req.text) // 2 or 500
     tokens_out = len(result.study_see) // 2 or 300
     cost_info = calculate_structure_cost(tokens_in, tokens_out)
-    billed = get_billed_amount(tenant["plan"], monthly["total_calls"], is_transcribe=False)
+    billed = get_billed_amount(tenant["plan"], monthly["total_calls"], audio_extra=0.0)
     if billed < 0:
         return error_response(429, "免费版月度配额已用完，请升级套餐", rid)
 
