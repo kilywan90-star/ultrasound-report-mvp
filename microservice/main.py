@@ -551,6 +551,12 @@ async def structure(
         "下一项": "NEXT",
         "跳到下一项": "NEXT",
         "打印报告": "PRINT",
+        "放大两倍": "ZOOM_IN",
+        "缩小一半": "ZOOM_OUT",
+        "调亮一点": "BRIGHTEN",
+        "左边对比": "COMPARE_LEFT",
+        "冻结图像": "FREEZE",
+        "截图保存": "SCREENSHOT",
     }
     raw_stripped = req.text.strip()
     for cmd_text, cmd_action in voice_commands.items():

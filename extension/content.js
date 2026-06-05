@@ -421,6 +421,34 @@
         window.print();
         addLog("info", "语音指令: 已触发打印");
         break;
+      case "ZOOM_IN":
+        document.body.style.transform = "scale(1.5)";
+        document.body.style.transformOrigin = "top left";
+        setTimeout(() => { document.body.style.transform = ""; }, 3000);
+        addLog("info", "语音指令: 临时放大画面(3秒后恢复)");
+        break;
+      case "ZOOM_OUT":
+        document.body.style.transform = "";
+        addLog("info", "语音指令: 恢复原始大小");
+        break;
+      case "BRIGHTEN":
+        document.body.style.filter = "brightness(1.3)";
+        setTimeout(() => { document.body.style.filter = ""; }, 5000);
+        addLog("info", "语音指令: 临时提高亮度(5秒后恢复)");
+        break;
+      case "COMPARE_LEFT":
+        addLog("info", "语音指令: 对比模式 — 请手动选择历史图像");
+        break;
+      case "FREEZE":
+        if (mediaRecorder && currentState === STATE.RECORDING) {
+          mediaRecorder.pause();
+          addLog("info", "语音指令: 暂停录音(冻结图像模式)");
+        }
+        break;
+      case "SCREENSHOT":
+        addLog("info", "语音指令: 截图 — 触发浏览器打印截图");
+        window.print();
+        break;
       default:
         addLog("info", `未知语音指令: ${cmd}`);
     }
