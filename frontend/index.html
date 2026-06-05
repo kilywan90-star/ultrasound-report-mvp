@@ -8,25 +8,38 @@
 <meta http-equiv="Expires" content="0">
 <title>超声报告语音结构化</title>
 <style>
+:root{--nav-bg:#0f172a;--nav-text:#94a3b8;--bg:#f1f5f9;--card-bg:#fff;--text:#1e293b;--text-muted:#64748b;--radius:8px;--green:#059669;--blue:#3b82f6;--red:#dc2626}
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,'PingFang SC','Microsoft YaHei',sans-serif;background:#f1f5f9;color:#0f172a;height:100vh;display:flex;flex-direction:column}
-.bar{background:#059669;color:white;padding:8px 16px;font-size:14px;display:flex;justify-content:space-between;flex-shrink:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column}
+.bar{background:var(--nav-bg);padding:0 20px;height:52px;display:flex;align-items:center;gap:24px;flex-shrink:0}
+.bar .brand{font-size:15px;font-weight:700;color:#fff;letter-spacing:-0.3px}
+.bar .brand span{font-size:10px;color:var(--nav-text);font-weight:400;margin-left:6px}
+.bar a{font-size:13px;color:var(--nav-text);text-decoration:none;font-weight:500;padding:6px 10px;border-radius:6px;transition:all .15s}
+.bar a:hover{color:#fff;background:rgba(255,255,255,.08)}
+.bar a.active{color:#fff;background:var(--green)}
+.bar .shortcuts{font-size:10px;color:var(--nav-text);margin-left:auto}
 .app{display:flex;flex:1;overflow:hidden}
-.side{width:240px;background:white;border-right:1px solid #e2e8f0;display:flex;flex-direction:column;flex-shrink:0}
-.side h3{padding:10px 12px;font-size:13px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
-.qa{padding:8px;border-bottom:1px solid #e2e8f0}
-.qa input,.qa select{padding:4px 6px;border:1px solid #e2e8f0;border-radius:4px;font-size:12px;width:100%;margin-bottom:4px}
-.qa .row{display:flex;gap:3px;margin-bottom:3px}
-.qa .row:last-child{margin-bottom:0}
-.qa button{padding:4px 10px;border:none;border-radius:4px;background:#059669;color:white;font-size:11px;cursor:pointer;white-space:nowrap}
+.side{width:240px;background:var(--card-bg);border-right:1px solid #e2e8f0;display:flex;flex-direction:column;flex-shrink:0}
+.side h3{padding:10px 14px;font-size:12px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+.qa{padding:10px;border-bottom:1px solid #e2e8f0}
+.qa input,.qa select{padding:6px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;width:100%;margin-bottom:4px;background:#fff}
+.qa input:focus,.qa select:focus{outline:none;border-color:var(--blue)}
+.qa .row{display:flex;gap:4px;margin-bottom:3px}
+.qa button{padding:5px 12px;border:none;border-radius:6px;background:var(--green);color:#fff;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s}
+.qa button:hover{background:#047857}
 .plist{flex:1;overflow-y:auto}
-.pi{padding:8px 10px;border-bottom:1px solid #e2e8f0;cursor:pointer;font-size:12px;border-left:3px solid transparent}
+.pi{padding:8px 12px;border-bottom:1px solid #e2e8f0;cursor:pointer;font-size:12px;border-left:3px solid transparent;transition:all .1s}
 .pi:hover{background:#f8fafc}
-.pi.on{background:#ecfdf5;border-left-color:#059669}
-.pi .n{font-weight:600}.pi .e{color:#059669;font-size:11px}.pi .s{font-size:9px;color:#64748b}
-.main{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:6px}
-.pn{background:white;border:1px solid #e2e8f0;border-radius:6px;overflow:hidden}
-.pn h4{padding:8px 12px;background:#f8fafc;font-size:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0}
+.pi.on{background:#ecfdf5;border-left-color:var(--green)}
+.pi .n{font-weight:600;color:var(--text)}.pi .e{color:var(--green);font-size:11px}.pi .s{font-size:9px;color:var(--text-muted)}
+.main{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px}
+.pn{background:var(--card-bg);border:1px solid #e2e8f0;border-radius:var(--radius);overflow:hidden}
+.pn h4{padding:10px 14px;background:#f8fafc;font-size:12px;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #e2e8f0}
+.pn h4 .tag{font-size:10px;padding:2px 8px;border-radius:8px;font-weight:600}
+.pn h4 .tag.idle{background:#e2e8f0;color:var(--text-muted)}
+.pn h4 .tag.rec{background:#fee2e2;color:var(--red);animation:pulse 1.5s infinite}
+.pn h4 .tag.done{background:#dcfce7;color:#16a34a}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .pn .b{padding:10px;display:block}
 .pn.coll .b{display:none}
 .rec-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
@@ -64,17 +77,17 @@ textarea.txt:focus{outline:none;border-color:#059669}
 </head>
 <body>
 
-<div class="bar"><span>超声报告语音结构化 <span style="font-size:10px;color:#93c5fd;font-weight:400">v3.0</span></span>
-<span style="font-size:11px;display:flex;gap:16px">
-  <a href="/" style="color:white;text-decoration:none;font-weight:600">工作站</a>
-  <a href="/developer.html" style="color:#93c5fd;text-decoration:none">开发者</a>
-  <a href="/plans.html" style="color:#93c5fd;text-decoration:none">套餐</a>
-  <a href="/admin.html" style="color:#93c5fd;text-decoration:none">管理</a>
-  <a href="/dashboard.html" style="color:#93c5fd;text-decoration:none">看板</a>
-  <a href="/trace_logs.html" style="color:#93c5fd;text-decoration:none">日志</a>
-  <a href="/error_report.html" style="color:#93c5fd;text-decoration:none">纠错</a>
-</span>
-<span style="font-size:10px">Ctrl+R录音 Ctrl+S保存 Ctrl+Enter发送</span></div>
+<div class="bar">
+  <span class="brand">UltraSonic AI<span>v4.2</span></span>
+  <a href="/" class="active">工作站</a>
+  <a href="/developer.html">开发者</a>
+  <a href="/plans.html">套餐</a>
+  <a href="/admin.html">管理</a>
+  <a href="/dashboard.html">看板</a>
+  <a href="/trace_logs.html">日志</a>
+  <a href="/error_report.html">纠错</a>
+  <span class="shortcuts">Ctrl+R 录音 · Ctrl+S 保存 · Ctrl+Enter 发送</span>
+</div>
 
 <div class="app">
 <aside class="side">
