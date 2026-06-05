@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>套餐购买 — 超声报告语音结构化 API</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1e293b}
+nav{background:#0f172a;color:white;padding:0 16px;height:48px;display:flex;align-items:center;gap:24px;font-size:13px}
+nav h1{font-size:15px}
+nav a{color:#94a3b8;text-decoration:none}
+nav a:hover,nav a.active{color:white}
+main{max-width:960px;margin:20px auto;padding:0 12px}
+.card{background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);padding:20px;margin-bottom:16px}
+.card h2{font-size:15px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 10px;text-align:center;border-bottom:1px solid #e2e8f0}
+th{color:#64748b;font-weight:500;font-size:12px;background:#f8fafc}
+td:first-child{text-align:left;font-weight:500}
+.btn{display:inline-block;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:.15s}
+.btn-primary{background:#3b82f6;color:white}.btn-primary:hover{background:#2563eb}
+.btn-success{background:#16a34a;color:white}.btn-success:hover{background:#15803d}
+.btn-lg{padding:10px 32px;font-size:15px}
+.qr-box{text-align:center;padding:16px;background:#f8fafc;border-radius:8px;margin:12px 0}
+.qr-box img{width:160px;height:160px;border:1px solid #e2e8f0;border-radius:8px}
+.step{display:flex;align-items:flex-start;gap:10px;margin:10px 0;font-size:13px}
+.step-num{width:24px;height:24px;border-radius:50%;background:#3b82f6;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.highlight{background:#fef3c7;border:1px solid #f59e0b;border-radius:8px;padding:12px;margin:10px 0;font-size:13px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.modal>div{background:white;border-radius:12px;padding:24px;max-width:420px;width:90%}
+.modal h3{font-size:16px;margin-bottom:12px}
+.modal label{display:block;font-size:13px;color:#64748b;margin-bottom:4px;margin-top:8px}
+.modal input{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px}
+</style>
+</head>
+<body>
+
+<nav>
+  <h1>超声报告语音结构化 API</h1>
+  <a href="/developer.html">开发者门户</a>
+  <a href="/plans.html" class="active">套餐购买</a>
+  <a href="/admin.html">管理后台</a>
+</nav>
+
+<main>
+  <!-- 套餐对比 -->
+  <div class="card">
+    <h2>套餐对比</h2>
+    <table>
+      <tr><th></th><th style="background:#dbeafe;font-weight:700">免费版</th><th style="background:#dcfce7;font-weight:700">基础版</th><th style="background:#fef3c7;font-weight:700">专业版</th></tr>
+      <tr><td>月费</td><td style="font-size:20px;font-weight:700">¥0</td><td style="font-size:20px;font-weight:700;color:#16a34a">¥99</td><td style="font-size:20px;font-weight:700;color:#d97706">¥299</td></tr>
+      <tr><td>调用次数/月</td><td>100</td><td>1,000</td><td>5,000</td></tr>
+      <tr><td>超量单价</td><td style="color:#dc2626">不可用</td><td>¥0.15/次</td><td>¥0.10/次</td></tr>
+      <tr><td>API 速率</td><td>5次/分钟</td><td>20次/分钟</td><td>60次/分钟</td></tr>
+      <tr><td>技术支持</td><td>文档</td><td>邮件+文档</td><td>微信+邮件+文档</td></tr>
+      <tr><td>适用场景</td><td>测试评估</td><td>小型医院/科室</td><td>中型医院/PACS厂商</td></tr>
+      <tr><td></td><td><span class="btn" style="background:#94a3b8;color:white;cursor:default">当前套餐</span></td><td><button class="btn btn-success" onclick="buy('basic')">购买基础版 ¥99/月</button></td><td><button class="btn btn-primary" onclick="buy('pro')">购买专业版 ¥299/月</button></td></tr>
+    </table>
+  </div>
+
+  <!-- 购买流程 -->
+  <div class="card" id="buySection" style="display:none">
+    <h2>购买流程 — <span id="buyPlanName"></span></h2>
+
+    <div class="step"><span class="step-num">1</span><div>扫码支付 <b id="buyPrice"></b></div></div>
+    <div class="qr-box">
+      <div style="font-size:12px;color:#64748b;margin-bottom:8px">微信/支付宝扫码支付</div>
+      <div style="width:160px;height:160px;margin:0 auto;background:#e2e8f0;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;color:#64748b">
+        请上传收款码<br>替换此区域
+      </div>
+      <div style="margin-top:8px;font-size:11px;color:#94a3b8">收款人: 超声AI平台 | 备注请填: <b id="payNote"></b></div>
+    </div>
+
+    <div class="step"><span class="step-num">2</span><div>输入您的 API Key, 点击确认升级</div></div>
+    <div style="margin-left:34px">
+      <input id="buyApiKey" placeholder="sk-..." style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;max-width:400px">
+      <button class="btn btn-primary btn-lg" onclick="doUpgrade()" style="margin-top:10px">确认支付并升级</button>
+    </div>
+
+    <div class="step"><span class="step-num">3</span><div>升级即时生效, 下月自动续费 (目前为人工确认模式)</div></div>
+    <div class="highlight" id="upgradeResult" style="display:none"></div>
+  </div>
+</main>
+
+<div class="modal" id="upgradeOk">
+  <div>
+    <h3>升级成功!</h3>
+    <p style="font-size:14px;margin:12px 0">您的套餐已升级为 <b id="upgradePlanName"></b></p>
+    <p style="font-size:13px;color:#64748b">配额已刷新, 即刻生效</p>
+    <button class="btn btn-primary" onclick="location.reload()" style="margin-top:12px;width:100%">确定</button>
+  </div>
+</div>
+
+<script>
+const BASE = 'http://47.109.151.238:80';
+
+function buy(plan) {
+  document.getElementById('buySection').style.display = 'block';
+  const names = {basic:'基础版', pro:'专业版'};
+  const prices = {basic:'¥99', pro:'¥299'};
+  document.getElementById('buyPlanName').textContent = names[plan];
+  document.getElementById('buyPrice').textContent = prices[plan]+'/月';
+  document.getElementById('payNote').textContent = 'plan-'+plan+'-'+Date.now().toString(36);
+  // Store selected plan
+  document.getElementById('buySection').setAttribute('data-plan', plan);
+  document.getElementById('buyApiKey').value = localStorage.getItem('dev_api_key')||'';
+}
+
+async function doUpgrade() {
+  const plan = document.getElementById('buySection').getAttribute('data-plan');
+  const key = document.getElementById('buyApiKey').value.trim();
+  if (!key) { alert('请输入 API Key'); return; }
+
+  // 调用后端升级 (管理员API, 用API Key身份)
+  try {
+    const r = await fetch(BASE+'/api/admin/upgrade-by-key', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({api_key: key, plan: plan})
+    });
+    const d = await r.json();
+    const el = document.getElementById('upgradeResult');
+    el.style.display = 'block';
+    if (d.success) {
+      el.innerHTML = '升级成功! 套餐: <b>'+d.plan_name+'</b> 配额: '+d.monthly_quota+'次/月';
+      el.style.background = '#dcfce7'; el.style.border = '1px solid #16a34a';
+      document.getElementById('upgradePlanName').textContent = d.plan_name;
+      document.getElementById('upgradeOk').classList.add('show');
+    } else {
+      el.innerHTML = '升级失败: '+d.msg;
+      el.style.background = '#fee2e2'; el.style.border = '1px solid #dc2626';
+    }
+  } catch(e) {
+    alert('网络错误: '+e);
+  }
+}
+</script>
+</body>
+</html>

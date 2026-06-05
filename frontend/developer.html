@@ -2,208 +2,205 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>超声报告语音结构化 API — 开发者门户</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f8fafc;color:#1e293b}
-nav{background:#0f172a;color:white;padding:0 24px;height:56px;display:flex;align-items:center;justify-content:space-between}
-nav h1{font-size:18px}
-nav .ver{font-size:12px;color:#94a3b8}
-main{max-width:960px;margin:32px auto;padding:0 16px}
-.card{background:white;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);padding:24px;margin-bottom:20px}
-.card h2{font-size:16px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
-.card h2 .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
-.dot.green{background:#22c55e}
-.dot.yellow{background:#eab308}
-.key-box{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:14px;display:flex;align-items:center;justify-content:space-between}
-.key-box button{background:#3b82f6;color:white;border:none;padding:6px 16px;border-radius:6px;cursor:pointer;font-size:13px}
-table{width:100%;border-collapse:collapse;font-size:14px}
-th,td{padding:10px 12px;text-align:left;border-bottom:1px solid #e2e8f0}
-th{color:#64748b;font-weight:500;font-size:13px}
-.quota-bar{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-top:4px}
-.quota-bar .fill{height:100%;border-radius:4px;transition:width .3s}
-.fill.safe{background:#22c55e}
-.fill.warn{background:#eab308}
-.fill.danger{background:#ef4444}
-.plan-tags{display:flex;gap:8px;margin-top:12px}
-.plan-tag{border:2px solid #e2e8f0;border-radius:8px;padding:12px;flex:1;cursor:pointer;text-align:center;transition:.2s}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f2f5;color:#1e293b}
+nav{background:#0f172a;color:white;padding:0 16px;height:48px;display:flex;align-items:center;gap:24px;font-size:13px}
+nav h1{font-size:15px}
+nav a{color:#94a3b8;text-decoration:none}
+nav a:hover{color:white}
+main{max-width:960px;margin:20px auto;padding:0 12px}
+.card{background:white;border-radius:10px;box-shadow:0 1px 3px rgba(0,0,0,.06);padding:20px;margin-bottom:16px}
+.card h2{font-size:15px;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.badge{font-size:11px;padding:2px 8px;border-radius:10px;font-weight:500}
+.badge.post{background:#dbeafe;color:#1d4ed8}.badge.get{background:#dcfce7;color:#16a34a}
+.curl-box{background:#1e293b;color:#e2e8f0;padding:12px 14px;border-radius:8px;font-family:Menlo,monospace;font-size:12px;overflow-x:auto;white-space:pre-wrap;margin:8px 0;line-height:1.5}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:8px 10px;text-align:left;border-bottom:1px solid #e2e8f0}
+th{color:#64748b;font-weight:500;font-size:12px}
+.plan-tags{display:flex;gap:10px;margin-top:12px}
+.plan-tag{border:2px solid #e2e8f0;border-radius:10px;padding:14px;flex:1;cursor:pointer;text-align:center;transition:.2s}
 .plan-tag:hover{border-color:#3b82f6}
 .plan-tag.active{border-color:#3b82f6;background:#eff6ff}
-.plan-tag .name{font-weight:600;font-size:15px}
-.plan-tag .price{font-size:24px;font-weight:700;color:#1e40af;margin:4px 0}
-.plan-tag .quota{font-size:13px;color:#64748b}
-.plan-tag .overage{font-size:12px;color:#94a3b8}
-.curl-box{background:#1e293b;color:#e2e8f0;padding:12px 16px;border-radius:8px;font-family:'SF Mono',Menlo,monospace;font-size:13px;overflow-x:auto;white-space:pre-wrap;margin:8px 0}
-code{border:1px solid #e2e8f0;background:#f1f5f9;padding:1px 4px;border-radius:3px;font-size:13px}
-.badge{font-size:11px;padding:2px 8px;border-radius:12px;font-weight:500}
-.badge.post{background:#dbeafe;color:#1d4ed8}
-.badge.get{background:#dcfce7;color:#16a34a}
+.plan-tag .name{font-weight:600;font-size:14px}
+.plan-tag .price{font-size:22px;font-weight:700;color:#1e40af;margin:4px 0}
+.plan-tag .quota{font-size:12px;color:#64748b}
+.plan-tag .overage{font-size:11px;color:#94a3b8}
+.btn{display:inline-block;padding:8px 20px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;text-decoration:none;border:none;transition:.15s}
+.btn-primary{background:#3b82f6;color:white}.btn-primary:hover{background:#2563eb}
+.btn-success{background:#16a34a;color:white}.btn-success:hover{background:#15803d}
+.btn-outline{border:1px solid #d1d5db;background:white;color:#374151}.btn-outline:hover{background:#f9fafb}
+.btn-sm{padding:4px 12px;font-size:12px}
+.qr-box{text-align:center;padding:20px;background:#f8fafc;border-radius:8px;margin:12px 0}
+.qr-box img{width:180px;height:180px;border:1px solid #e2e8f0;border-radius:8px}
+.modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.4);z-index:1000;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.modal>div{background:white;border-radius:12px;padding:24px;max-width:420px;width:90%}
+.modal h3{font-size:16px;margin-bottom:12px}
+.modal label{display:block;font-size:13px;color:#64748b;margin-bottom:4px}
+.modal input,.modal select{width:100%;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;margin-bottom:10px}
+.step{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:13px}
+.step-num{width:24px;height:24px;border-radius:50%;background:#3b82f6;color:white;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
 </style>
 </head>
 <body>
 
 <nav>
-  <h1>超声报告语音结构化 API 平台</h1>
-  <span class="ver">v4.0.0</span>
+  <h1>超声报告语音结构化 API</h1>
+  <a href="#">开发者门户</a>
+  <a href="/plans.html">套餐购买</a>
+  <a href="/admin.html">管理后台</a>
+  <span style="margin-left:auto;font-size:11px;color:#94a3b8" id="navVersion">v4.1.0</span>
 </nav>
 
 <main>
-
-  <!-- API Key 卡片 -->
+  <!-- API Key -->
   <div class="card">
-    <h2><span class="dot green"></span>您的 API Key</h2>
-    <div class="key-box">
-      <span id="apiKeyDisplay">加载中...</span>
-      <button onclick="copyKey()">复制</button>
+    <h2>您的 API Key</h2>
+    <div class="curl-box">
+      <span id="apiKeyDisplay">点击「注册」获取免费 Key</span>
+      <button class="btn btn-sm btn-outline" onclick="copyKey()" style="float:right">复制</button>
     </div>
-    <p style="margin-top:8px;color:#64748b;font-size:13px">
-      请在请求的 <code>Authorization</code> header 中携带: <code>Bearer &lt;your-api-key&gt;</code>
-    </p>
+    <div style="margin-top:8px;display:flex;gap:8px">
+      <button class="btn btn-primary btn-sm" onclick="showSignup()">注册</button>
+      <button class="btn btn-outline btn-sm" onclick="localStorage.clear();location.reload()">切换账号</button>
+    </div>
   </div>
 
-  <!-- 用量卡片 -->
+  <!-- 用量 -->
   <div class="card">
-    <h2><span class="dot yellow"></span>本月用量</h2>
+    <h2>本月用量</h2>
     <table>
       <tr><th>套餐</th><td id="usagePlan">-</td><th>调用次数</th><td id="usageCalls">-</td></tr>
       <tr><th>配额</th><td id="usageQuota">-</td><th>剩余</th><td id="usageRemaining">-</td></tr>
-      <tr><th>ASR时长(秒)</th><td id="usageAsr">-</td><th>本月费用</th><td id="usageBilled">-</td></tr>
+      <tr><th>本月费用</th><td id="usageBilled">-</td><th>ASR时长</th><td id="usageAsr">-</td></tr>
     </table>
-    <div class="quota-bar" style="margin-top:12px"><div class="fill safe" id="usageBar" style="width:0%"></div></div>
   </div>
 
-  <!-- 套餐选择 -->
+  <!-- 快速测试 -->
   <div class="card">
-    <h2>套餐方案</h2>
-    <div class="plan-tags" id="planTags">
-      <div class="plan-tag" onclick="selectPlan('free')">
-        <div class="name">免费版</div><div class="price">¥0</div>
-        <div class="quota">100次/月</div><div class="overage">超量停用</div>
-      </div>
-      <div class="plan-tag" onclick="selectPlan('basic')">
-        <div class="name">基础版</div><div class="price">¥300</div>
-        <div class="quota">1,000次/月</div><div class="overage">超量 ¥0.50/次</div>
-      </div>
-      <div class="plan-tag" onclick="selectPlan('pro')">
-        <div class="name">专业版</div><div class="price">¥1,200</div>
-        <div class="quota">5,000次/月</div><div class="overage">超量 ¥0.40/次</div>
-      </div>
-      <div class="plan-tag" onclick="selectPlan('enterprise')">
-        <div class="name">企业版</div><div class="price">议价</div>
-        <div class="quota">不限量</div><div class="overage">¥0.30/次</div>
-      </div>
-    </div>
+    <h2>快速测试</h2>
+    <p style="font-size:12px;color:#64748b;margin-bottom:8px">输入口述文本, 点"生成报告"</p>
+    <textarea id="testText" style="width:100%;padding:8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;resize:vertical" rows="2" placeholder="肝脏大小形态正常, 胆囊壁光滑, 未见异常..."></textarea>
+    <select id="testExam" style="margin:8px 0;padding:4px 8px;border:1px solid #d1d5db;border-radius:4px;font-size:12px">
+      <option>腹部超声</option><option>乳腺超声</option><option>甲状腺超声</option><option>产科超声</option><option>心脏超声</option><option>泌尿超声</option><option>妇科超声</option>
+    </select>
+    <br>
+    <button class="btn btn-primary btn-sm" onclick="testStructure()">生成报告</button>
+    <div id="testResult" style="margin-top:8px;font-size:12px"></div>
   </div>
 
   <!-- API 文档 -->
   <div class="card">
     <h2>API 参考</h2>
-
-    <h3 style="margin:16px 0 8px"><span class="badge post">POST</span> /v1/transcribe — 语音→报告</h3>
-    <p style="font-size:13px;color:#64748b">上传音频文件, 返回结构化超声报告。支持 wav/mp3/webm 格式, 最大 50MB。</p>
-    <div class="curl-box">curl -X POST https://47.109.151.238:8800/v1/transcribe \
-  -H "Authorization: Bearer sk-YOUR_API_KEY" \
-  -F "audio_file=@recording.wav" \
-  -F 'patient_context={"gender":"男","age":52,"exam_type":"腹部超声"}'</div>
-
-    <h3 style="margin:16px 0 8px"><span class="badge post">POST</span> /v1/structure — 文本→报告</h3>
-    <p style="font-size:13px;color:#64748b">直接提交 ASR 文本, 返回结构化报告。</p>
-    <div class="curl-box">curl -X POST https://47.109.151.238:8800/v1/structure \
-  -H "Authorization: Bearer sk-YOUR_API_KEY" \
+    <h3 style="margin:12px 0 6px;font-size:13px"><span class="badge post">POST</span> /v1/structure — 文本→报告</h3>
+    <div class="curl-box">curl -X POST http://47.109.151.238/v1/structure \
   -H "Content-Type: application/json" \
-  -d '{"text":"肝脏大小正常,胆囊壁光滑,未见异常","patient_context":{"exam_type":"腹部超声"}}'</div>
+  -H "Authorization: Bearer &lt;KEY&gt;" \
+  -d '{"text":"...","patient_context":{"patient_id":"必传","gender":"男","age":45,"exam_type":"腹部超声"}}'</div>
 
-    <h3 style="margin:16px 0 8px"><span class="badge get">GET</span> /v1/usage</h3>
-    <p style="font-size:13px;color:#64748b">查询当前租户的月度用量统计。</p>
-    <div class="curl-box">curl -H "Authorization: Bearer sk-YOUR_API_KEY" \
-  https://47.109.151.238:8800/v1/usage</div>
+    <h3 style="margin:12px 0 6px;font-size:13px"><span class="badge post">POST</span> /v1/transcribe — 语音→报告</h3>
+    <div class="curl-box">curl -X POST http://47.109.151.238/v1/transcribe \
+  -H "Authorization: Bearer &lt;KEY&gt;" \
+  -F "audio_file=@recording.webm" \
+  -F 'patient_context={"patient_id":"必传","gender":"女","age":38,"exam_type":"乳腺超声"}'</div>
 
-    <h3 style="margin:16px 0 8px"><span class="badge get">GET</span> /v1/health</h3>
-    <p style="font-size:13px;color:#64748b">健康检查, 不需要鉴权。</p>
-    <div class="curl-box">curl https://47.109.151.238:8800/v1/health</div>
+    <p style="font-size:12px;margin-top:8px"><a href="http://47.109.151.238:8800/docs" target="_blank">Swagger 交互文档</a></p>
   </div>
-
-  <!-- Swagger 文档链接 -->
-  <div class="card" style="text-align:center">
-    <p>完整的 OpenAPI/Swagger 交互式文档:</p>
-    <a href="/docs" target="_blank" style="color:#3b82f6;font-weight:600">/docs — Swagger UI</a>
-    &nbsp;&nbsp;
-    <a href="/redoc" target="_blank" style="color:#3b82f6;font-weight:600">/redoc — ReDoc</a>
-  </div>
-
 </main>
 
+<div class="modal" id="signupModal">
+  <div>
+    <h3>注册 API Key</h3>
+    <label>医院/公司名称</label>
+    <input id="signupName" placeholder="XX医院超声科">
+    <label>联系邮箱</label>
+    <input id="signupEmail" type="email" placeholder="your@hospital.cn">
+    <label>联系人 (可选)</label>
+    <input id="signupContact" placeholder="张医生">
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn btn-primary" onclick="doSignup()">立即注册</button>
+      <button class="btn btn-outline" onclick="document.getElementById('signupModal').classList.remove('show')">取消</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// 从 URL hash 或 localStorage 读取 API Key
-function getStoredKey() {
-  return localStorage.getItem('dev_api_key') || '';
-}
-function setStoredKey(k) { localStorage.setItem('dev_api_key', k); }
+const BASE = 'http://47.109.151.238:80';
 
-// 页面初始化
+function getKey() { return localStorage.getItem('dev_api_key')||''; }
+function setKey(k) { localStorage.setItem('dev_api_key',k); }
+
 async function init() {
-  const key = getStoredKey();
-  if (key) {
-    document.getElementById('apiKeyDisplay').textContent = key;
-    await loadUsage(key);
-  } else {
-    document.getElementById('apiKeyDisplay').textContent = '请先设置 API Key';
-  }
+  const key = getKey();
+  if (!key) { return; }
+  document.getElementById('apiKeyDisplay').textContent = key;
+  try {
+    const r = await fetch(BASE+'/v1/usage', { headers: { 'Authorization': 'Bearer '+key } });
+    const d = await r.json();
+    document.getElementById('usagePlan').textContent = d.tenant.plan_name;
+    document.getElementById('usageCalls').textContent = d.usage.total_calls;
+    document.getElementById('usageQuota').textContent = d.usage.monthly_quota;
+    document.getElementById('usageRemaining').textContent = d.usage.remaining;
+    document.getElementById('usageBilled').textContent = '¥'+d.usage.total_billed.toFixed(2);
+    document.getElementById('usageAsr').textContent = d.usage.total_asr_seconds.toFixed(1)+'s';
+  } catch(e) { console.error(e); }
 }
 
-async function loadUsage(key) {
+function showSignup() {
+  document.getElementById('signupModal').classList.add('show');
+}
+
+async function doSignup() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const contact = document.getElementById('signupContact').value.trim();
+  if (!name||!email) { alert('名称和邮箱必填'); return; }
   try {
-    const resp = await fetch('/v1/usage', { headers: { 'Authorization': 'Bearer ' + key } });
-    if (!resp.ok) throw new Error(resp.status);
-    const data = await resp.json();
-    document.getElementById('usagePlan').textContent = data.tenant.plan_name;
-    document.getElementById('usageCalls').textContent = data.usage.total_calls;
-    document.getElementById('usageQuota').textContent = data.usage.monthly_quota;
-    document.getElementById('usageRemaining').textContent = data.usage.remaining;
-    document.getElementById('usageAsr').textContent = data.usage.total_asr_seconds.toFixed(1);
-    document.getElementById('usageBilled').textContent = '¥' + data.usage.total_billed.toFixed(2);
-    // 进度条
-    const pct = data.usage.monthly_quota > 0
-      ? Math.min(100, (data.usage.total_calls / data.usage.monthly_quota) * 100)
-      : 0;
-    const bar = document.getElementById('usageBar');
-    bar.style.width = pct + '%';
-    bar.className = 'fill ' + (pct > 80 ? 'danger' : pct > 60 ? 'warn' : 'safe');
-  } catch(e) {
-    document.getElementById('usagePlan').textContent = '未能加载';
-  }
+    const r = await fetch(BASE+'/v1/signup', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name,email,contact:contact||undefined})
+    });
+    const d = await r.json();
+    if (d.api_key) {
+      setKey(d.api_key);
+      document.getElementById('apiKeyDisplay').textContent = d.api_key;
+      document.getElementById('signupModal').classList.remove('show');
+      init();
+    }
+  } catch(e) { alert('注册失败: '+e); }
 }
 
 function copyKey() {
-  const key = document.getElementById('apiKeyDisplay').textContent;
-  if (key && key.length > 5) {
-    navigator.clipboard.writeText(key).then(() => {
-      alert('API Key 已复制到剪贴板');
+  const k = getKey();
+  if (k) { navigator.clipboard.writeText(k); alert('已复制'); }
+}
+
+async function testStructure() {
+  const key = getKey(); if(!key) { alert('请先注册'); return; }
+  const text = document.getElementById('testText').value.trim();
+  if(!text) { alert('请输入口述文本'); return; }
+  const exam = document.getElementById('testExam').value;
+  try {
+    const r = await fetch(BASE+'/v1/structure', {
+      method:'POST', headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},
+      body: JSON.stringify({text, patient_context:{patient_id:'web-test-'+Date.now(), gender:'男', age:45, exam_type:exam}})
     });
-  }
-}
-
-function selectPlan(planId) {
-  // Visual feedback only — actual upgrade requires admin
-  document.querySelectorAll('.plan-tag').forEach(el => el.classList.remove('active'));
-  const tags = document.querySelectorAll('.plan-tag');
-  const plans = ['free','basic','pro','enterprise'];
-  tags[plans.indexOf(planId)].classList.add('active');
-  alert('套餐升级请联系管理员: 微信/电话联系');
-}
-
-// 首次访问: 提示设置 API Key
-window.onload = () => {
-  const key = getStoredKey();
-  if (!key) {
-    const input = prompt('请输入您的 API Key (首次使用请从管理员获取):');
-    if (input && input.trim()) {
-      setStoredKey(input.trim());
+    const d = await r.json();
+    if (d.data && d.data.study_see) {
+      document.getElementById('testResult').innerHTML =
+        '<b>结构化报告:</b><br>'+d.data.study_see+'<br><br><b>提示:</b> '+
+        (d.data.study_hint||[]).map(h=>h.diagnosis+' ['+(h.icd10||'')+']').join(', ') +
+        '<br><small>模板:'+d.data.template_used+' | 方法:'+d.data.method+' | '+(d.data.elapsed_ms||0)+'ms</small>';
+    } else {
+      document.getElementById('testResult').textContent = '错误: '+d.msg;
     }
-  }
-  init();
-};
+  } catch(e) { document.getElementById('testResult').textContent = '网络错误: '+e; }
+}
+
+init();
 </script>
 </body>
 </html>

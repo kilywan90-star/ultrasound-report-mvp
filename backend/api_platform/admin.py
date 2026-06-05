@@ -7,6 +7,7 @@ from .db import (
     tenant_create, tenant_get, tenant_list, tenant_update,
     usage_get_monthly, usage_get_all_monthly,
     rate_limit_get, rate_limit_set,
+    tenant_get_by_key,
 )
 from .auth import generate_api_key
 from .billing import PLANS, get_plan
@@ -142,3 +143,39 @@ async def set_ratelimit(tenant_id: int, req: RateLimitSetRequest):
         raise HTTPException(404, "租户不存在")
     rate_limit_set(tenant_id, req.endpoint, req.rpm, req.rpd)
     return {"success": True, "message": f"限流已更新: {req.endpoint} RPM={req.rpm} RPD={req.rpd}"}
+
+
+# ── 自助升级 (用户通过自己的 API Key 升级套餐) ──
+
+class UpgradeRequest(BaseModel):
+    api_key: str = Field(..., min_length=10, description="用户的 API Key")
+    plan: str = Field(..., description="目标套餐: basic / pro")
+
+
+@router.post("/upgrade-by-key")
+async def upgrade_by_key(req: UpgradeRequest):
+    """用户自助升级套餐 — 通过 API Key 验证身份后直接升级"""
+    if req.plan not in PLANS:
+        raise HTTPException(400, f"无效套餐: {req.plan}, 可选: {list(PLANS.keys())}")
+    t = tenant_get_by_key(req.api_key)
+    if not t:
+        raise HTTPException(404, "API Key 无效或已禁用")
+    if t["plan"] == req.plan:
+        return {
+            "success": True,
+            "msg": f"当前已是 {PLANS[req.plan]['name']}, 无需重复升级",
+            "plan": t["plan"],
+            "plan_name": PLANS[req.plan]["name"],
+            "monthly_quota": PLANS[req.plan]["monthly_quota"],
+        }
+    result = tenant_update(t["id"], plan=req.plan)
+    plan_info = PLANS[req.plan]
+    return {
+        "success": True,
+        "msg": f"升级成功: {t['plan']} → {req.plan}",
+        "plan": req.plan,
+        "plan_name": plan_info["name"],
+        "monthly_quota": plan_info["monthly_quota"],
+        "monthly_fee": plan_info["monthly_fee"],
+        "overage_price": plan_info["overage_price"],
+    }
