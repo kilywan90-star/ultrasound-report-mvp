@@ -257,10 +257,19 @@ async def pacs_report_export(report_id: int, format: str = Query("json", descrip
         })
 
     elif format == "json" or format == "dicomxml":
+        audio_info = None
+        if report.get('audio_path'):
+            audio_filename = Path(report['audio_path']).stem if report.get('audio_path') else None
+            audio_info = {
+                "has_audio": True,
+                "playback_url": f"https://47.109.151.238/api/audio/{audio_filename}" if audio_filename else None,
+                "download_url": f"https://47.109.151.238/api/audio/{audio_filename}/download" if audio_filename else None,
+            }
         return JSONResponse({
             "success": True,
             "report": report,
             "format": format,
+            "audio": audio_info,
         })
 
     raise HTTPException(400, f"不支持格式: {format}")
