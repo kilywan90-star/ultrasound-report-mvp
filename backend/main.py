@@ -397,14 +397,42 @@ async def structure(req: StructureRequest):
         tpl = get_template_by_name(best_name)
         if tpl: template_info1 = tpl.get("info1", "")
 
-    # Step2: LLM
-    if best_score >= 50 and template_info1 and len(template_info1) >= 20:
-        report = _llm_fill_template(A, req.exam_type, best_name, template_info1)
-        method = "template_fill"
+    # Step1.5: 多器官综合描述检测（≥3个器官或>100字符时走LLM综合报告）
+    _organ_kw = ["肝脏","胆囊","胰腺","脾脏","双肾","子宫","卵巢","附件","甲状腺","乳腺","心脏","颈动脉","前列腺","膀胱"]
+    _organ_count = sum(1 for o in _organ_kw if o in A)
+    is_multi = _organ_count >= 3 or (len(A) > 100 and _organ_count >= 2)
+
+    if is_multi and not is_fetal:
+        report = _llm_multi_organ_fill(A, req.exam_type)
+        method = "llm_multi"
+        best_name = "多器官综合报告"
     else:
-        report = _llm_free_generate(A, req.exam_type)
-        method = "llm_free"
-        best_name = "自由生成(无匹配模板)"
+        # Step2: 转换模板路径 (结构化3色HTML)
+        from template_converted import lookup_template, setup as _tc_setup
+        _tc_setup()
+        converted = lookup_template(best_name) if best_name else None
+        if converted and best_score >= 100 and not is_fetal:
+            from template_converted.fill import fill_converted_template
+            from template_converted.measurements import ALL as _ALL_MEAS
+            from template_converted.options import ALL as _ALL_OPTS
+            cat = converted.get("category", "")
+            measurements = _ALL_MEAS.get(cat, _ALL_MEAS.get("abdomen", []))
+            options_list = _ALL_OPTS.get(cat, []) + _ALL_OPTS.get("common", [])
+            report = fill_converted_template(A, converted.get("html", template_info1), converted.get("fields", {}), measurements, options_list, {}, set())
+            method = "converted_fill"
+        elif best_score >= 50 and template_info1 and len(template_info1) >= 20:
+            if best_score >= 200:
+                from template_filler import match_and_fill as _rule_fill
+                rule_result = _rule_fill(A)
+                report = rule_result or {"study_see": template_info1, "study_hint": [], "recommendation": ""}
+                method = "rule_fill"
+            else:
+                report = _llm_fill_template(A, req.exam_type, best_name, template_info1)
+                method = "template_fill"
+        else:
+            report = _llm_free_generate(A, req.exam_type)
+            method = "llm_free"
+            best_name = "自由生成(无匹配模板)"
 
     report = _wrap_hints_with_toggle(report)
 
@@ -459,6 +487,53 @@ def _llm_fill_template(asr_text, exam_type, tpl_name, info1):
             return _parse_json(content)
     except Exception as e:
         logging.warning(f"LLM fill failed: {e}")
+
+    return {"study_see": f"<div class='rpt-html'>{asr_text}</div>", "study_hint": [], "recommendation": ""}
+
+
+def _llm_multi_organ_fill(asr_text, exam_type):
+    """多器官综合描述 — 用LLM生成完整的逐器官报告"""
+    from llm_client import _get_client, _parse_json
+    client = _get_client(provider="volc")
+    model = "doubao-seed-1-6-flash-250615"
+
+    import re
+    all_organs = ["乳腺","甲状腺","胆囊","肝脏","胰腺","脾脏","双肾","子宫","卵巢","附件","前列腺","膀胱","心脏","颈动脉"]
+    found_organs = [o for o in all_organs if o in asr_text]
+
+    system = f"""一位资深超声科主任医师，将口语口述转为规范化超声报告。
+检查类型: {exam_type}
+涉及器官: {', '.join(found_organs) if found_organs else exam_type}
+
+规则:
+1. 按器官逐项输出，每个器官独立一行
+2. 数值用原文，单位用mm或cm，用<b class="voice">值</b>标记
+3. 缺失值填___mm
+4. 覆盖所有涉及器官，每个器官都出现（包括正常的）
+5. 口语转术语(乘→×, 小水泡→无回声区)
+6. 只输出JSON: {{"study_see":"...", "study_hint":[{{"rank":1,"diagnosis":"...","icd10":"..."}}], "recommendation":"..."}}
+
+示例:
+输入: "右侧乳腺外上象限见一个0.8×0.5cm结节。胆囊见一个1.2cm强回声团。甲状腺左叶见一个0.3×0.2cm无回声结节。"
+输出: {{"study_see":"乳腺: 右侧外上象限可见大小约0.8×0.5cm低回声结节，边界清晰。\\n胆囊: 大小正常，壁上可见大小约1.2cm强回声团，后伴声影。\\n甲状腺: 左叶可见大小约0.3×0.2cm无回声结节。\\n肝脏: 大小形态正常。\\n胰腺: 正常。\\n脾脏: 未见肿大。\\n双肾: 正常。", "study_hint":[{{"rank":1,"diagnosis":"乳腺结节","icd10":"N60.8"}},{{"rank":2,"diagnosis":"胆囊结石","icd10":"K80.2"}}], "recommendation":"建议专科随访。"}}"""
+
+    for attempt in range(2):
+        try:
+            response = client.chat.completions.create(
+                model=model, temperature=0.1, max_tokens=4096, timeout=30,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": f"请将以下口述转为规范化报告:\n\n{asr_text[:2000]}"},
+                ])
+            content = response.choices[0].message.content
+            if content:
+                return _parse_json(content)
+        except Exception as e:
+            if attempt < 1:
+                import time
+                time.sleep(1)
+                continue
+            logging.warning(f"多器官填充失败: {e}")
 
     return {"study_see": f"<div class='rpt-html'>{asr_text}</div>", "study_hint": [], "recommendation": ""}
 
