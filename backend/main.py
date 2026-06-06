@@ -40,6 +40,7 @@ from api_section_templates import router as section_templates_router
 from api_pacs import router as pacs_router
 from api_pacs_config import router as pacs_config_router
 from api_system_log import router as syslog_router
+from api_data_list import router as datalist_router
 import db
 
 BUILD = "20260607-0045"
@@ -51,6 +52,7 @@ app.include_router(section_templates_router)
 app.include_router(pacs_router)
 app.include_router(pacs_config_router)
 app.include_router(syslog_router)
+app.include_router(datalist_router)
 
 # CORS: 允许常见来源但不回显任意Origin（避免creds问题）
 app.add_middleware(

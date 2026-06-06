@@ -258,6 +258,63 @@ def report_confirm(report_id: int, edited: dict) -> dict | None:
     return report_get(report_id)
 
 
+def report_search(keyword: str = None, exam_type: str = None,
+                  template_id: str = None, date_from: str = None,
+                  date_to: str = None, limit: int = 100, offset: int = 0) -> list[dict]:
+    """搜索 reports 表, 支持多条件组合"""
+    c = _conn()
+    sql = "SELECT r.*, p.name as patient_name, p.gender, p.age, p.exam_type FROM reports r LEFT JOIN patients p ON r.patient_id = p.id WHERE 1=1"
+    params = []
+    if keyword:
+        sql += " AND (r.raw_text LIKE ? OR r.structured LIKE ? OR r.template LIKE ? OR p.name LIKE ?)"
+        kw = f"%{keyword}%"
+        params.extend([kw, kw, kw, kw])
+    if exam_type:
+        sql += " AND p.exam_type LIKE ?"
+        params.append(f"%{exam_type}%")
+    if template_id:
+        sql += " AND (r.template LIKE ? OR r.structured LIKE ?)"
+        params.extend([f"%{template_id}%", f"%{template_id}%"])
+    if date_from:
+        sql += " AND r.created_at >= ?"
+        params.append(date_from)
+    if date_to:
+        sql += " AND r.created_at < ?"
+        params.append(date_to)
+    sql += " ORDER BY r.created_at DESC LIMIT ? OFFSET ?"
+    params.extend([limit, offset])
+    rows = c.execute(sql, params).fetchall()
+    results = []
+    for row in rows:
+        d = dict(row)
+        if d.get("structured"):
+            try: d["structured"] = json.loads(d["structured"])
+            except: pass
+        results.append(d)
+    return results
+
+
+def api_report_search(keyword: str = None, date_from: str = None,
+                      date_to: str = None, limit: int = 100, offset: int = 0) -> list[dict]:
+    """搜索 api_reports 表"""
+    c = _conn()
+    sql = "SELECT * FROM api_reports WHERE 1=1"
+    params = []
+    if keyword:
+        sql += " AND (NAME LIKE ? OR DESCRIBES LIKE ? OR DIAGNOSIS LIKE ? OR ModuleName LIKE ? OR OUTPATIENTNO LIKE ?)"
+        kw = f"%{keyword}%"
+        params.extend([kw, kw, kw, kw, kw])
+    if date_from:
+        sql += " AND examdate >= ?"
+        params.append(date_from)
+    if date_to:
+        sql += " AND examdate < ?"
+        params.append(date_to)
+    sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+    params.extend([limit, offset])
+    return [dict(r) for r in c.execute(sql, params).fetchall()]
+
+
 # ==================== 操作留痕 ====================
 
 def audit_log(action: str, patient_id: int = None, input_text: str = None,

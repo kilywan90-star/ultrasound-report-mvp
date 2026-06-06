@@ -149,7 +149,7 @@ textarea.txt:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px
 </head>
 <body>
 
-<div class="bar"><span>超声报告语音结构化<span class="ver" id="app_ver">v3.1-加载中...</span></span><span style="font-size:10px"><kbd>Ctrl+R</kbd> 录音 <kbd>Ctrl+S</kbd> 保存 <kbd>Ctrl+Enter</kbd> 发送  <button class="btn" onclick="toggleSysLog()" style="font-size:10px;padding:3px 10px;margin-left:8px;background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:3px;cursor:pointer">系统日志</button></span></div>
+<div class="bar"><span>超声报告语音结构化<span class="ver" id="app_ver">v3.1-加载中...</span></span><span style="font-size:10px"><kbd>Ctrl+R</kbd> 录音 <kbd>Ctrl+S</kbd> 保存 <kbd>Ctrl+Enter</kbd> 发送  <button class="btn" onclick="toggleSysLog()" style="font-size:10px;padding:3px 10px;margin-left:8px;background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:3px;cursor:pointer">系统日志</button><button class="btn" onclick="toggleDataList()" style="font-size:10px;padding:3px 10px;margin-left:4px;background:rgba(255,255,255,.15);color:white;border:1px solid rgba(255,255,255,.3);border-radius:3px;cursor:pointer">数据列表</button></span></div>
 
 <div id="syslog_panel" style="display:none;position:fixed;top:50px;right:10px;width:720px;max-height:80vh;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:999;overflow:hidden;resize:both">
   <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface-alt);border-bottom:1px solid var(--border);cursor:move" id="syslog_header">
@@ -229,6 +229,135 @@ function filterSysLog(){refreshSysLog();}
 document.addEventListener('DOMContentLoaded',function(){
   var header=document.getElementById('syslog_header');
   var panel=document.getElementById('syslog_panel');
+  if(!header||!panel)return;
+  var ox,oy,px,py,dragging=false;
+  header.onmousedown=function(e){dragging=true;ox=e.clientX;oy=e.clientY;px=panel.offsetLeft;py=panel.offsetTop;e.preventDefault()};
+  document.onmousemove=function(e){if(!dragging)return;panel.style.left=(px+e.clientX-ox)+'px';panel.style.top=(py+e.clientY-oy)+'px';panel.style.right='auto'};
+  document.onmouseup=function(){dragging=false};
+});
+</script>
+
+<!-- 数据列表面板 -->
+<div id="datalist_panel" style="display:none;position:fixed;top:50px;right:10px;width:900px;max-height:85vh;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);z-index:998;overflow:hidden;resize:both">
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--surface-alt);border-bottom:1px solid var(--border)" id="datalist_header">
+    <span style="font-weight:600;font-size:12px">数据列表</span>
+    <div style="display:flex;gap:6px;align-items:center">
+      <select id="dl_table" onchange="loadDataList()" style="font-size:10px;padding:2px;border:1px solid var(--border);border-radius:3px">
+        <option value="all">全部</option><option value="reports">reports</option><option value="api_reports">api_reports(PACS)</option><option value="audit_log">audit_log</option>
+      </select>
+      <input id="dl_search" placeholder="搜索..." oninput="loadDataList()" style="font-size:10px;padding:3px 6px;border:1px solid var(--border);border-radius:3px;width:120px">
+      <select id="dl_year" onchange="loadDataList()" style="font-size:10px;padding:2px;border:1px solid var(--border);border-radius:3px"><option value="">年</option></select>
+      <select id="dl_month" onchange="loadDataList()" style="font-size:10px;padding:2px;border:1px solid var(--border);border-radius:3px"><option value="">月</option></select>
+      <select id="dl_day" onchange="loadDataList()" style="font-size:10px;padding:2px;border:1px solid var(--border);border-radius:3px"><option value="">日</option></select>
+      <button class="btn" onclick="loadDataList()" style="font-size:9px;padding:3px 8px">查询</button>
+      <button class="btn" onclick="document.getElementById('datalist_panel').style.display='none'" style="font-size:9px;padding:3px 8px">关闭</button>
+    </div>
+  </div>
+  <div id="datalist_body" style="max-height:calc(85vh - 50px);overflow:auto;padding:6px;font-size:10px">
+    <div style="text-align:center;padding:20px;color:var(--text-secondary)">点击查询加载数据...</div>
+  </div>
+</div>
+
+<script>
+function toggleDataList(){
+  var p=document.getElementById('datalist_panel');
+  if(p.style.display==='block'){p.style.display='none';return}
+  p.style.display='block';
+  // init year dropdown
+  var ys=document.getElementById('dl_year');
+  if(!ys.options.length||ys.options.length<=2){
+    ys.innerHTML='<option value="">年</option>';
+    for(var y=2024;y<=2027;y++){ys.innerHTML+='<option value=\"'+y+'\">'+y+'</option>';}
+  }
+  var ms=document.getElementById('dl_month');
+  if(!ms.options.length||ms.options.length<=2){
+    ms.innerHTML='<option value="">月</option>';
+    for(var m=1;m<=12;m++){ms.innerHTML+='<option value=\"'+m+'\">'+m+'月</option>';}
+  }
+  var ds=document.getElementById('dl_day');
+  if(!ds.options.length||ds.options.length<=2){
+    ds.innerHTML='<option value="">日</option>';
+    for(var d=1;d<=31;d++){ds.innerHTML+='<option value=\"'+d+'\">'+d+'日</option>';}
+  }
+  loadDataList();
+}
+
+function loadDataList(){
+  var body=document.getElementById('datalist_body');
+  body.innerHTML='<div style=\"text-align:center;padding:20px;color:var(--text-secondary)\">加载中...</div>';
+
+  var params=[];
+  var table=document.getElementById('dl_table').value;
+  var search=document.getElementById('dl_search').value.trim();
+  var year=document.getElementById('dl_year').value;
+  var month=document.getElementById('dl_month').value;
+  var day=document.getElementById('dl_day').value;
+  params.push('table='+table);
+  params.push('limit=200');
+  if(search) params.push('keyword='+encodeURIComponent(search));
+  if(year) params.push('year='+year);
+  if(month) params.push('month='+month);
+  if(day) params.push('day='+day);
+
+  fetch('/api/data/list?'+params.join('&')).then(function(r){return r.json()}).then(function(d){
+    if(!d.data||!d.data.length){
+      body.innerHTML='<div style=\"text-align:center;padding:20px;color:var(--text-secondary)\">无匹配数据</div>';
+      return;
+    }
+    renderDataList(d.data);
+  }).catch(function(e){
+    body.innerHTML='<div style=\"text-align:center;padding:20px;color:var(--danger)\">加载失败: '+e.message+'</div>';
+  });
+}
+
+function renderDataList(data){
+  var body=document.getElementById('datalist_body');
+  // Build a compact but informative table
+  var html='<table style=\"width:100%;border-collapse:collapse;font-size:9px\">';
+  html+='<tr style=\"background:var(--bg);font-weight:600;position:sticky;top:0\">';
+  html+='<td style=\"padding:3px 4px;width:50px\">ID</td>';
+  html+='<td style=\"padding:3px 4px;width:50px\">表</td>';
+  html+='<td style=\"padding:3px 4px;width:90px\">日期</td>';
+  html+='<td style=\"padding:3px 4px;width:60px\">患者</td>';
+  html+='<td style=\"padding:3px 4px;width:70px\">模板/方法</td>';
+  html+='<td style=\"padding:3px 4px;min-width:200px\">超声所见</td>';
+  html+='<td style=\"padding:3px 4px;min-width:120px\">提示</td>';
+  html+='<td style=\"padding:3px 4px;width:50px\">操作</td>';
+  html+='</tr>';
+  for(var i=0;i<data.length;i++){
+    var r=data[i];
+    var id=r.id||'';
+    var tbl=r._table||'';
+    var dt=(r.created_at||r.examdate||'').substring(0,16)||'--';
+    var name=r.patient_name||r.NAME||'--';
+    var method=r._method||r._template_used||r.action||'--';
+    var see=(r._study_see||'').substring(0,80);
+    var hint='';
+    if(Array.isArray(r._study_hint)){hint=r._study_hint.map(function(h){return h.diagnosis||''}).join('; ').substring(0,60);}
+    else if(typeof r._study_hint==='string'){hint=r._study_hint.substring(0,60);}
+    else if(r.DIAGNOSIS){hint=r.DIAGNOSIS.substring(0,60);}
+    var audioPath=r.audio_path||r.audio_path_1||'';
+    var hasAudio=audioPath?'*':'';
+    html+='<tr style=\"border-bottom:1px solid var(--bg)\">';
+    html+='<td style=\"padding:3px 4px\">'+id+'</td>';
+    html+='<td style=\"padding:3px 4px;color:var(--text-secondary)\">'+tbl+'</td>';
+    html+='<td style=\"padding:3px 4px;color:var(--text-secondary)\">'+dt+'</td>';
+    html+='<td style=\"padding:3px 4px\">'+name+''+hasAudio+'</td>';
+    html+='<td style=\"padding:3px 4px;color:var(--primary);font-weight:500\">'+method+'</td>';
+    html+='<td style=\"padding:3px 4px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap\">'+see+'</td>';
+    html+='<td style=\"padding:3px 4px;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-secondary)\">'+hint+'</td>';
+    html+='<td style=\"padding:3px 4px\">'+(hasAudio?'<a href=\"/api/audio/'+(audioPath.replace(/.*[\\\\/]/,'').replace(/\.[^.]+$/,''))+'\" target=\"_blank\" title=\"回听语音\" style=\"color:var(--primary);cursor:pointer\">&#9654;</a>':'')+'</td>';
+    html+='</tr>';
+  }
+  html+='</table>';
+  html+='<div style=\"text-align:center;padding:6px;font-size:9px;color:var(--text-secondary)\">共 '+data.length+' 条</div>';
+  body.innerHTML=html;
+}
+
+// 数据列表面板拖动
+document.addEventListener('DOMContentLoaded',function(){
+  var header=document.getElementById('datalist_header');
+  var panel=document.getElementById('datalist_panel');
   if(!header||!panel)return;
   var ox,oy,px,py,dragging=false;
   header.onmousedown=function(e){dragging=true;ox=e.clientX;oy=e.clientY;px=panel.offsetLeft;py=panel.offsetTop;e.preventDefault()};
