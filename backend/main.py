@@ -365,6 +365,19 @@ async def structure(req: StructureRequest):
     if is_fetal and req.patient_gender != "男":
         report = fill_fetal_template(A)
         report = _wrap_hints_with_toggle(report)
+
+        # Save to reports table (same as normal path)
+        if req.patient_id and req.patient_id.strip():
+            try:
+                pid = int(req.patient_id)
+                db.report_create(pid, "胎儿超声", req.text, _filter_checked(report))
+            except Exception as e:
+                logging.warning(f"胎儿报告保存失败: {e}")
+
+        # Save trace log
+        db.audit_log("fetal_template", patient_id=int(req.patient_id) if (req.patient_id and req.patient_id.strip()) else None,
+                      input_text=req.text[:300], output_text=_extract_plain_text(report.get("study_see", ""))[:300])
+
         return _make_response(report, req, "fetal_template", "胎儿超声标准模板", 0.9, warnings, A)
 
     # Step1: Pattern match
