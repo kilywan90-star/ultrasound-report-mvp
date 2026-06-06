@@ -272,6 +272,25 @@ def audit_log(action: str, patient_id: int = None, input_text: str = None,
     c.commit()
 
 
+def audit_log_search(keyword: str = None, action: str = None,
+                     limit: int = 500, offset: int = 0) -> list[dict]:
+    """搜索审计日志, 支持关键词+级别过滤"""
+    c = _conn()
+    sql = "SELECT * FROM audit_log WHERE 1=1"
+    params = []
+    if keyword:
+        sql += " AND (input_text LIKE ? OR output_text LIKE ? OR detail LIKE ? OR action LIKE ?)"
+        kw = f"%{keyword}%"
+        params.extend([kw, kw, kw, kw])
+    if action:
+        sql += " AND (action = ? OR detail LIKE ?)"
+        params.extend([action, f'%{action}%'])
+    sql += " ORDER BY created_at DESC LIMIT ? OFFSET ?"
+    params.extend([limit, offset])
+    rows = c.execute(sql, params).fetchall()
+    return [dict(r) for r in rows]
+
+
 # ==================== 标准化报告存档 (匹配CSV格式) ====================
 
 def api_report_save(
