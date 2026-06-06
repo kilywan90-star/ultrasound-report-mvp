@@ -392,7 +392,7 @@ document.addEventListener('DOMContentLoaded',function(){
       <!-- 意图识别 -->
       <div id="intent_bar" class="intent-bar">
         <span style="color:var(--primary);font-weight:600">模板:</span>
-        <select id="intent_sel" onchange="onTemplateChange()" style="font-size:11px;padding:2px 4px;border:1px solid var(--primary);border-radius:3px;max-width:160px;margin-left:4px"><option value="">自动选择...</option></select>
+        <select id="intent_sel" onchange="onTemplateChange()" style="font-size:11px;padding:2px 4px;border:1px solid var(--primary);border-radius:3px;max-width:320px;margin-left:4px"><option value="">自动选择...</option></select>
         <span style="color:#1e40af;font-weight:600" id="intent_name" title="当前模板">-</span>
         <span style="color:var(--text-secondary);font-size:10px" id="intent_conf"></span>
         <button class="btn" onclick="toggleTemplatePreview()" style="font-size:10px;padding:2px 6px;margin-left:6px" title="查看/复制模板内容">预览</button>
@@ -496,6 +496,8 @@ document.addEventListener('DOMContentLoaded',function(){
 <div class="toasts" id="toasts"></div>
 
 <script>
+function t(m,c){var ct=document.getElementById("toasts");var d=document.createElement("div");d.className="toast "+(c||"s");d.textContent=m;ct.appendChild(d);setTimeout(function(){d.remove()},3500)}
+
 // HTTPS 检测: 只在标准80端口才跳转(浏览器会强制HTTPS升级), 自定义端口保持HTTP
 if(location.protocol==='http:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'&&!location.port){
   location.replace('https://'+location.host+location.pathname+location.search);
@@ -585,6 +587,54 @@ function doTransAuto(){
     setSt('idle');
     document.getElementById('tb').disabled=false;
   });
+
+function t(m,c){var ct=document.getElementById('toasts');var d=document.createElement('div');d.className='toast '+(c||'s');d.textContent=m;ct.appendChild(d);setTimeout(function(){d.remove()},3500)}
+
+document.addEventListener('keydown',function(e){if(e.ctrlKey&&e.key==='r'){e.preventDefault();toggleRec()}if(e.ctrlKey&&e.key==='s'){e.preventDefault();doSave()}if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();doSend()}if(e.key==='Escape'){e.preventDefault();if(S.sel)rs()}})
+
+
+function doStructFixed(){
+  var text=document.getElementById('rt').value.trim();
+  if(!text){t('请先输入内容','e');return}
+  var cat=S.ftCategory||document.getElementById('intent_name').textContent||'腹部';
+  document.getElementById('sb').disabled=true;setSt('o','填充中...');
+  fetch('/api/fixed-template/structure',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,fixed_template:S.customTemplate||''})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail||'失败','e');setSt('idle');document.getElementById('sb').disabled=false;return}
+    document.getElementById('se').innerHTML=d.filled_template||'';
+    document.getElementById('hc').innerHTML='';document.getElementById('rc').textContent='';up();
+    document.getElementById('svb').disabled=false;document.getElementById('sdb').disabled=false;
+    document.getElementById('sb').disabled=false;setSt('k','完成');
+    showIntent(d);
+  }).catch(function(e){t('失败','e');setSt('idle');document.getElementById('sb').disabled=false})}
+
+function renderHints(rpt){var hc=document.getElementById('hc');hc.innerHTML='';(rpt.study_hint||[]).forEach(function(h,i){var d=document.createElement('div');d.className='hcard';d.innerHTML='<div class="hh"><span style="font-weight:600;color:#2563eb">'+h.rank+'. '+e(h.diagnosis||'')+'</span><span style="font-size:9px;color:#64748b">'+(h.icd10?e(h.icd10):'')+'</span><button class="btn-del" onclick="dh(this,\''+h.id+'\')">✕ 删除</button><button class="btn-res" onclick="eh(this,\''+h.id+'\')">↩ 恢复</button></div>';hc.appendChild(d)})}
+
+function dh(btn,id){S.dels.add(id);btn.closest('.hcard').classList.add('off');btn.style.display='none';btn.nextElementSibling.style.display='inline-block';up();ukc()}
+
+function eh(btn,id){S.dels.delete(id);btn.closest('.hcard').classList.remove('off');btn.style.display='none';btn.previousElementSibling.style.display='';up();ukc()}
+
+function ukc(){var t=(S.rpt?S.rpt.study_hint||[]:[]).length;document.getElementById('kc').textContent=t-S.dels.size}
+
+function onTemplateChange(){
+  var sel=document.getElementById('intent_sel');
+  var tag=sel.options[sel.selectedIndex].textContent;
+  var cat=sel.value;
+  // 获取optgroup的label作为分类名
+  var optgroupLabel=sel.options[sel.selectedIndex].parentNode.label||cat;
+  if(cat){
+    document.getElementById('intent_name').textContent=optgroupLabel+' → '+tag;
+    document.getElementById('intent_conf').textContent='(手动选择)';
+    S.ftCategory=cat;
+    S.currentTagName=tag;
+    S.currentCategory=optgroupLabel;
+    t('已切换到: '+optgroupLabel+' → '+tag,'s');
+    fetchAndShowTemplate(tag, optgroupLabel);
+    var text=document.getElementById('rt').value.trim();
+    if(text&&text.length>=10){
+      doStructFixed();
+    }
+  }
+}
+
 }
 function doTrans(){
   if(!S.ab){t('请先录音','e');return}
@@ -855,7 +905,7 @@ function populateTemplateSelect(){
         o.value=tplCat;
         var name=tpl.source||tpl.id;
         var flag=tpl.variables?'[V] ':'';
-        o.textContent=flag+tpl.id+' '+name.substring(0,40);
+        o.textContent=tplCat+' | '+tpl.id+' | '+name.substring(0,50);
         og.appendChild(o);
       });
       sel.appendChild(og);
@@ -867,6 +917,127 @@ function populateTemplateSelect(){
   });
 }
 
-document.addEventListener('keydown',function(e){if(e.ctrlKey&&e.key==='r'){e.preventDefault();toggleRec()}if(e.ctrlKey&&e.key==='s'){e.preventDefault();doSave()}if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();doSend()}if(e.key==='Escape'){e.preventDefault();if(S.sel)rs()}})
+
+
+function e(s){if(s===null||s===undefined)return'';return String(s).replace(/[<>&]/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;'}[c]})}
+
+function toggleP(id){document.getElementById(id).classList.toggle('coll')}
+function onCustomTemplateChange(){
+  var v=document.getElementById('ct').value.trim();
+  S.customTemplate=v||'';
+  // 输入固定模板后自动触发意图识别
+  if(v&&v.length>=20){
+    var text=document.getElementById('rt').value.trim();
+    if(text&&text.length>=10){
+      clearTimeout(S._ctDebounce);
+      S._ctDebounce=setTimeout(function(){doStructFixed()},500);
+    }
+  }
+}
+
+
+function clearCustomTemplate(){
+  document.getElementById('ct').value='';
+  S.customTemplate='';
+  t('已清除自定义模板，使用系统默认','s');
+}
+
+function toggleTemplatePreview(){
+  var panel=document.getElementById('template_preview_panel');
+  if(panel.style.display==='block'){panel.style.display='none';return}
+  // 尝试获取当前模板名和分类
+  var tagName=S.currentTagName||'';
+  var category=S.currentCategory||'';
+  if(!tagName){t('请先从下拉框选择模板','e');return}
+  fetchAndShowTemplate(tagName, category);
+}
+
+function fetchAndShowTemplate(tagName, category){
+  var panel=document.getElementById('template_preview_panel');
+  var displayName = category ? category+' → '+tagName : tagName;
+  document.getElementById('tpl_preview_name').textContent='模板: '+displayName+' (加载中...)';
+  document.getElementById('tpl_edit_info1').value='';
+  document.getElementById('tpl_edit_info2').value='';
+  document.getElementById('tpl_save_status').textContent='';
+  panel.style.display='block';
+  // 搜索匹配的CSV模板
+  fetch('/api/template/search?q='+encodeURIComponent(tagName)).then(function(r){return r.json()}).then(function(d){
+    if(d.templates&&d.templates.length>0){
+      var tpl=d.templates[0];
+      TPL_CURRENT_NAME=tpl.name;
+      document.getElementById('tpl_preview_name').textContent='模板: '+displayName+' ('+tpl.name+')';
+      document.getElementById('tpl_edit_info1').value=tpl.info1||'';
+      document.getElementById('tpl_edit_info2').value=tpl.info2||'';
+      TPL_PREVIEW_TEXT=tpl.info1||'';
+      document.getElementById('tpl_save_status').textContent='模块: '+(tpl.module||'-')+' | 分组: '+(tpl.group||'-');
+    }else{
+      document.getElementById('tpl_preview_name').textContent='模板: '+displayName+' (未找到匹配模板)';
+      document.getElementById('tpl_save_status').textContent='提示: 可手动输入模板内容后保存';
+    }
+  }).catch(function(err){
+    document.getElementById('tpl_preview_name').textContent='模板: '+displayName+' (加载失败)';
+    t('模板加载失败','e');
+  });
+}
+
+// 保存模板修改
+
+function saveTemplate(){
+  var name=TPL_CURRENT_NAME;
+  var info1=document.getElementById('tpl_edit_info1').value;
+  var info2=document.getElementById('tpl_edit_info2').value;
+  if(!name){
+    t('请先选择一个已有模板','e');return;
+  }
+  var status=document.getElementById('tpl_save_status');
+  status.textContent='保存中...';
+  fetch('/api/template/'+encodeURIComponent(name),{
+    method:'PUT',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({info1:info1,info2:info2})
+  }).then(function(r){return r.json()}).then(function(d){
+    if(d.success){
+      status.textContent='已保存';status.style.color='#16a34a';
+      t('模板 "'+name+'" 已保存','s');
+      TPL_PREVIEW_TEXT=info1;
+      setTimeout(function(){status.textContent=''},3000);
+    }else{
+      status.textContent='保存失败: '+(d.detail||'未知错误');status.style.color='#dc2626';
+      t('保存失败','e');
+    }
+  }).catch(function(err){
+    status.textContent='保存失败: '+err.message;status.style.color='#dc2626';
+    t('保存失败','e');
+  });
+}
+
+function copyTemplateText(){
+  var txt=document.getElementById('tpl_edit_info1').value||'';
+  if(!txt.trim()){t('暂无可复制的模板内容','e');return}
+  navigator.clipboard.writeText(txt).then(function(){t('模板已复制到剪贴板','s')}).catch(function(){t('复制失败','e')});
+}
+
+function fillTest(i){
+  if(i<0||i>=TEST_TEXTS.length)return;
+  document.getElementById('rt').value=TEST_TEXTS[i];
+  document.getElementById('sb').disabled=false;
+  var exam=TEST_EXAM_TYPES[i];
+  // 同时设置检查类型下拉框
+  var sel=document.getElementById('qe');
+  if(sel){
+    for(var j=0;j<sel.options.length;j++){
+      if(sel.options[j].value===exam||sel.options[j].text===exam){sel.value=sel.options[j].value;break}
+    }
+  }
+  document.getElementById('rt').focus();
+  t('已填入: '+exam+' 测试文本','s');
+  // 自动触发 ABCDEF 结构化
+  doStruct();
+}
+// 自动版本号 (从后端 /api/health 获取)
+fetch('/api/health').then(function(r){return r.json()}).then(function(d){
+  var el=document.getElementById('app_ver');
+  if(el&&d.version) el.textContent=d.version;
+}).catch(function(){});
+
 lq();document.getElementById('qn').focus()
 </script>
