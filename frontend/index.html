@@ -835,264 +835,36 @@ function populateTemplateSelect(){
   var sel=document.getElementById('intent_sel');
   sel.innerHTML='<option value="">自动选择...</option>';
 
-  // 优先从 section-templates/list API 加载
-  fetch('/api/section-templates/list').then(function(r){return r.json()}).then(function(d){
-    if(!d.success||!d.categories) return;
-    var cats=d.categories;
+  var catOrder={'乳腺专科':'甲状腺','甲状腺/颈部软组织':'甲状腺','腹部彩超':'腹部综合','泌尿生殖':'腹部综合','妇科盆腔':'妇科','心血管/心脏':'心脏','体表小器官/软组织':'其他','产科':'妇科'}
+  Promise.all([
+    fetch('/api/section-templates/list').then(function(r){return r.json()}),
+    fetch('/api/exam-parts/catalog').then(function(r){return r.json()})
+  ]).then(function(data){
+    var tplData=data[0], catData=data[1];
+    if(!tplData.success) return;
+    var cats=tplData.categories;
+    var catNames=catData.success? catData.categories.map(function(c){return c.name}) : Object.keys(cats);
     sel.innerHTML='<option value="">自动选择...</option>';
-    for(var cat in cats){
-      var og=document.createElement('optgroup');
-      og.label=cat;
-      cats[cat].templates.forEach(function(tpl){
+    catNames.forEach(function(catName){
+      var tplCat=catOrder[catName]||catName;
+      var items=cats[tplCat];
+      if(!items||!items.templates.length) return;
+      var og=document.createElement('optgroup'); og.label=catName;
+      items.templates.forEach(function(tpl){
         var o=document.createElement('option');
-        o.value=cat; o.textContent=(tpl.variables?'[V] ':'')+tpl.id+' '+(tpl.text||'').substring(0,30);
+        o.value=tplCat;
+        var name=tpl.source||tpl.id;
+        var flag=tpl.variables?'[V] ':'';
+        o.textContent=flag+tpl.id+' '+name.substring(0,40);
         og.appendChild(o);
       });
       sel.appendChild(og);
-    }
+    });
   }).catch(function(){
-    // Fallback: 硬编码
-    var defaults={'腹部综合':['正常腹部','脂肪肝','肝囊肿','胆囊结石'],'甲状腺':['正常甲状腺','甲状腺结节'],'心脏':['正常心脏','二尖瓣反流'],'妇科':['正常妇科','早孕'],'其他':['CDFI正常']};
     sel.innerHTML='<option value="">自动选择...</option>';
-    for(var cat in defaults){
-      var og=document.createElement('optgroup');
-      og.label=cat;
-      defaults[cat].forEach(function(tag){var o=document.createElement('option');o.value=cat;o.textContent=tag;og.appendChild(o)});
-      sel.appendChild(og);
-    }
-  });
-}
-// 页面加载时填充模板下拉框
-setTimeout(populateTemplateSelect, 500);
-setTimeout(loadAllTags, 1000);
-function onTemplateChange(){
-  var sel=document.getElementById('intent_sel');
-  var tag=sel.options[sel.selectedIndex].textContent;
-  var cat=sel.value;
-  // 获取optgroup的label作为分类名
-  var optgroupLabel=sel.options[sel.selectedIndex].parentNode.label||cat;
-  if(cat){
-    document.getElementById('intent_name').textContent=optgroupLabel+' → '+tag;
-    document.getElementById('intent_conf').textContent='(手动选择)';
-    S.ftCategory=cat;
-    S.currentTagName=tag;
-    S.currentCategory=optgroupLabel;
-    t('已切换到: '+optgroupLabel+' → '+tag,'s');
-    fetchAndShowTemplate(tag, optgroupLabel);
-    var text=document.getElementById('rt').value.trim();
-    if(text&&text.length>=10){
-      doStructFixed();
-    }
-  }
-}
-
-function doStructFixed(){
-  var text=document.getElementById('rt').value.trim();
-  if(!text){t('请先输入内容','e');return}
-  var cat=S.ftCategory||document.getElementById('intent_name').textContent||'腹部';
-  document.getElementById('sb').disabled=true;setSt('o','填充中...');
-  fetch('/api/fixed-template/structure',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text:text,fixed_template:S.customTemplate||''})}).then(function(r){return r.json()}).then(function(d){if(!d.success){t(d.detail||'失败','e');setSt('idle');document.getElementById('sb').disabled=false;return}
-    document.getElementById('se').innerHTML=d.filled_template||'';
-    document.getElementById('hc').innerHTML='';document.getElementById('rc').textContent='';up();
-    document.getElementById('svb').disabled=false;document.getElementById('sdb').disabled=false;
-    document.getElementById('sb').disabled=false;setSt('k','完成');
-    showIntent(d);
-  }).catch(function(e){t('失败','e');setSt('idle');document.getElementById('sb').disabled=false})}
-
-// ==================== 原结构化函数(带意图并行) ====================
-function renderHints(rpt){var hc=document.getElementById('hc');hc.innerHTML='';(rpt.study_hint||[]).forEach(function(h,i){var d=document.createElement('div');d.className='hcard';d.innerHTML='<div class="hh"><span style="font-weight:600;color:#2563eb">'+h.rank+'. '+e(h.diagnosis||'')+'</span><span style="font-size:9px;color:#64748b">'+(h.icd10?e(h.icd10):'')+'</span><button class="btn-del" onclick="dh(this,\''+h.id+'\')">✕ 删除</button><button class="btn-res" onclick="eh(this,\''+h.id+'\')">↩ 恢复</button></div>';hc.appendChild(d)})}
-function dh(btn,id){S.dels.add(id);btn.closest('.hcard').classList.add('off');btn.style.display='none';btn.nextElementSibling.style.display='inline-block';up();ukc()}
-function eh(btn,id){S.dels.delete(id);btn.closest('.hcard').classList.remove('off');btn.style.display='none';btn.previousElementSibling.style.display='';up();ukc()}
-function ukc(){var t=(S.rpt?S.rpt.study_hint||[]:[]).length;document.getElementById('kc').textContent=t-S.dels.size}
-function up(){var pv=document.getElementById('pv');var see=document.getElementById('se').innerText.trim();var hints=(S.rpt?S.rpt.study_hint||[]:[]).filter(function(h){return !S.dels.has(h.id)});var rec=document.getElementById('rc').textContent.trim();
-  if(!see&&!hints.length){pv.innerHTML='<p style="color:#64748b;text-align:center;padding:20px;font-family:inherit">内容为空</p>';return}
-  var now=new Date();var ts=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-  var ptName=S.sel?S.sel.name:'';
-  var h='<div style="border-bottom:2px solid #334155;padding-bottom:6px;margin-bottom:10px">';
-  h+='<div style="font-size:13px;font-weight:700;color:#1e293b;text-align:center;letter-spacing:2px">超声检查报告</div>';
-  if(ptName)h+='<div style="font-size:10px;color:#64748b;text-align:center;margin-top:2px">患者: '+e(ptName)+'</div>';
-  h+='<div style="font-size:9px;color:#94a3b8;text-align:center;margin-top:1px">'+ts+'</div>';
-  h+='</div>';
-  h+='<div style="font-size:11px;font-weight:700;color:#334155;margin:8px 0 4px;border-left:3px solid #2563eb;padding-left:6px">超声所见</div>';
-  h+='<div style="white-space:pre-wrap;line-height:1.8;font-size:11px;color:#1e293b;padding:4px 0 8px;border-bottom:1px dashed #e2e8f0">'+e(see)+'</div>';
-  if(hints.length){
-    h+='<div style="font-size:11px;font-weight:700;color:#334155;margin:8px 0 4px;border-left:3px solid #2563eb;padding-left:6px">超声提示</div>';
-    hints.forEach(function(x){h+='<div style="padding:2px 0;font-size:11px;color:#1e293b">'+x.rank+'. '+e(x.diagnosis||'')+(x.icd10?' <span style="color:#94a3b8;font-size:9px">('+e(x.icd10)+')</span>':'')+'</div>'});
-  }
-  if(rec){h+='<div style="font-size:11px;font-weight:700;color:#334155;margin:8px 0 4px;border-left:3px solid #2563eb;padding-left:6px">建议</div><div style="font-size:11px;color:#1e293b;line-height:1.7">'+e(rec)+'</div>'}
-  h+='<div style="margin-top:12px;padding-top:6px;border-top:2px solid #334155;font-size:9px;color:#94a3b8;text-align:right">— 报告预览 (模拟PACS输出) —</div>';
-  pv.innerHTML=h}
-function copyReportPreview(){var pv=document.getElementById('pv');var txt=pv.innerText.trim();if(!txt||txt==='内容为空'){t('暂无报告内容','e');return}navigator.clipboard.writeText(txt).then(function(){t('报告已复制到剪贴板','s')}).catch(function(){t('复制失败','e')})}
-
-// ==================== 保存/发送 ====================
-function onEdit(){document.getElementById('upb').disabled=false}
-function doUpdatePreview(){if(!S.rpt){t('请先完成结构化','e');return};up();t('预览已刷新','s');document.getElementById('pv').scrollIntoView({behavior:'smooth'})}
-function br(){return{study_see:document.getElementById('se').innerText.trim(),study_hint:(S.rpt?S.rpt.study_hint||[]:[]).filter(function(h){return !S.dels.has(h.id)}).map(function(h){return{rank:h.rank,diagnosis:h.diagnosis,icd10:h.icd10}}),recommendation:document.getElementById('rc').textContent.trim()}}
-function doSave(){if(!S.rpt){t('请先完成结构化','e');return};up();localStorage['rpt_'+S.sel.id]=JSON.stringify(br());document.getElementById('upb').disabled=true;t('已保存草稿，可继续修改','s')}
-function doSend(){if(!S.rpt){t('请先完成结构化','e');return}if(!confirm('确认发送至PACS？发送后不可修改。'))return;doSave();done();
-  // 发送至 PACS API
-  var rpt=br();
-  rpt.patient_name=S.sel?S.sel.name:'';rpt.patient_sex=S.sel?S.sel.gender:'';rpt.patient_age=S.sel?S.sel.age:'';
-  fetch('/api/pacs/report/send',{method:'POST',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({describes:rpt.study_see,diagnosis:(rpt.study_hint||[]).map(function(h){return h.diagnosis}).join('; '),template_name:S.currentTagName||'',patient_name:rpt.patient_name,patient_sex:rpt.patient_sex,patient_age:rpt.patient_age,exam_date:new Date().toISOString().split('T')[0]})
-  }).then(function(r){return r.json()}).then(function(d){
-    if(d.success)t('已发送至PACS ('+(d.report_id||'')+')','s');
-    else t('PACS发送失败','e');
-  }).catch(function(){t('PACS连接失败','e')});
-  document.getElementById('sdb').disabled=true;document.getElementById('svb').disabled=true;}
-
-// ==================== 工具 ====================
-function toggleP(id){document.getElementById(id).classList.toggle('coll')}
-function e(s){if(s===null||s===undefined)return'';return String(s).replace(/[<>&]/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;'}[c]})}
-function t(m,c){var ct=document.getElementById('toasts');var d=document.createElement('div');d.className='toast '+(c||'s');d.textContent=m;ct.appendChild(d);setTimeout(function(){d.remove()},3500)}
-
-// ==================== P0-3: 自定义模板管理 ====================
-function onCustomTemplateChange(){
-  var v=document.getElementById('ct').value.trim();
-  S.customTemplate=v||'';
-  // 输入固定模板后自动触发意图识别
-  if(v&&v.length>=20){
-    var text=document.getElementById('rt').value.trim();
-    if(text&&text.length>=10){
-      clearTimeout(S._ctDebounce);
-      S._ctDebounce=setTimeout(function(){doStructFixed()},500);
-    }
-  }
-}
-function clearCustomTemplate(){
-  document.getElementById('ct').value='';
-  S.customTemplate='';
-  t('已清除自定义模板，使用系统默认','s');
-}
-// 模板预览 编辑 保存功能
-var TPL_PREVIEW_TEXT='';
-var TPL_FILLED_TEXT='';
-var TPL_CURRENT_NAME='';
-
-// 获取并显示模板内容（可编辑）
-function fetchAndShowTemplate(tagName, category){
-  var panel=document.getElementById('template_preview_panel');
-  var displayName = category ? category+' → '+tagName : tagName;
-  document.getElementById('tpl_preview_name').textContent='模板: '+displayName+' (加载中...)';
-  document.getElementById('tpl_edit_info1').value='';
-  document.getElementById('tpl_edit_info2').value='';
-  document.getElementById('tpl_save_status').textContent='';
-  panel.style.display='block';
-  // 搜索匹配的CSV模板
-  fetch('/api/template/search?q='+encodeURIComponent(tagName)).then(function(r){return r.json()}).then(function(d){
-    if(d.templates&&d.templates.length>0){
-      var tpl=d.templates[0];
-      TPL_CURRENT_NAME=tpl.name;
-      document.getElementById('tpl_preview_name').textContent='模板: '+displayName+' ('+tpl.name+')';
-      document.getElementById('tpl_edit_info1').value=tpl.info1||'';
-      document.getElementById('tpl_edit_info2').value=tpl.info2||'';
-      TPL_PREVIEW_TEXT=tpl.info1||'';
-      document.getElementById('tpl_save_status').textContent='模块: '+(tpl.module||'-')+' | 分组: '+(tpl.group||'-');
-    }else{
-      document.getElementById('tpl_preview_name').textContent='模板: '+displayName+' (未找到匹配模板)';
-      document.getElementById('tpl_save_status').textContent='提示: 可手动输入模板内容后保存';
-    }
-  }).catch(function(err){
-    document.getElementById('tpl_preview_name').textContent='模板: '+displayName+' (加载失败)';
-    t('模板加载失败','e');
+    var fb={'腹部彩超':['肝脏正常','胆囊正常'],'甲状腺':['甲状腺正常'],'心脏':['心脏正常'],'妇科':['子宫附件']};
+    for(var c in fb){var og=document.createElement('optgroup');og.label=c;fb[c].forEach(function(t){var o=document.createElement('option');o.value=c;o.textContent=t;og.appendChild(o)});sel.appendChild(og);}
   });
 }
 
-// 保存模板修改
-function saveTemplate(){
-  var name=TPL_CURRENT_NAME;
-  var info1=document.getElementById('tpl_edit_info1').value;
-  var info2=document.getElementById('tpl_edit_info2').value;
-  if(!name){
-    t('请先选择一个已有模板','e');return;
-  }
-  var status=document.getElementById('tpl_save_status');
-  status.textContent='保存中...';
-  fetch('/api/template/'+encodeURIComponent(name),{
-    method:'PUT',headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({info1:info1,info2:info2})
-  }).then(function(r){return r.json()}).then(function(d){
-    if(d.success){
-      status.textContent='已保存';status.style.color='#16a34a';
-      t('模板 "'+name+'" 已保存','s');
-      TPL_PREVIEW_TEXT=info1;
-      setTimeout(function(){status.textContent=''},3000);
-    }else{
-      status.textContent='保存失败: '+(d.detail||'未知错误');status.style.color='#dc2626';
-      t('保存失败','e');
-    }
-  }).catch(function(err){
-    status.textContent='保存失败: '+err.message;status.style.color='#dc2626';
-    t('保存失败','e');
-  });
-}
 
-function toggleTemplatePreview(){
-  var panel=document.getElementById('template_preview_panel');
-  if(panel.style.display==='block'){panel.style.display='none';return}
-  // 尝试获取当前模板名和分类
-  var tagName=S.currentTagName||'';
-  var category=S.currentCategory||'';
-  if(!tagName){t('请先从下拉框选择模板','e');return}
-  fetchAndShowTemplate(tagName, category);
-}
-
-function copyTemplateText(){
-  var txt=document.getElementById('tpl_edit_info1').value||'';
-  if(!txt.trim()){t('暂无可复制的模板内容','e');return}
-  navigator.clipboard.writeText(txt).then(function(){t('模板已复制到剪贴板','s')}).catch(function(){t('复制失败','e')});
-}
-function copyFilledText(){
-  var txt=document.getElementById('se').innerText||'';
-  if(!txt.trim()){t('暂无可复制的填充内容','e');return}
-  navigator.clipboard.writeText(txt).then(function(){t('填充内容已复制到剪贴板','s')}).catch(function(){t('复制失败','e')});
-}
-// 结构化完成后更新模板预览内容
-function updateTemplatePreviewText(rawInfo1){
-  if(rawInfo1){TPL_PREVIEW_TEXT=rawInfo1}
-}
-document.addEventListener('keydown',function(e){if(e.ctrlKey&&e.key==='r'){e.preventDefault();toggleRec()}if(e.ctrlKey&&e.key==='s'){e.preventDefault();doSave()}if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();doSend()}if(e.key==='Escape'){e.preventDefault();if(S.sel)rs()}})
-
-// 自动版本号 (从后端 /api/health 获取)
-fetch('/api/health').then(r=>r.json()).then(d=>{
-  var el=document.getElementById('app_ver');
-  if(el&&d.version) el.textContent=d.version;
-}).catch(function(){});
-
-lq();document.getElementById('qn').focus()
-
-// ==================== 测试文本 ====================
-var TEST_TEXTS=[
-  "肝脏大小形态正常，包膜光滑，边缘锐利，实质回声均匀。胆囊大小正常，囊壁光滑，腔内未见异常回声。胰腺形态大小正常，回声均匀。脾脏位置及大小正常。双肾大小形态正常，包膜光滑，实质回声均匀，集合系未见分离。未见异常血流信号。",
-  "肝脏体积稍增大，实质回声增强、增粗，肝肾反差明显，血管走行显示不清，符合脂肪肝声像图改变。胆囊大小正常，囊壁上见一约0.4x0.3cm的高回声团，附壁，后方无声影，不随体位移动，考虑胆囊息肉。胰腺、脾脏、双肾未见明显异常。超声提示: 1.脂肪肝 2.胆囊息肉 K82.8",
-  "子宫呈前位，宫体大小约7.2x5.1x4.8cm，宫腔内可见一孕囊，大小约2.8x1.8cm，可见卵黄囊，胚芽长约0.5cm，可见原始心管搏动，心率约145次/分。双侧卵巢可见，黄体可见。盆腔未见积液。超声提示: 宫内早孕，约孕6周，胚胎存活。",
-  "各房室内径正常范围。室间隔与左室壁厚度正常，静息状态下左室壁运动协调。二尖瓣回声稍增强，关闭时可见少量反流信号，反流面积约1.2平方厘米。三尖瓣可见少量反流。主动脉瓣、肺动脉瓣形态结构未见明显异常。心包腔内未见积液征象。超声提示: 1.二尖瓣少量反流 I34.0 2.三尖瓣少量反流 I07.1",
-  "甲状腺左叶大小约4.5x1.6x1.5cm，右叶大小约4.8x1.8x1.7cm，峡部厚约0.3cm。双侧叶内均可见多个低回声结节，左侧最大约0.6x0.4cm，右侧最大约0.8x0.5cm，边界清晰，形态规则，未见明显钙化。CDFI:结节内未见明显血流信号。双侧颈部未见肿大淋巴结。超声提示: 1.甲状腺双侧叶多发结节，TI-RADS 3类 2.建议6-12个月复查",
-  "经腹前列腺超声检查: 前列腺大小约5.2x4.5x4.2cm，形态饱满，突入膀胱约1.5cm，被膜光滑连续。实质回声欠均匀，内可见多个点状强回声，考虑钙化灶。CDFI:前列腺内未见异常血流信号。排尿后膀胱内残余尿量约80ml。超声提示: 1.前列腺增生伴钙化 N40 2.膀胱残余尿量增多 R33",
-  "双顶径约5.8cm，头围约22.1cm，腹围约19.8cm，股骨长约4.2cm，相当于22周。肱骨长约3.9cm，相当于22周。小脑横径约2.5cm，胎儿体重约480克。羊水最大深度4.5cm，羊水指数12.8cm。脐动脉S/D=2.8，RI=0.62，PI=1.05。胎心率145次/分。胎盘附着子宫后壁，I级。超声提示: 宫内妊娠，单活胎，中孕期，约22周。",
-  "双侧乳腺皮肤皮下组织各层次结构清晰，未见异常。双侧乳腺腺体增厚，回声不均匀，呈片状低回声区，未见明确占位性病变。双侧腋窝及乳腺周围未见长大的淋巴结。CDFI:未见异常的血流信号。超声提示: 双侧乳腺增生样改变 N60.1，BI-RADS 2类。",
-  "双侧颈总动脉内径正常，内膜中层厚度约1.2mm。左侧颈总动脉分叉处后壁可见一约1.2x0.3cm的低回声斑块，右侧颈总动脉未见明显斑块。双侧颈内动脉、颈外动脉内径未见异常。双侧椎动脉颅外段走行及管径未见异常。多普勒检查见血流速度及频谱未见明显异常。超声提示: 1.左侧颈动脉粥样硬化斑块形成 I70.0 2.建议定期复查。",
-  "经颞窗探查: 双侧大脑中动脉、大脑前动脉、大脑后动脉血流方向正常，频谱形态正常。双侧椎动脉及基底动脉血流方向正常，血流速度未见明显增快或减慢。未见异常血流信号。超声提示: 经颅多普勒超声检查未见明显异常。"
-];
-var TEST_EXAM_TYPES=["腹部超声","腹部超声","妇产超声","心脏超声","甲状腺超声","腹部超声","妇产超声","甲状腺超声","血管超声","脑血管超声"];
-
-function fillTest(i){
-  if(i<0||i>=TEST_TEXTS.length)return;
-  document.getElementById('rt').value=TEST_TEXTS[i];
-  document.getElementById('sb').disabled=false;
-  var exam=TEST_EXAM_TYPES[i];
-  // 同时设置检查类型下拉框
-  var sel=document.getElementById('qe');
-  if(sel){
-    for(var j=0;j<sel.options.length;j++){
-      if(sel.options[j].value===exam||sel.options[j].text===exam){sel.value=sel.options[j].value;break}
-    }
-  }
-  document.getElementById('rt').focus();
-  t('已填入: '+exam+' 测试文本','s');
-  // 自动触发 ABCDEF 结构化
-  doStruct();
-}
-</script>
-</body>
-</html>
