@@ -101,7 +101,10 @@ AUDIO_DIR.mkdir(exist_ok=True)
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok", "version": VERSION, "build": BUILD, "templates": 70}
+    from asr_client import _load_hotwords
+    hw_count = len(_load_hotwords())
+    return {"status": "ok", "version": VERSION, "build": BUILD,
+            "templates": 70, "asr_hotwords": hw_count}
 
 @app.get("/api/templates")
 async def list_templates():
@@ -226,7 +229,10 @@ async def transcribe(file: UploadFile = File(...)):
 
     # 转写
     try:
+        from asr_client import _load_hotwords
+        hw_count = len(_load_hotwords())
         result = await transcribe_audio(audio_bytes)
+        logging.info(f"ASR转写成功: 热词{hw_count}个, 原始{len(result['raw'])}字, 纠错{len(result['text'])}字")
     except Exception as e:
         raise HTTPException(500, f"语音识别失败: {e}")
 
@@ -352,7 +358,7 @@ async def structure(req: StructureRequest):
 
     # L0: short text gate
     _meaningful = _re.sub(r'[\s嗯啊哦呃额呢吧啦噢哦\W]', '', A)
-    if len(_meaningful) < 15:
+    if len(_meaningful) < 8:
         raise HTTPException(400, f"录音内容过短（有效字符仅{len(_meaningful)}个），请重新录音")
 
     # Sex guard

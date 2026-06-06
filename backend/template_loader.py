@@ -4,8 +4,8 @@ import csv, os, re
 from pathlib import Path
 from collections import defaultdict, OrderedDict
 
-TEMPLATE_DIR = Path(os.environ.get("TEMPLATE_DIR", ""))
-TEMPLATE_CSV = TEMPLATE_DIR / "超声模板.csv"
+TEMPLATE_DIR = Path(os.environ.get("TEMPLATE_DIR", "") or "knowledge")
+TEMPLATE_CSV = TEMPLATE_DIR / "1长沙范本.csv"
 
 _template_index: OrderedDict[str, dict] = OrderedDict()
 _templates_loaded = False
@@ -96,6 +96,18 @@ def load_templates() -> OrderedDict[str, dict]:
                 _keyword_index[clean] = name
             _keyword_index[name] = name
 
+            # 从info1提取额外关键词 (如"双肾"、"集合系统")
+            if info1:
+                info_keywords = re.findall(r'[双两][侧肾]|[双两]侧[输卵子肾]|实质回声|大小形态|回声均匀|未见[异常占位]', info1)
+                for kw in info_keywords:
+                    if kw not in _keyword_index:
+                        _keyword_index[kw] = name
+            # 额外: 如果模板名含"正常"且info1含"双肾"+"集合系统"，增加专属关键词
+            if '正常' in name and info1 and ('双肾' in info1 or '集合系统' in info1):
+                _keyword_index['肾正常'] = name
+                _keyword_index['双肾正常'] = name
+                _keyword_index['双肾'] = name  # 覆盖"双肾"指向，保障优先命中正常肾模板
+
             # 类别索引
             if group:
                 _category_index[group].append(name)
@@ -125,6 +137,9 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10) -> list[d
 
     scored: dict[str, int] = {}
 
+    from rule_engine import get_rule as _gr
+    organ_words = _gr("templates.organ_words", ["肝脏","胆囊","胰腺","脾脏","肾脏","子宫","卵巢"])
+
     # 策略1: DISCNAME关键词精确匹配
     for keyword in sorted(_keyword_index.keys(), key=len, reverse=True):
         if keyword in text and len(keyword) >= 2:
@@ -142,6 +157,33 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10) -> list[d
                 else:
                     extra_bonus = -50  # 无证据强扣分
             scored[name] = max(scored.get(name, 0), 100 + len(keyword) * 5 + extra_bonus)
+
+        # P0-3: "正常"关键词匹配——文本含"正常"时给正常模板加成
+    normal_words = ["正常", "大小正常", "光滑", "光整", "规则", "均匀", "清晰", "通畅", "可"]
+    has_normal_signal = any(w in text for w in normal_words)
+    if has_normal_signal:
+        for name, entry in _template_index.items():
+            entry_text = (entry.get("name", "") + entry.get("info1", ""))[:100]
+            if "正常" in name and any(w in text for w in ["正常","大小正常","光滑"]):
+                scored[name] = max(scored.get(name, 0), 120)
+            # 文本含器官词且模板名含"正常"时保底加分
+            if "正常" in name:
+                for organ in organ_words:
+                    if organ in text and organ in (entry.get("info1","") + entry.get("name","")):
+                        scored[name] = max(scored.get(name, 0), 80)
+                        break
+                # 额外: 匹配"双肾"、"集合系统"等字段
+                extra_kidney_words = ["双肾", "集合系统", "肾"]
+                if any(kw in entry.get("info1","")[:200] for kw in extra_kidney_words) and \
+                   any(kw in text for kw in ["双肾", "集合系统", "肾", "肾"]):
+                    scored[name] = max(scored.get(name, 0), 100)
+                # 直接匹配: 如果文本含"双肾"且模板info1含"双肾"
+                if "双肾" in text:
+                    if "双肾" in (entry.get("info1","") + entry.get("name",""))[:300]:
+                        scored[name] = max(scored.get(name, 0), 140)  # 提高到140超过其他正常模板
+                if "集合系统" in text:
+                    if "集合系统" in (entry.get("info1","") + entry.get("name",""))[:300]:
+                        scored[name] = max(scored.get(name, 0), 140)
 
         # 策略1.5: 模板匹配关键词精确匹配 (master_rules.json)
     from rule_engine import get_rule as _gr2

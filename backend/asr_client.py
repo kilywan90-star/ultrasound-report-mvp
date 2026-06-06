@@ -1,9 +1,33 @@
 """阿里云百炼 DashScope 语音识别 — 支持流式输出 v2"""
 
-import os, asyncio, tempfile, dashscope, time, logging
+import os, asyncio, tempfile, dashscope, time, logging, json
 from asr_correction import correct_ASR_text
 
 _log = logging.getLogger(__name__)
+
+# 加载超声热词表（670个医学术语），提升ASR识别准确率
+_HOTWORDS_CACHE = None
+def _load_hotwords() -> list[str]:
+    global _HOTWORDS_CACHE
+    if _HOTWORDS_CACHE is not None:
+        return _HOTWORDS_CACHE
+    hw_path = os.path.join(os.path.dirname(__file__), "knowledge", "asr_hotwords_auto.json")
+    try:
+        with open(hw_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        words = [item["word"] for item in data.get("hotwords", []) if "word" in item]
+        _HOTWORDS_CACHE = words
+        print(f"[ASR热词] 已加载 {len(words)} 个超声术语")
+        _log.info(f"ASR热词已加载: {len(words)}个")
+
+        # 验证: 打印一些热词的注入格式
+        sample = words[:5]
+        print(f"[ASR热词] 即将注入到qwen3-asr-flash: {sample}")
+        print(f"[ASR热词] 总计 {len(words)} 个词, 来源: {data.get('_source','unknown')}")
+    except Exception as e:
+        _log.warning(f"ASR热词加载失败: {e}")
+        _HOTWORDS_CACHE = []
+    return _HOTWORDS_CACHE
 
 
 async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> dict:
@@ -16,6 +40,10 @@ async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> dict:
         tmp.write(audio_data)
         tmp_path = tmp.name
 
+    # 加载热词
+    hot_words = _load_hotwords()
+    _log.info(f"ASR请求: 热词{len(hot_words)}个, 音频{len(audio_data)}字节")
+
     last_error = None
     for attempt in range(3):
         try:
@@ -25,6 +53,7 @@ async def transcribe_audio(audio_data: bytes, sample_rate: int = 16000) -> dict:
                         model="qwen3-asr-flash",
                         messages=[{"role":"user","content":[{"audio":tmp_path}]}],
                         api_key=api_key,
+                        hot_words=hot_words,
                     )
                 finally:
                     pass
@@ -85,6 +114,7 @@ async def transcribe_audio_stream(audio_data: bytes, sample_rate: int = 16000):
                 api_key=api_key,
                 stream=True,
                 incremental_output=True,
+                hot_words=_load_hotwords(),
             )
 
         response = await asyncio.to_thread(_call)

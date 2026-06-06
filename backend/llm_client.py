@@ -331,7 +331,12 @@ ICD10_MAP = _load_icd10_map()
 load_templates()
 
 
-def _get_client():
+def _get_client(provider: str = "deepseek"):
+    if provider == "dashscope":
+        return OpenAI(
+            api_key=os.getenv("DASHSCOPE_API_KEY"),
+            base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
+        )
     return OpenAI(
         api_key=os.getenv("DEEPSEEK_API_KEY"),
         base_url="https://api.deepseek.com/v1",
