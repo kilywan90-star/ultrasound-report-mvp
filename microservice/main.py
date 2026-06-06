@@ -33,13 +33,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field, ValidationError
 
-from . import config
-from .schema import (
+import microservice.config as config
+import microservice.schema as schema
+from microservice.schema import (
     ApiResponse, StructureData, StructureRequest,
     PatientContext, StudyHint, VALID_EXAM_TYPES,
 )
-from .logger import logger, setup_logger
-from .pipeline import run_pipeline
+from microservice.logger import logger, setup_logger
+from microservice.pipeline import run_pipeline
 
 # 确保 backend/ 可导入
 _backend_api = _root / "backend"
