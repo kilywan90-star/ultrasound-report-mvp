@@ -361,35 +361,43 @@ async def structure(req: StructureRequest):
     if len(_meaningful) < 8:
         raise HTTPException(400, f"录音内容过短（有效字符仅{len(_meaningful)}个），请重新录音")
 
-    # Sex guard
-    sex_conflict = detect_sex_conflict(A, req.patient_gender)
-    if sex_conflict:
-        warnings.append(sex_conflict)
-        A = mask_conflict_organs(A, req.patient_gender)
+    # Route: 预分类
+    from routing import classify as _route
+    _route_result = _route(A, req.exam_type)
 
-    # Fetal fast path
-    fetal_kw = get_rule("pipeline.fetal_path.keywords", ["产科","胎儿","四维","排畸","BPD","双顶径","股骨长"])
-    is_fetal = any(kw in (req.exam_type + A[:80]) for kw in fetal_kw)
-    if is_fetal and req.patient_gender != "男":
+    # Fetal fast path (路由优先)
+    if _route_result["is_fetal"] and req.patient_gender != "男":
         report = fill_fetal_template(A)
         report = _wrap_hints_with_toggle(report)
-
-        # Save to reports table (same as normal path)
         if req.patient_id and req.patient_id.strip():
             try:
                 pid = int(req.patient_id)
                 db.report_create(pid, "胎儿超声", req.text, _filter_checked(report))
             except Exception as e:
                 logging.warning(f"胎儿报告保存失败: {e}")
-
-        # Save trace log
         db.audit_log("fetal_template", patient_id=int(req.patient_id) if (req.patient_id and req.patient_id.strip()) else None,
                       input_text=req.text[:300], output_text=_extract_plain_text(report.get("study_see", ""))[:300])
-
         return _make_response(report, req, "fetal_template", "胎儿超声标准模板", 0.9, warnings, A)
 
-    # Step1: Pattern match
-    candidates = search_candidates(A, req.exam_type, limit=8)
+    # Multi-organ LLM path
+    if _route_result["is_multi"]:
+        report = _llm_multi_organ_fill(A, req.exam_type)
+        report = _wrap_hints_with_toggle(report)
+        report, warnings = _preserve_numbers(A, report, warnings)
+        # Save
+        pid = None
+        if req.patient_id and req.patient_id.strip():
+            try:
+                pid = int(req.patient_id)
+                r = db.report_create(pid, match_template(req.exam_type), req.text, _filter_checked(report))
+            except Exception as e:
+                logging.warning(f"报告保存失败: {e}")
+        elapsed_ms = int((_time.time() - t0) * 1000)
+        _save_trace_simple(req, pid, A, report, "多器官综合报告", "llm_multi", elapsed_ms, warnings)
+        return _make_response(report, req, "llm_multi", "多器官综合报告", 0.85, warnings, A)
+
+    # Step1: Pattern match (按分类限制搜索范围)
+    candidates = search_candidates(A, req.exam_type, limit=8, category=_route_result.get("category"))
     best_score = candidates[0]["score"] if candidates else 0
     best_name = candidates[0]["name"] if candidates else ""
     template_info1 = candidates[0].get("info1", "") if candidates else ""
@@ -397,42 +405,32 @@ async def structure(req: StructureRequest):
         tpl = get_template_by_name(best_name)
         if tpl: template_info1 = tpl.get("info1", "")
 
-    # Step1.5: 多器官综合描述检测（≥3个器官或>100字符时走LLM综合报告）
-    _organ_kw = ["肝脏","胆囊","胰腺","脾脏","双肾","子宫","卵巢","附件","甲状腺","乳腺","心脏","颈动脉","前列腺","膀胱"]
-    _organ_count = sum(1 for o in _organ_kw if o in A)
-    is_multi = _organ_count >= 3 or (len(A) > 100 and _organ_count >= 2)
+    # Step2: 路径分派
+    from template_converted import lookup_template, setup as _tc_setup
+    _tc_setup()
+    converted = lookup_template(best_name) if best_name else None
 
-    if is_multi and not is_fetal:
-        report = _llm_multi_organ_fill(A, req.exam_type)
-        method = "llm_multi"
-        best_name = "多器官综合报告"
+    if converted and best_score >= 100:
+        from template_converted.fill import fill_converted_template
+        from template_converted.measurements import ALL as _ALL_MEAS
+        from template_converted.options import ALL as _ALL_OPTS
+        cat = _route_result.get("category", "abdomen")
+        measurements = _ALL_MEAS.get(cat, _ALL_MEAS.get("abdomen", []))
+        options_list = _ALL_OPTS.get(cat, []) + _ALL_OPTS.get("common", [])
+        report = fill_converted_template(A, converted.get("html", template_info1), converted.get("fields", {}), measurements, options_list, {}, set())
+        method = "converted_fill"
+    elif best_score >= 200 and template_info1 and len(template_info1) >= 20:
+        from template_filler import match_and_fill as _rule_fill
+        rule_result = _rule_fill(A)
+        report = rule_result or {"study_see": template_info1, "study_hint": [], "recommendation": ""}
+        method = "rule_fill"
+    elif best_score >= 50 and template_info1 and len(template_info1) >= 20:
+        report = _llm_fill_template(A, req.exam_type, best_name, template_info1)
+        method = "template_fill"
     else:
-        # Step2: 转换模板路径 (结构化3色HTML)
-        from template_converted import lookup_template, setup as _tc_setup
-        _tc_setup()
-        converted = lookup_template(best_name) if best_name else None
-        if converted and best_score >= 100 and not is_fetal:
-            from template_converted.fill import fill_converted_template
-            from template_converted.measurements import ALL as _ALL_MEAS
-            from template_converted.options import ALL as _ALL_OPTS
-            cat = converted.get("category", "")
-            measurements = _ALL_MEAS.get(cat, _ALL_MEAS.get("abdomen", []))
-            options_list = _ALL_OPTS.get(cat, []) + _ALL_OPTS.get("common", [])
-            report = fill_converted_template(A, converted.get("html", template_info1), converted.get("fields", {}), measurements, options_list, {}, set())
-            method = "converted_fill"
-        elif best_score >= 50 and template_info1 and len(template_info1) >= 20:
-            if best_score >= 200:
-                from template_filler import match_and_fill as _rule_fill
-                rule_result = _rule_fill(A)
-                report = rule_result or {"study_see": template_info1, "study_hint": [], "recommendation": ""}
-                method = "rule_fill"
-            else:
-                report = _llm_fill_template(A, req.exam_type, best_name, template_info1)
-                method = "template_fill"
-        else:
-            report = _llm_free_generate(A, req.exam_type)
-            method = "llm_free"
-            best_name = "自由生成(无匹配模板)"
+        report = _llm_free_generate(A, req.exam_type)
+        method = "llm_free"
+        best_name = "自由生成(无匹配模板)"
 
     report = _wrap_hints_with_toggle(report)
 
@@ -445,7 +443,7 @@ async def structure(req: StructureRequest):
         try:
             pid = int(req.patient_id)
             r = db.report_create(pid, match_template(req.exam_type), req.text, _filter_checked(report))
-            report_id = r["id"]
+            report_id = r["id"] if r else None
         except Exception as e:
             logging.warning(f"报告保存失败: {e}")
 

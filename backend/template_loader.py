@@ -126,10 +126,11 @@ def get_template_by_name(name: str) -> dict | None:
     return _template_index.get(name)
 
 
-def search_candidates(text: str, exam_type: str = "", limit: int = 10) -> list[dict]:
+def search_candidates(text: str, exam_type: str = "", limit: int = 10, category: str = None) -> list[dict]:
     """
     从4871条模板中搜索候选模板列表
     策略: 关键词匹配 DISCNAME + 模块名过滤
+    可选: category 限制搜索范围（按器官分类）
     """
     load_templates()
     if not _template_index:
