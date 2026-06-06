@@ -41,7 +41,10 @@ from api_pacs import router as pacs_router
 from api_pacs_config import router as pacs_config_router
 import db
 
-app = FastAPI(title="超声报告语音结构化", version="3.0.0.ABCDEF")
+BUILD = "20260607-0045"
+VERSION = f"v3.1.{BUILD}"
+
+app = FastAPI(title="超声报告语音结构化", version=VERSION)
 
 app.include_router(section_templates_router)
 app.include_router(pacs_router)
@@ -92,7 +95,7 @@ AUDIO_DIR.mkdir(exist_ok=True)
 
 @app.get("/api/health")
 async def health():
-    return {"status": "ok"}
+    return {"status": "ok", "version": VERSION, "build": BUILD, "templates": 70}
 
 @app.get("/api/templates")
 async def list_templates():
