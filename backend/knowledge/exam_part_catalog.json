@@ -1,0 +1,181 @@
+{
+  "version": "2.0",
+  "description": "超声检查部位分级清单 — 规则库 + API 枚举 + 方言映射",
+  "categories": [
+    {
+      "id": "breast",
+      "name": "乳腺专科",
+      "icon": "乳腺",
+      "grading": "BI-RADS",
+      "parts": [
+        {"code": "B_L",  "name": "左乳腺",   "dialect": ["左边奶子","左乳","左乳房"]},
+        {"code": "B_R",  "name": "右乳腺",   "dialect": ["右边奶子","右乳","右乳房"]},
+        {"code": "B_B",  "name": "双侧乳腺", "dialect": ["双乳","两边奶子","两个乳房"]},
+        {"code": "AX_L", "name": "左腋窝",   "dialect": ["左边腋下","左腋下"]},
+        {"code": "AX_R", "name": "右腋窝",   "dialect": ["右边腋下","右腋下"]},
+        {"code": "AX_B", "name": "双侧腋窝淋巴结", "dialect": ["两边腋下","双侧腋下淋巴结"]}
+      ],
+      "template_ids": ["T0038","T0041"],
+      "exam_type": "乳腺超声"
+    },
+    {
+      "id": "thyroid",
+      "name": "甲状腺/颈部软组织",
+      "icon": "甲状腺",
+      "grading": "TI-RADS",
+      "parts": [
+        {"code": "THY_L", "name": "甲状腺左叶",     "dialect": ["左边甲状腺","左甲"]},
+        {"code": "THY_R", "name": "甲状腺右叶",     "dialect": ["右边甲状腺","右甲"]},
+        {"code": "THY_I", "name": "甲状腺峡部",     "dialect": ["峡部"]},
+        {"code": "THY_A", "name": "全甲状腺",       "dialect": ["甲状腺","甲功","脖子上的腺体"]},
+        {"code": "LN_L",  "name": "左颈淋巴结",     "dialect": ["左边脖子淋巴结"]},
+        {"code": "LN_R",  "name": "右颈淋巴结",     "dialect": ["右边脖子淋巴结"]},
+        {"code": "LN_B",  "name": "双侧颈部淋巴结", "dialect": ["颈部淋巴结","脖子两边淋巴结"]},
+        {"code": "NECK",  "name": "颈部包块",       "dialect": ["脖子上的包","颈部肿块"]},
+        {"code": "GLAND", "name": "颌下腺/腮腺",    "dialect": ["腮帮子腺体","颌下"]}
+      ],
+      "template_ids": ["T0012","T0015","T0034","T0035","T0045","T0066"],
+      "exam_type": "甲状腺超声"
+    },
+    {
+      "id": "abdomen",
+      "name": "腹部彩超",
+      "icon": "腹部",
+      "grading": null,
+      "parts": [
+        {"code": "LIVER",   "name": "肝脏",       "dialect": ["肝"]},
+        {"code": "GB",      "name": "胆囊",       "dialect": ["胆"]},
+        {"code": "CBD",     "name": "胆总管",     "dialect": ["胆管"]},
+        {"code": "IHD",     "name": "肝内胆管",   "dialect": ["肝内胆管","肝管"]},
+        {"code": "PANC_H",  "name": "胰头",       "dialect": ["胰头"]},
+        {"code": "PANC_B",  "name": "胰体",       "dialect": ["胰体"]},
+        {"code": "PANC_T",  "name": "胰尾",       "dialect": ["胰尾"]},
+        {"code": "SPLEEN",  "name": "脾脏",       "dialect": ["脾"]},
+        {"code": "ASCITES", "name": "腹腔积液",   "dialect": ["腹水","肚子里有水"]},
+        {"code": "MESENT",  "name": "肠系膜淋巴结","dialect": ["肠系膜"]},
+        {"code": "APPX",    "name": "阑尾",       "dialect": ["盲肠"]},
+        {"code": "AO_ABD",  "name": "腹主动脉",   "dialect": ["肚子里的主动脉"]}
+      ],
+      "combos": [
+        {"code": "ABD_LGBSP", "name": "肝胆胰脾彩超",   "parts": ["LIVER","GB","SPLEEN","PANC_H","PANC_B","PANC_T"]},
+        {"code": "ABD_UPPER", "name": "上腹部彩超",     "parts": ["LIVER","GB","SPLEEN","PANC_H","PANC_B"]}
+      ],
+      "template_ids": ["T0001","T0002","T0003","T0004","T0005","T0006","T0008","T0009","T0013","T0014","T0017","T0018","T0025","T0026","T0028","T0030","T0033","T0036","T0044","T0048","T0050","T0051","T0052","T0055","T0059","T0064","T0065","T0068"],
+      "exam_type": "腹部超声"
+    },
+    {
+      "id": "urinary",
+      "name": "泌尿生殖",
+      "icon": "泌尿",
+      "grading": "PI-RADS (前列腺)",
+      "parts": [
+        {"code": "KID_L",   "name": "左肾",       "dialect": ["左边肾","左腰子"]},
+        {"code": "KID_R",   "name": "右肾",       "dialect": ["右边肾","右腰子"]},
+        {"code": "KID_B",   "name": "双肾",       "dialect": ["两个肾","双腰子"]},
+        {"code": "UR_L",    "name": "左输尿管",   "dialect": ["左边尿管"]},
+        {"code": "UR_R",    "name": "右输尿管",   "dialect": ["右边尿管"]},
+        {"code": "UR_B",    "name": "双侧输尿管", "dialect": ["尿管","输尿管"]},
+        {"code": "BLAD",    "name": "膀胱",       "dialect": ["尿包","膀胱"]},
+        {"code": "RESIDUAL","name": "残余尿",     "dialect": ["剩下的尿","解完小便后剩余"]},
+        {"code": "PROS",    "name": "前列腺",     "dialect": ["前列线","前列腺"]},
+        {"code": "SEMVES",  "name": "精囊腺",     "dialect": ["精囊"]}
+      ],
+      "combos": [
+        {"code": "UR_KUB",  "name": "双肾输尿管膀胱","parts": ["KID_B","UR_B","BLAD"]},
+        {"code": "UR_FULL", "name": "泌尿系彩超",    "parts": ["KID_B","UR_B","BLAD","PROS"]}
+      ],
+      "template_ids": ["T0006","T0007","T0010","T0023","T0024","T0029","T0037","T0047","T0053","T0058","T0069","T0070"],
+      "exam_type": "腹部超声"
+    },
+    {
+      "id": "gyn",
+      "name": "妇科盆腔",
+      "icon": "妇科",
+      "grading": null,
+      "parts": [
+        {"code": "UTERUS",  "name": "子宫",       "dialect": ["宫","子宫"]},
+        {"code": "CERVIX",  "name": "宫颈",       "dialect": ["宫颈口","宫颈"]},
+        {"code": "OV_L",    "name": "左侧卵巢",   "dialect": ["左边卵巢"]},
+        {"code": "OV_R",    "name": "右侧卵巢",   "dialect": ["右边卵巢"]},
+        {"code": "ADNEX_B", "name": "双侧附件",   "dialect": ["附件"]},
+        {"code": "PELVIS",  "name": "盆腔",       "dialect": ["盆腔","肚子里"]},
+        {"code": "PELV_FL", "name": "盆腔积液",   "dialect": ["盆腔有水","盆腔积液"]},
+        {"code": "GSAC",    "name": "孕囊",       "dialect": ["孕囊","胎囊"]},
+        {"code": "CAVITY",  "name": "宫腔",       "dialect": ["宫腔","子宫腔"]},
+        {"code": "FTUBE",   "name": "双侧输卵管", "dialect": ["输卵管"]}
+      ],
+      "template_ids": ["T0039","T0040","T0060","T0061","T0063"],
+      "exam_type": "妇产超声"
+    },
+    {
+      "id": "cardio",
+      "name": "心血管/心脏",
+      "icon": "心脏",
+      "grading": null,
+      "parts": [
+        {"code": "HEART",   "name": "心脏",              "dialect": ["心","心彩超","心脏彩超"]},
+        {"code": "CAR_L",   "name": "左颈总动脉",        "dialect": ["左边颈动脉"]},
+        {"code": "CAR_R",   "name": "右颈总动脉",        "dialect": ["右边颈动脉"]},
+        {"code": "CAR_B",   "name": "双侧颈动脉",        "dialect": ["颈动脉","脖子动脉"]},
+        {"code": "LEG_L",   "name": "左下肢动静脉",      "dialect": ["左边腿血管"]},
+        {"code": "LEG_R",   "name": "右下肢动静脉",      "dialect": ["右边腿血管"]},
+        {"code": "ARM",     "name": "上肢血管",          "dialect": ["胳膊血管","手血管"]}
+      ],
+      "template_ids": ["T0011","T0014","T0016","T0017","T0020","T0021","T0022","T0027","T0029","T0031","T0032","T0042","T0043","T0046","T0049","T0056","T0057","T0062"],
+      "exam_type": "心脏超声"
+    },
+    {
+      "id": "small_parts",
+      "name": "体表小器官/软组织",
+      "icon": "小器官",
+      "grading": null,
+      "parts": [
+        {"code": "EYE",     "name": "眼球",       "dialect": ["眼睛"]},
+        {"code": "SCROTUM", "name": "阴囊/睾丸附睾","dialect": ["蛋蛋","睾丸","阴囊"]},
+        {"code": "SPERM_C", "name": "精索",       "dialect": ["精索"]},
+        {"code": "SKIN",    "name": "皮下包块",   "dialect": ["皮下坨","皮下肿块","体表坨"]},
+        {"code": "JOINT",   "name": "关节",       "dialect": ["膝盖","脚踝","手腕"]},
+        {"code": "GROIN_LN","name": "腹股沟淋巴结","dialect": ["胯下淋巴结","腿根淋巴结"]}
+      ],
+      "template_ids": [],
+      "exam_type": "小器官超声"
+    },
+    {
+      "id": "obstetrics",
+      "name": "产科",
+      "icon": "产科",
+      "grading": null,
+      "parts": [
+        {"code": "OB_EARLY","name": "宫内早孕",   "dialect": ["早孕","刚怀孕"]},
+        {"code": "OB_MID",  "name": "中晚孕胎儿", "dialect": ["大肚子","孕中期","孕晚期"]},
+        {"code": "PLACENTA","name": "胎盘",       "dialect": ["胎盘","衣包"]},
+        {"code": "AMNIO",   "name": "羊水",       "dialect": ["羊水","胎水"]}
+      ],
+      "template_ids": ["T0060","T0061"],
+      "exam_type": "妇产超声"
+    }
+  ],
+  "combined_parts": [
+    "左乳","右乳","双侧乳腺","左腋窝","右腋窝","双侧腋窝淋巴结",
+    "甲状腺左叶","甲状腺右叶","甲状腺峡部","全甲状腺",
+    "左颈淋巴结","右颈淋巴结","双侧颈部淋巴结","颈部包块","颌下腺","腮腺",
+    "肝脏","胆囊","胆总管","肝内胆管","胰头","胰体","胰尾","脾脏",
+    "腹腔积液","肠系膜淋巴结","阑尾","腹主动脉",
+    "左肾","右肾","双肾","左输尿管","右输尿管","双侧输尿管","膀胱","残余尿",
+    "前列腺","精囊腺",
+    "子宫","宫颈","左侧卵巢","右侧卵巢","双侧附件","盆腔","盆腔积液",
+    "孕囊","宫腔","双侧输卵管",
+    "心脏","左颈总动脉","右颈总动脉","双侧颈动脉","左下肢动静脉","右下肢动静脉","上肢血管",
+    "眼球","阴囊/睾丸附睾","精索","皮下包块","关节","腹股沟淋巴结",
+    "宫内早孕","中晚孕胎儿","胎盘","羊水"
+  ],
+  "exam_type_mapping": {
+    "腹部超声": ["腹部彩超","泌尿生殖"],
+    "妇产超声": ["妇科盆腔","产科"],
+    "心脏超声": ["心血管/心脏"],
+    "甲状腺超声": ["甲状腺/颈部软组织"],
+    "乳腺超声": ["乳腺专科"],
+    "血管超声": ["心血管/心脏"],
+    "小器官超声": ["体表小器官/软组织"]
+  }
+}

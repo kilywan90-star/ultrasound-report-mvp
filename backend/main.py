@@ -46,6 +46,7 @@ import db
 BUILD = "20260607-0045"
 VERSION = f"v3.1.{BUILD}"
 
+from api_exam_parts import router as exam_parts_router
 app = FastAPI(title="超声报告语音结构化", version=VERSION)
 
 app.include_router(section_templates_router)
@@ -53,6 +54,7 @@ app.include_router(pacs_router)
 app.include_router(pacs_config_router)
 app.include_router(syslog_router)
 app.include_router(datalist_router)
+app.include_router(exam_parts_router)
 
 # CORS: 允许常见来源但不回显任意Origin（避免creds问题）
 app.add_middleware(
