@@ -440,6 +440,7 @@ def anchored_structure(text: str, exam_type: str = "腹部超声",
                         skip_llm: bool = False) -> dict:
     """
     模板锚定结构化 — D路径主函数
+    0. 极速段落匹配 (44张模板, O(1)哈希, 微秒级)
     1. 精确模板匹配 (top-5候选)
     2. 选最优模板
     3. LLM精填变量 (或正则兜底)
@@ -449,6 +450,61 @@ def anchored_structure(text: str, exam_type: str = "腹部超声",
     load_templates()
 
     start_time = time.time()
+
+    # Step 0: 极速段落匹配 (覆盖80%常规报告, 不走LLM)
+    try:
+        from section_match_engine import match_sections, assemble_report
+        exam_cat_map = {
+            "腹部超声": "腹部综合", "泌尿前列腺": "腹部综合",
+            "甲状腺超声": "甲状腺", "血管超声": "颈动脉",
+            "乳腺超声": "乳腺", "妇产超声": "妇科", "心脏超声": "心脏",
+        }
+        section_cat = exam_cat_map.get(exam_type, None)
+        section_matches = match_sections(text, exam_category=section_cat, min_hits=1)
+
+        if section_matches and section_matches[0]["hits"] >= 2:
+            # 高信心段落匹配: 直接组装报告, 跳过LLM
+            assembled = assemble_report(section_matches, asr_text=text)
+            if assembled["study_see_text"]:
+                elapsed = time.time() - start_time
+                hints = []
+                for i, hint in enumerate(assembled.get("study_hint_list", [])[:3]):
+                    hints.append({
+                        "rank": i + 1,
+                        "diagnosis": hint,
+                        "icd10": "",
+                        "id": f"h{i}",
+                        "checked": True,
+                    })
+                report = {
+                    "patient_info": {"name": None, "gender": None, "age": None, "exam_id": None},
+                    "exam_info": {"modality": exam_type, "device": None, "exam_date": None},
+                    "study_see": assembled["study_see_text"],
+                    "study_hint": hints,
+                    "recommendation": "",
+                    "_template_matched": section_matches[0]["section_id"],
+                    "_method": "section_match",
+                }
+                return {
+                    "success": True,
+                    "report": report,
+                    "report_id": None,
+                    "method": "section_match",
+                    "warnings": [],
+                    "template_used": section_matches[0]["section_id"],
+                    "confidence": section_matches[0]["confidence_pct"] / 100,
+                    "conflicts": [],
+                    "sources": {
+                        "A_asr": text[:300],
+                        "section_matches": [
+                            {"id": m["section_id"], "hits": m["hits"], "text": m["section_text"][:60]}
+                            for m in section_matches[:5]
+                        ],
+                    },
+                    "elapsed_ms": round(elapsed * 1000),
+                }
+    except Exception:
+        _log.debug("Section match engine not available, falling through")
 
     # Step 1: 精确模板匹配
     candidates = match_exact_template(text, exam_type)
