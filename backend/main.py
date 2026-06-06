@@ -575,47 +575,50 @@ def _preserve_numbers(A, report, warnings):
 def _save_trace_simple(req, pid, A, report, template_name, method, elapsed_ms, warnings):
     import json as _json
     from datetime import datetime as _dt
-    now = _dt.now()
-    _base = now.strftime("%Y%m%d%H%M%S") + now.strftime("%f")[:3]
-    _seq = 1
-    while True:
-        _rid = f"{_base}{_seq:03d}"
+    try:
+        now = _dt.now()
         c = db._conn()
-        if not c.execute("SELECT id FROM abcdef_trace_log WHERE trace_id=?", (_rid,)).fetchone():
-            break
-        _seq += 1
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS abcdef_trace_log (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            trace_id TEXT UNIQUE NOT NULL,
-            patient_id INTEGER, gender TEXT, age INTEGER,
-            A_asr TEXT, B_free_llm TEXT, C_regex TEXT,
-            D_enhanced TEXT, E_template TEXT, F_validated TEXT,
-            study_see TEXT, study_hint TEXT, recommendation TEXT,
-            created_at TEXT NOT NULL, error_msg TEXT,
-            template_name TEXT, template_id TEXT
-        )
-    """)
-    see = _extract_plain_text(report.get("study_see", ""))[:5000]
-    hints = _json.dumps(report.get("study_hint", []), ensure_ascii=False)[:2000]
-    rec = (report.get("recommendation", "") or "")[:2000]
-    c.execute("""
-        INSERT INTO abcdef_trace_log (trace_id,patient_id,gender,age,
-            A_asr,B_free_llm,C_regex,study_see,study_hint,recommendation,
-            created_at,error_msg,template_name,template_id)
-        VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-    """, (
-        _rid, pid, req.patient_gender or "", req.patient_age or 0,
-        A[:5000],
-        _json.dumps({"method": method, "template": template_name}, ensure_ascii=False)[:5000],
-        "simplified_v1",
-        see, hints, rec,
-        now.strftime("%Y-%m-%d %H:%M:%S"),
-        "; ".join(warnings)[:1000] if warnings else None,
-        template_name[:500] if template_name else None,
-        template_name[:200] if template_name else None,
-    ))
-    c.commit()
+        c.execute("""
+            CREATE TABLE IF NOT EXISTS abcdef_trace_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                trace_id TEXT UNIQUE NOT NULL,
+                patient_id INTEGER, gender TEXT, age INTEGER,
+                A_asr TEXT, B_free_llm TEXT, C_regex TEXT,
+                D_enhanced TEXT, E_template TEXT, F_validated TEXT,
+                study_see TEXT, study_hint TEXT, recommendation TEXT,
+                created_at TEXT NOT NULL, error_msg TEXT,
+                template_name TEXT, template_id TEXT
+            )
+        """)
+        _base = now.strftime("%Y%m%d%H%M%S") + now.strftime("%f")[:3]
+        _seq = 1
+        while True:
+            _rid = f"{_base}{_seq:03d}"
+            if not c.execute("SELECT id FROM abcdef_trace_log WHERE trace_id=?", (_rid,)).fetchone():
+                break
+            _seq += 1
+        see = _extract_plain_text(report.get("study_see", ""))[:5000]
+        hints = _json.dumps(report.get("study_hint", []), ensure_ascii=False)[:2000]
+        rec = (report.get("recommendation", "") or "")[:2000]
+        c.execute("""
+            INSERT INTO abcdef_trace_log (trace_id,patient_id,gender,age,
+                A_asr,B_free_llm,C_regex,study_see,study_hint,recommendation,
+                created_at,error_msg,template_name,template_id)
+            VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+        """, (
+            _rid, pid, req.patient_gender or "", req.patient_age or 0,
+            A[:5000],
+            _json.dumps({"method": method, "template": template_name}, ensure_ascii=False)[:5000],
+            "simplified_v1",
+            see, hints, rec,
+            now.strftime("%Y-%m-%d %H:%M:%S"),
+            "; ".join(warnings)[:1000] if warnings else None,
+            template_name[:500] if template_name else None,
+            template_name[:200] if template_name else None,
+        ))
+        c.commit()
+    except Exception:
+        pass  # trace log 非关键路径，不影响主流程
 
 
 def _extract_plain_text(html_or_text: str) -> str:
