@@ -735,7 +735,7 @@ fetch('/api/structure',{method:'POST',headers:{'Content-Type':'application/json'
   showABCDEFPanel(d);
   if(d.method==='rule_fallback'){t('ABCDEF流水线部分降级，已使用规则引擎结果','e')}
   var unfillCount=(document.getElementById('se').innerHTML.match(/unfill/g)||[]).length;
-  if(unfillCount>10){t('报告有'+unfillCount+'个空字段，建议补充','e')}
+  if(unfillCount>15){t('报告有'+unfillCount+'个空字段，建议补充','w')}else if(unfillCount>10){t('报告有'+unfillCount+'个空字段','w')}
 }).catch(function(e){t('结构化失败','e');setSt('idle');document.getElementById('sb').disabled=false})}
 
 function showMethodBadge(d){
