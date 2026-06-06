@@ -866,4 +866,7 @@ function populateTemplateSelect(){
     for(var c in fb){var og=document.createElement('optgroup');og.label=c;fb[c].forEach(function(t){var o=document.createElement('option');o.value=c;o.textContent=t;og.appendChild(o)});sel.appendChild(og);}
   });
 }
+
+document.addEventListener('keydown',function(e){if(e.ctrlKey&&e.key==='r'){e.preventDefault();toggleRec()}if(e.ctrlKey&&e.key==='s'){e.preventDefault();doSave()}if(e.ctrlKey&&e.key==='Enter'){e.preventDefault();doSend()}if(e.key==='Escape'){e.preventDefault();if(S.sel)rs()}})
+lq();document.getElementById('qn').focus()
 </script>
