@@ -1,0 +1,243 @@
+"""自动生成 — cardiac 结构化模板"""
+from template_converted import register_templates
+
+_TPL = {
+    '心内结构未见明显异常': {
+        'html': '<div class="rpt-sec">AO:{_m_0}mm         LA:{_m_1}mm          LV:{_m_2}mm         PA：{_m_3}mm   \n\nRA:{_m_4}mm         RV:{_m_5}mm          IVS:{_m_6}mm        LVPW:{_m_7}mm   AOV：cm/s\n\n各房室内径正常，房室间隔未见明显连续中断,室间隔及左室后壁不厚，运动协调；</div>\n<div class="rpt-sec">主动脉、肺动脉内径正常，主、肺动脉位置关系正常，各瓣膜清晰，启闭自如；</div>\n<div class="rpt-sec">心包及心包腔未见明显异常回声。</div>\n<div class="rpt-sec">M:二尖瓣前叶曲线呈“双峰”，前后叶运动异向。</div>\n<div class="rpt-sec">AO波幅正常，重博波可见。</div>\n<div class="rpt-sec">CDFI： E＜A  E＞A  房室间隔未见过隔血流，各瓣膜口未见明显返流血彩。</div>\n<b class="rpt-label">心功能：EF：%  FS：%</b>',
+        'fields': {"_m_0": "AO:", "_m_1": "LA:", "_m_2": "LV:", "_m_3": "PA：", "_m_4": " \n\nRA:", "_m_5": "RV:", "_m_6": "IVS:", "_m_7": "LVPW:"},
+    },
+    '二尖瓣口轻度返流': {
+        'html': '<div class="rpt-sec">二尖瓣口→于左房侧收缩期可见少量以蓝色为主的返流，余瓣膜口未见明显返流血彩。</div>',
+        'fields': {},
+    },
+    '肺动脉瓣口轻度返流': {
+        'html': '<div class="rpt-sec">肺动脉瓣口→于右室侧舒张期可见少量以红色为主的返流，余瓣膜口未见明显返流血彩。</div>',
+        'fields': {},
+    },
+    '三尖瓣口轻度返流': {
+        'html': '<div class="rpt-sec">三尖瓣口→于右房侧收缩期可见少量以蓝色为主的返流，余瓣膜口未见明显返流血彩。</div>',
+        'fields': {},
+    },
+    '主动脉瓣口轻度返流': {
+        'html': '<div class="rpt-sec">主动脉瓣口→于左室侧舒张期可见少量以红色为主的返流，余瓣膜口未见明显返流血彩。</div>',
+        'fields': {},
+    },
+    '主动脉瓣退行性变': {
+        'html': '<div class="rpt-sec">主动脉瓣增厚，回声增强，可见强回声斑,余瓣膜清晰。</div>',
+        'fields': {},
+    },
+    '左室顺应性减退（假性正常）': {
+        'html': '<b class="rpt-label">TDI   e＜a</b>',
+        'fields': {},
+    },
+    '主动脉瓣钙化': {
+        'html': '<div class="rpt-sec">主动脉瓣可见附壁强回声斑。</div>',
+        'fields': {},
+    },
+    '二尖瓣钙化': {
+        'html': '<div class="rpt-sec">二尖瓣可见附壁强回声斑。</div>',
+        'fields': {},
+    },
+    'TDI: e＜a': {
+        'html': '<b class="rpt-label">TDI: E＜A</b>',
+        'fields': {},
+    },
+    'E＜A': {
+        'html': '<b class="rpt-label">E＜A</b>',
+        'fields': {},
+    },
+    '左室假腱索。（三医院）': {
+        'html': '<div class="rpt-sec">左室腔内可见一厚{_thick_0}mm的强回声带连于室间隔，与左室壁游离。</div>',
+        'fields': {"_thick_0": "腔内可见一厚"},
+    },
+    '永存下腔静脉瓣': {
+        'html': '<div class="rpt-sec">右房内可见一纤细光带漂浮，其一端附着于下腔静脉入右房处。</div>',
+        'fields': {},
+    },
+    '房间隔缺损': {
+        'html': '<div class="rpt-sec">右房右室增大，左心大小正常，室壁不厚，室间隔与左室后壁呈同像/异像，室壁收缩幅度正常/异常，房间隔中部/上部/下部可探及宽{_width_0}mm的连续性中断。</div>\n<div class="rpt-sec">室间隔连续完整，三尖瓣瓣环扩大，开放尚可，关闭不拢，余瓣膜成分清晰，启闭自如。</div>\n<div class="rpt-sec">升主动脉内径正常，肺动脉内径正常，大动脉位置关系正常。</div>\n<div class="rpt-sec">心包及心包腔未见明显异常。</div>',
+        'fields': {"_width_0": "下部可探及宽"},
+    },
+    '室间隔缺损': {
+        'html': '<div class="rpt-sec">左右房室内径增大，室间隔与右室前壁增厚，左室后壁不厚，运动幅度正常，房间隔连续，室间隔膜周部回声连续性中断，宽{_width_0}mm，大动脉短轴切面位于  点位置。</div>\n<div class="rpt-sec">二、三尖瓣环扩大，瓣叶形态回声正常/异常，对合欠佳，大动脉位置关系正常，肺动脉内径增宽，主动脉弓降部未见异常。</div>\n<div class="rpt-sec">心包及心包腔未见明显异常。</div>\n<div class="rpt-sec">M:二尖瓣前后叶逆向运动，曲线呈双峰。</div>\n<div class="rpt-sec">主动脉主波正常，重博波可见。</div>\n<div class="rpt-sec">CDFI:室间隔水平收缩期可探及左-右为主/双向的过膈血流，Vmax: cm/s。</div>\n<div class="rpt-sec">二尖瓣口→于左房侧收缩期可见少量以蓝色为主的返流,Vmax: cm/s，三尖瓣口→于右房侧收缩期可见少量以蓝色为主的返流,Vmax: cm/s，估测肺动脉收缩压{_缩压_1}mmHg，肺动脉瓣口→于右室侧舒张期可见少量以红色为主的返流,Vmax: cm/s。</div>',
+        'fields': {"_width_0": "续性中断，宽", "_缩压_1": "肺动脉收缩压"},
+    },
+    '室间隔缺损并膜部瘤形成': {
+        'html': '<div class="rpt-sec">双室增大，双房大小正常，房间隔连续，室间隔上部可见“风袋样”结构向右室内突起，基底宽{_width_0}mm，向右室面突起{_突起_1}mm，其表面回声中断宽{_width_2}mm，室壁不厚，运动不协调。</div>\n<div class="rpt-sec">各瓣膜成分清晰，启闭自如。</div>\n<div class="rpt-sec">升主动脉内径正常，肺动脉内径正常，大动脉位置关系正常。</div>\n<div class="rpt-sec">心包及心包腔未见明显异常。</div>',
+        'fields': {"_width_0": "突起，基底宽", "_突起_1": "向右室面突起", "_width_2": "面回声中断宽"},
+    },
+    '室间隔缺损并膜部瘤形成。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '动脉导管未闭': {
+        'html': '<div class="rpt-sec">左心增大，右心大小正常，房室间隔连续，室壁不厚，运动不协调。</div>\n<div class="rpt-sec">各瓣膜成分清晰，启闭自如。</div>\n<div class="rpt-sec">升主动脉内径正常，肺动脉内径增宽，大动脉位置关系正常。</div>\n<div class="rpt-sec">降主动脉与肺动脉分叉偏左侧之间可见宽{_width_0}mm，长{_width_1}mm的交通管道。</div>\n<div class="rpt-sec">包及心包腔未见明显异常。</div>',
+        'fields': {"_width_0": "侧之间可见宽", "_width_1": "约 mm，长"},
+    },
+    '二尖瓣机械瓣瓣膜置换术后': {
+        'html': '<div class="rpt-sec">二尖瓣机械瓣换瓣术后：各房室大小正常，房室间隔连续，室壁不厚，运动协调/不协调/欠协调。</div>\n<div class="rpt-sec">二尖瓣瓣位可见机械瓣回声，瓣架固定，瓣叶活动可，余瓣膜成分清晰，启闭自如。</div>\n<div class="rpt-sec">升主动脉内径正常，肺动脉内径正常，大动脉位置关系正常。</div>\n<div class="rpt-sec">心包及心包腔未见明显异常。</div>',
+        'fields': {},
+    },
+    '二尖瓣机械瓣瓣膜置换术后。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '心梗、室壁瘤形成': {
+        'html': '<div class="rpt-sec">各房室大小正常，房间隔连续，室间隔上部可见“风袋样”结构，向心脏轮廓外突起，范围约x{_围约_0}mm，运动明显减弱，不协调，呈“矛盾运动”。</div>\n<div class="rpt-sec">各瓣膜成分清晰，启闭自如。</div>\n<div class="rpt-sec">升主动脉内径正常，肺动脉内径正常，大动脉位置关系正常。</div>\n<div class="rpt-sec">心包及心包腔未见明显异常。</div>',
+        'fields': {"_围约_0": "起，范围约x"},
+    },
+    '三尖瓣下移畸形': {
+        'html': '<div class="rpt-sec">右房及房化右室明显增大，大小约x{_size_0}mm，功能右室缩短，大小约x{_size_1}mm，左心大小正常，三尖瓣后瓣及膈瓣根部距二尖瓣根部附着点分别{_分别_2}mm、{_别约_3}mm，瓣叶开放可，关闭有裂，余瓣膜成分清晰，启闭可。</div>\n<div class="rpt-sec">房室间隔连续不断，室壁不厚，升主动脉内径正常，肺动脉内径正常，大动脉位置关系正常。</div>\n<div class="rpt-sec">心包及心包腔未见明显异常。</div>',
+        'fields': {"_size_0": "大，大小约x", "_size_1": "短，大小约x", "_分别_2": "部附着点分别", "_别约_3": "分别约mm、"},
+    },
+    '三尖瓣下移畸形。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '主动脉瓣二叶化畸形': {
+        'html': '<div class="rpt-sec">各房室大小正常，房室间隔连续，室壁不厚，运动不协调。</div>\n<div class="rpt-sec">主动脉瓣仅见二叶瓣，关闭时“Y”字形结构消失，呈“1”字形，开放可/受限，余瓣膜成分清晰，启闭自如。</div>\n<div class="rpt-sec">升主动脉内径正常，肺动脉内径增宽，大动脉位置关系正常。</div>\n<div class="rpt-sec">包及心包腔未见明显异常。</div>',
+        'fields': {},
+    },
+    '主动脉瓣二叶化畸形。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    'TDI：E＞A（陈）': {
+        'html': '<div class="rpt-sec">CDFI:E＜A  TDI:E＞A。</div>',
+        'fields': {},
+    },
+    '房间隔封堵术后': {
+        'html': '<div class="rpt-sec">右心房室较术前回缩，左心大小正常，左室壁厚度正常，运动正常，房间隔连续完整，可探及封堵器回声，位置固定，与周围组织连续紧密，室间隔连续完整，各瓣膜形态结构、启闭大致正常。</div>\n<div class="rpt-sec">心包及心包腔未见明显异常。</div>',
+        'fields': {},
+    },
+    '气体干扰': {
+        'html': '<b class="rpt-label">受大量气体干扰，图像质量差，于非标准切面下扫查：</b>',
+        'fields': {},
+    },
+    '主动脉瓣前向血流增快': {
+        'html': '<div class="rpt-sec">主动脉瓣前向血流增快，AV:  m/s。</div>',
+        'fields': {},
+    },
+    '心包腔积液': {
+        'html': '<div class="rpt-sec">心包腔可见较宽处{_width_0}mm液暗区。</div>',
+        'fields': {"_width_0": "腔可见较宽处"},
+    },
+    '升主动脉增宽': {
+        'html': '<b class="rpt-label">升主动脉增宽，肺动脉内径及主、肺动脉位置关系正常，</b>',
+        'fields': {},
+    },
+    'HR:  次/分': {
+        'html': '<div class="rpt-sec">HR: 次/分。</div>',
+        'fields': {},
+    },
+    '备用模板': {
+        'html': '<div class="rpt-sec">AO: 30{_m_0}mm         LA: 32{_m_1}mm          LV:  45{_m_2}mm         PA： 21{_m_3}mm   \n\nRA: 26{_m_4}mm         RV: 25{_m_5}mm          IVS:  8{_m_6}mm        LVPW:  8{_m_7}mm\n\n各房室内径正常，房室间隔未见明显连续中断,室间隔及左室后壁不厚，运动协调；</div>\n<div class="rpt-sec">主、肺动脉内径及位置关系正常，各瓣膜清晰，启闭自如；</div>\n<div class="rpt-sec">心包及心包腔未见明显异常回声。</div>\n<div class="rpt-sec">M:二尖瓣前叶曲线呈“双峰”，前后叶运动异向。</div>\n<div class="rpt-sec">AO波幅正常，重博波可见。</div>\n<div class="rpt-sec">CDFI：房室间隔未见过隔血流，各瓣膜口未见明显返流血彩。</div>\n<b class="rpt-label">心功能：EF：65%  FS：35%</b>',
+        'fields': {"_m_0": "AO: 30", "_m_1": "LA: 32", "_m_2": "V:  45", "_m_3": "PA： 21", "_m_4": "RA: 26", "_m_5": "RV: 25", "_m_6": "VS:  8", "_m_7": "PW:  8"},
+    },
+    '左室假健索-CH': {
+        'html': '<div class="rpt-sec">左室内可见一大小约x{_size_0}mm假腱索回声。</div>',
+        'fields': {"_size_0": "见一大小约x"},
+    },
+    '左室收缩舒张功能测值正常范围': {
+        'html': '<div class="rpt-sec">二尖瓣环室间隔侧壁e’：cm/s 侧壁e’：cm/s,二尖瓣E/e\':＜14。</div>',
+        'fields': {},
+    },
+    '心脏(简化)': {
+        'html': '<div class="rpt-sec">2D：各房室内径正常，房室间隔未见明显连续中断,室间隔及左室后壁不厚，运动协调；</div>\n<div class="rpt-sec">主动脉、肺动脉内径正常，主、肺动脉位置关系正常，各瓣膜清晰，启闭自如；</div>\n<div class="rpt-sec">心包及心包腔未见明显异常回声。</div>\n<div class="rpt-sec">M:二尖瓣前叶曲线呈“双峰”，前后叶运动异向。</div>\n<div class="rpt-sec">AO波幅正常，重博波可见。</div>\n<div class="rpt-sec">CDFI：E＞A  E＜A  房室间隔未见过隔血流，各瓣膜口未见明显返流血彩。</div>\n<b class="rpt-label">心功能：EF：%  FS：%</b>',
+        'fields': {},
+    },
+    '正常心脏': {
+        'html': '<div class="rpt-sec">2D：各房室内径正常，房室间隔未见明显连续中断,室间隔及左室后壁不厚，运动协调；</div>\n<div class="rpt-sec">主动脉、肺动脉内径正常，主、肺动脉位置关系正常，各瓣膜清晰，启闭自如；</div>\n<div class="rpt-sec">心包及心包腔未见明显异常回声。</div>\n<div class="rpt-sec">M:二尖瓣前叶曲线呈“双峰”，前后叶运动异向。</div>\n<div class="rpt-sec">AO波幅正常，重博波可见。</div>\n<div class="rpt-sec">CDFI：E＞A 房室间隔未见过隔血流，各瓣膜口未见明显返流血彩。</div>\n<b class="rpt-label">心功能：EF：%  FS：%</b>',
+        'fields': {},
+    },
+    '心率不齐': {
+        'html': '<div class="rpt-sec">E-E间距不等。</div>',
+        'fields': {},
+    },
+    '房颤': {
+        'html': '<div class="rpt-sec">M:二尖瓣前叶曲线呈“单峰”，前后叶运动异向。</div>\n<div class="rpt-sec">AO波幅正常，重博波可见。</div>\n<div class="rpt-sec">E-E间距不等，大小，形态各异。</div>',
+        'fields': {},
+    },
+    '心脏起搏器植入术后': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '风心病，二尖瓣轻度关闭不全': {
+        'html': '<div class="rpt-sec">主动脉、肺动脉内径正常，主动脉主波波幅好，重搏波存在。</div>\n<div class="rpt-sec">左房左室扩大。</div>\n<div class="rpt-sec">二瓣前后叶稍厚，回声稍强，收缩期二尖瓣叶部分不能合拢，裂隙{_裂隙_0}mm。</div>\n<div class="rpt-sec">室间隔与左室后壁不厚，呈反向运动，活动幅度增大。</div>\n<div class="rpt-sec">心脏各结构连续完整。</div>\n<div class="rpt-sec">彩色多普勒显示：收缩期左房内可见以蓝色为主的五彩镶嵌的返流信号，呈束状，范围局限在瓣环水平，返流长度  cm，返流面积 cm2。</div>\n<div class="rpt-sec">频谱多普勒显示：取样容积在二尖瓣口左房侧可探及收缩期向下充填的返流频谱，返流速度 cm/s。</div>',
+        'fields': {"_裂隙_0": "能合拢，裂隙"},
+    },
+    '风心病，主A瓣轻度关闭不全': {
+        'html': '<div class="rpt-sec">主动脉内径增宽，搏动增强，肺动脉内径正常。</div>\n<div class="rpt-sec">左室扩大，其余房室腔大小正常。</div>\n<div class="rpt-sec">主动脉瓣叶增厚，回声增强，舒张期关闭不拢呈双线，间隙{_间隙_0}mm，M型显示二尖瓣前叶可见舒张期快速扑动。</div>\n<div class="rpt-sec">室间隔及左室后壁不厚，运动增强。</div>\n<div class="rpt-sec">心脏各结构连续完整。</div>\n<div class="rpt-sec">彩色多普勒显示：舒张期左室流出道内可见以红色为主五彩镶嵌的返流信号，范围在主动脉瓣下至二尖瓣尖，频谱多普勒显示：取样容积置于左室流出道内可见舒张期正向宽带湍流频谱，返流速度 cm/s。</div>',
+        'fields': {"_间隙_0": "呈双线，间隙"},
+    },
+    '风湿性心脏病，主动脉瓣轻度关闭不全。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '二尖瓣腱索断裂，二尖瓣轻度关闭不全': {
+        'html': '<div class="rpt-sec">主动脉、肺动脉内径正常，主动脉主波波幅好，重搏波存在，左房、左室扩大，二尖瓣叶与腱索连续中断，收缩期左房内可见呈飘浮活动的瓣叶及断裂腱索回声，前后叶瓣尖不能闭合，互相错位，二尖瓣收缩期运动过大，向左房方向脱垂，瓣尖和断裂腱索未见明显增厚，室间隔与左室后壁不厚，运动增强，心脏各结构连续完整，彩色多普勒显示：收缩期左房内可见以蓝色为主的五彩镶嵌的返流信号，呈束状，范围口局限在瓣环水平，返流长度 cm，返流面积  平方厘米。</div>\n<div class="rpt-sec">频谱多普勒显示：取样容积在二尖瓣左房侧可探及收缩期向下充填的返流频谱，返流速度约  cm/s。</div>',
+        'fields': {},
+    },
+    '二尖瓣前叶脱垂': {
+        'html': '<div class="rpt-sec">主动脉、肺动脉内径正常，主动脉主波波幅好，重搏波存在。</div>\n<div class="rpt-sec">各房室脏大小正常。</div>\n<div class="rpt-sec">收缩期二尖瓣前叶呈弧形凸入左心房，运动幅度增大，超过二尖瓣环连线3{_连线_0}mm以上，舒张期呈快速挥鞭样向左室运动，瓣叶不厚，二尖瓣肥大过长，二尖瓣口短轴切面显示瓣口开放时局部呈口圆隆状突起，收缩期仍能合拢，但位置向后移，并偏向左房，M型显示，CD段呈“吊床样”改变，超过CD点连线2{_连线_1}mm以上。</div>\n<div class="rpt-sec">室间隔与左室后壁不厚，逆向运动。</div>\n<div class="rpt-sec">心脏各结构连续完整。</div>\n<div class="rpt-sec">彩色多普勒显示：收缩期左房内未见明显的返流信号。</div>\n<div class="rpt-sec">频谱多普勒显示，各瓣口均呈层流频谱。</div>',
+        'fields': {"_连线_0": "尖瓣环连线3", "_连线_1": "CD点连线2"},
+    },
+    '急性前间壁心肌梗塞并二尖瓣轻-中度返流': {
+        'html': '<div class="rpt-sec">主动脉内径增宽，前后壁回声增粗增强，主波波幅低平，重搏波消失，主动脉活动僵硬，肺动脉不宽。</div>\n<div class="rpt-sec">左房扩大，左室腔内未见异常回声。</div>\n<div class="rpt-sec">二尖瓣曲线可见EF斜率减慢{_减慢_0}mm/s，Epss增大，{_增大_1}mm，A峰波幅增高。</div>\n<div class="rpt-sec">左室运动不协调，呈扭动样，前间壁局部收缩期变薄，回声减弱，运动消失，室间隔连续完整。</div>\n<div class="rpt-sec">心脏各结构连续完整。</div>\n<div class="rpt-sec">彩色多普勒显示：收缩期左房内未见返流信号的返流血流。</div>\n<div class="rpt-sec">频谱多普勒显示：二尖瓣下血流频谱A峰大于E峰，E峰速度减低，cm/s，收缩期左房内未探及返流频谱，返流速度 cm/s。</div>',
+        'fields': {"_减慢_0": "EF斜率减慢", "_增大_1": "pss增大，"},
+    },
+    '急性前间壁心肌梗塞，合并二尖瓣轻至中度返流。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '心包少量积液': {
+        'html': '<div class="rpt-sec">主动脉内径正常，主波波幅好，重搏波存在，肺动脉不宽。</div>\n<div class="rpt-sec">各房室腔大小正常。</div>\n<div class="rpt-sec">各心瓣膜尚纤细，启闭尚好。</div>\n<div class="rpt-sec">左室长轴切面左室后壁脏壁层心包分离，暗区宽度{_width_0}mm。</div>\n<div class="rpt-sec">室间隔与左室后壁逆向运动。</div>\n<div class="rpt-sec">彩色多普勒显示：流入道呈红色血流束，流出道呈蓝色血流束，频谱多普勒显示：各瓣口均呈层流频著。</div>',
+        'fields': {"_width_0": "离，暗区宽度"},
+    },
+    '心包少量积液。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '左房粘液瘤': {
+        'html': '<div class="rpt-sec">主动脉内径正常，主波波幅好，重搏波可见，肺动脉不宽。</div>\n<div class="rpt-sec">左房扩大。</div>\n<div class="rpt-sec">左房内可见大小约 ×{_size_0}mm的异常实质性回声，形状呈圆形，回声强度中等，分布均质，内呈点状回声，根部附在房间隔上，活动度较大，舒张期瘤体脱入二尖瓣口，收缩期进入左房内。</div>\n<div class="rpt-sec">各心瓣膜纤细，未见明显增厚，肺动脉瓣活动曲线未见异常。</div>\n<div class="rpt-sec">心脏各结构连续完整。</div>\n<div class="rpt-sec">彩色多普勒显示舒张期在瘤体一侧可见以红色为主的五彩镶嵌的射流束。</div>\n<div class="rpt-sec">频谱多普勒显示：舒张期，二尖瓣下可探及宽带充填的湍流频谱，流速约cm/s。</div>',
+        'fields': {"_size_0": "见大小约 ×"},
+    },
+    '主动脉夹层': {
+        'html': '<div class="rpt-sec">各房室大小正常，各瓣膜成分清晰，启闭自如。</div>\n<div class="rpt-sec">房室间隔连续，室壁不厚，运动协调。</div>\n<div class="rpt-sec">主动脉内径增宽，腔内可见一光带。</div>\n<div class="rpt-sec">肺动脉内径及位置关系正常。</div>\n<div class="rpt-sec">心包及心包腔末见明显异常声像。</div>',
+        'fields': {},
+    },
+    '室壁瘤': {
+        'html': '<div class="rpt-sec">左房左室增大，右房右室大小正常，房室间隔连续，室间隔近心尖部局部变薄为{_薄为_0}mm，向前膨出{_膨出_1}mm，局部运动消失，左室后壁运动代偿增强。</div>\n<div class="rpt-sec">各瓣膜成分清晰，启闭可。</div>\n<div class="rpt-sec">主动脉内径增宽，肺动脉内径正常，二者位置关系正常。</div>\n<div class="rpt-sec">心包及心包腔未见明显异常声像。</div>',
+        'fields': {"_薄为_0": "部局部变薄为", "_膨出_1": "m，向前膨出"},
+    },
+    '二尖瓣机械瓣换瓣术后': {
+        'html': '<div class="rpt-sec">二尖瓣机械瓣换瓣术后：各房室大小正常，房室间隔连续，室壁不厚，运动协调/不协调/欠协调。</div>\n<div class="rpt-sec">二尖瓣瓣位可见机械瓣强回声，瓣架固定，瓣叶活动可，余瓣膜成分清晰，启闭自如。</div>\n<div class="rpt-sec">升主动脉内径正常，肺动脉内径正常，大动脉位置关系正常。</div>\n<div class="rpt-sec">心包及心包腔未见明显异常。</div>',
+        'fields': {},
+    },
+    '风心病': {
+        'html': '<div class="rpt-sec">二尖瓣瓣膜增厚，回声增强，开放受限，瓣尖呈结节样改变，二尖瓣曲线前后叶同向运动，呈“城垛样”改变，二尖辦口前向血流，Vmax:  m/s，PG：{_m_0}mmHg。</div>\n<div class="rpt-sec">压力半降法估测瓣口面积约  平方厘米，轨迹法估测二尖瓣瓣口面积约  平方厘米。</div>',
+        'fields': {"_m_0": "/s，PG："},
+    },
+    '二尖瓣生物瓣': {
+        'html': '<div class="rpt-sec">二尖瓣瓣位可探及生物瓣回声，辦架固定，瓣叶回声稍强，活动尚可，瓣口前向血流Vmax:  m/s，PHT 法估测瓣口面积约  平方厘米，二尖瓣口前向血流频谱大小、间距不等。</div>',
+        'fields': {},
+    },
+    '冠心病': {
+        'html': '<b class="rpt-label">左室壁运动节段性减弱、不协调</b>',
+        'fields': {},
+    },
+    '二尖瓣关闭不全（重度）': {
+        'html': '<div class="rpt-sec">二尖瓣瓣叶稍厚，二、三尖瓣未见明显狭窄。</div>',
+        'fields': {},
+    },
+    '主动脉瓣口局限性返流（申）': {
+        'html': '<div class="rpt-sec">主动脉瓣口左室侧可见以红色为主的局限性返流束。</div>',
+        'fields': {},
+    },
+    '心脏（申）': {
+        'html': '<div class="rpt-sec">2D：各房室内径正常，房室间隔未见明显连续中断,室间隔及左室后壁不厚，运动协调；</div>\n<div class="rpt-sec">主动脉、肺动脉内径正常，主、肺动脉位置关系正常，各瓣膜清晰，启闭自如；</div>\n<div class="rpt-sec">心包及心包腔未见明显异常回声。</div>\n<div class="rpt-sec">M:二尖瓣前叶曲线呈“双峰”，前后叶运动异向。</div>\n<div class="rpt-sec">CDFI：E＞A 房室间隔未见过隔血流，各瓣膜口未见明显返流血彩。</div>\n<b class="rpt-label">心功能：EF：%  FS：%</b>',
+        'fields': {},
+    },
+}
+
+register_templates(_TPL, category='心脏')

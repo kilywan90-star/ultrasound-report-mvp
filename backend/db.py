@@ -169,7 +169,7 @@ def patient_get(patient_id: int) -> dict | None:
 
 
 def patient_queue(status: str = None) -> list[dict]:
-    """获取患者队列，默认返回已缴费+检查中"""
+    """获取患者队列，默认返回所有等待和检查中的患者"""
     c = _conn()
     if status:
         rows = c.execute(
@@ -177,7 +177,7 @@ def patient_queue(status: str = None) -> list[dict]:
         ).fetchall()
     else:
         rows = c.execute(
-            "SELECT * FROM patients WHERE status IN ('已缴费','检查中') ORDER BY created_at DESC"
+            "SELECT * FROM patients WHERE status IN ('待检','检查中') ORDER BY created_at DESC"
         ).fetchall()
     return [dict(r) for r in rows]
 
@@ -195,16 +195,18 @@ def patient_update_status(patient_id: int, status: str) -> dict | None:
 # ==================== 报告操作 ====================
 
 def report_create(patient_id: int, template: str, raw_text: str = None,
-                  structured: dict = None, audio_path: str = None) -> dict:
-    c = _conn()
-    cur = c.execute(
-        "INSERT INTO reports (patient_id, template, raw_text, structured, audio_path) VALUES (?,?,?,?,?)",
-        (patient_id, template, raw_text, json.dumps(structured, ensure_ascii=False) if structured else None, audio_path),
-    )
-    c.commit()
-    # 更新患者状态
-    patient_update_status(patient_id, "检查中")
-    return report_get(cur.lastrowid)
+                  structured: dict = None, audio_path: str = None) -> dict | None:
+    try:
+        c = _conn()
+        cur = c.execute(
+            "INSERT INTO reports (patient_id, template, raw_text, structured, audio_path) VALUES (?,?,?,?,?)",
+            (patient_id, template, raw_text, json.dumps(structured, ensure_ascii=False) if structured else None, audio_path),
+        )
+        c.commit()
+        patient_update_status(patient_id, "检查中")
+        return report_get(cur.lastrowid)
+    except Exception:
+        return None
 
 
 def report_get(report_id: int) -> dict | None:
@@ -319,14 +321,17 @@ def api_report_search(keyword: str = None, date_from: str = None,
 
 def audit_log(action: str, patient_id: int = None, input_text: str = None,
               output_text: str = None, detail: dict = None, operator: str = "system"):
-    c = _conn()
-    c.execute(
-        "INSERT INTO audit_log (patient_id, action, input_text, output_text, detail, operator) VALUES (?,?,?,?,?,?)",
-        (patient_id, action, input_text[:500] if input_text else None,
-         output_text[:500] if output_text else None,
-         json.dumps(detail, ensure_ascii=False) if detail else None, operator),
-    )
-    c.commit()
+    try:
+        c = _conn()
+        c.execute(
+            "INSERT INTO audit_log (patient_id, action, input_text, output_text, detail, operator) VALUES (?,?,?,?,?,?)",
+            (patient_id, action, input_text[:500] if input_text else None,
+             output_text[:500] if output_text else None,
+             json.dumps(detail, ensure_ascii=False) if detail else None, operator),
+        )
+        c.commit()
+    except Exception:
+        pass  # 审计日志非关键路径，失败不影响主流程
 
 
 def audit_log_search(keyword: str = None, action: str = None,

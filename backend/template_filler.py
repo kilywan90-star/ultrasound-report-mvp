@@ -5,7 +5,9 @@ from pathlib import Path
 from collections import defaultdict
 from cn_num import cn_to_arabic
 
-TEMPLATE_CSV = Path(os.environ.get("TEMPLATE_CSV", ""))
+# 先尝试.env加载TEMPLATE_DIR
+_HERE = Path(__file__).resolve().parent
+TEMPLATE_CSV = _HERE / "knowledge" / "1长沙范本.csv"
 _templates: list[dict] = []
 _fulltext: dict[str, list[int]] = defaultdict(list)
 _categories: dict[str, list[int]] = defaultdict(list)
@@ -48,7 +50,9 @@ SITE_DISEASE = {
 def _load():
     global _loaded, _templates, _fulltext, _categories, _names
     if _loaded: return
-    if not TEMPLATE_CSV.exists(): _loaded = True; return
+    if not TEMPLATE_CSV.exists():
+        _loaded = True
+        return
 
     organs = ["肝脏","胆囊","胆总管","胰腺","脾脏","肾脏","左肾","右肾","双肾",
               "膀胱","前列腺","子宫","卵巢","附件","盆腔","胎儿","甲状腺",

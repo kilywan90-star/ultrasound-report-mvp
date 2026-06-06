@@ -1,0 +1,339 @@
+"""自动生成 — other 结构化模板"""
+from template_converted import register_templates
+
+_TPL = {
+    '肝血管瘤': {
+        'html': '<div class="rpt-sec">肝内可见稍高/稍低/等回声结节，大小约 x{_size_0}mm，形态规则，边界尚清，内部回声欠均匀，内呈“网格状”改变，后方回声无衰减。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '肝内稍高/稍低/等回声结节，考虑肝血管瘤。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '肾结石（单发）': {
+        'html': '<div class="rpt-sec">左肾/右肾集合系内见一强回声点，后伴声影，大小约 x{_size_0}mm，无液性暗区。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '肾结石并积水': {
+        'html': '<div class="rpt-sec">肾集合系内见一强回声团，大小约 x{_size_0}mm，后伴声影，并见{_并见_1}mm宽的液暗区。</div>',
+        'fields': {"_size_0": "，大小约 x", "_并见_1": "伴声影，并见"},
+    },
+    '肾囊肿（单发）': {
+        'html': '<div class="rpt-sec">肾实质内可见一无回声区，壁薄，后壁回声增强，内透声可，大小约 x{_size_0}mm。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '肾钙化灶': {
+        'html': '<div class="rpt-sec">左肾/右肾实质内见一强回声斑，后伴弱声影，大小约 x{_size_0}mm。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '肾多发钙化灶': {
+        'html': '<div class="rpt-sec">肾实质内见多个强回声斑，后伴弱声影，较大约 x{_大约_0}mm。</div>',
+        'fields': {"_大约_0": "，较大约 x"},
+    },
+    '肾积水': {
+        'html': '<div class="rpt-sec">左侧/右侧肾脏集合系统可见宽{_width_0}mm的分离液暗区。</div>',
+        'fields': {"_width_0": "合系统可见宽"},
+    },
+    '肾积水伴输尿管结石': {
+        'html': '<div class="rpt-sec">肾集合系回声分离，可见深{_depth_0}mm的分离暗区，输尿管上段内径{_diameter_1}mm，距肾门{_diameter_2}mm处可见大小约 x{_size_3}mm的强回声团，伴声影。</div>',
+        'fields': {"_depth_0": "分离，可见深", "_diameter_1": "尿管上段内径", "_diameter_2": "mm，距肾门", "_size_3": "见大小约 x"},
+    },
+    '肾积水伴输尿管结石。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '宫内节育器': {
+        'html': '<div class="rpt-sec">宫腔内可见强回声环，其上缘距宫底{_宫底_0}mm，位置正常。</div>',
+        'fields': {"_宫底_0": "其上缘距宫底"},
+    },
+    '双乳小叶增生 1类': {
+        'html': '<div class="rpt-sec">双乳组织增厚、增粗，回声分布不均，见多个粗大点片状低回声区，呈“豹纹征”。</div>',
+        'fields': {},
+    },
+    '乳结节，BI-RADS   级。': {
+        'html': '<b class="rpt-label">罗海华</b>',
+        'fields': {},
+    },
+    '正常双侧肾上腺': {
+        'html': '<div class="rpt-sec">双侧肾上腺显示欠清，双侧肾上腺区未探及明显包块及液暗区等。</div>',
+        'fields': {},
+    },
+    '双侧肾上腺未见明显异常声像。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '上肢血管': {
+        'html': '<div class="rpt-sec">双侧肱动脉及其分支走行规则，管壁光滑，管腔无扩张，狭窄，内未见异常回声。</div>',
+        'fields': {},
+    },
+    '双乳小叶增生': {
+        'html': '<div class="rpt-sec">双乳组织增厚、增粗，回声分布不均，见多个粗大点片状低回声区，呈“豹纹征”。</div>',
+        'fields': {},
+    },
+    '双乳小叶增生。': {
+        'html': '<b class="rpt-label">罗海华</b>',
+        'fields': {},
+    },
+    '左室假腱索。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '动脉导管未闭。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '室壁运动异常，室壁瘤形成。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '肾上腺皮质增生': {
+        'html': '<div class="rpt-sec">左、右肾上腺处多断面超声扫查，两侧肾上腺弥漫性增大，厚度明显增加，形态饱满，内部呈均匀的弱回声，未见明显其他异常声像。</div>',
+        'fields': {},
+    },
+    '肾上腺嗜铬细胞瘤': {
+        'html': '<div class="rpt-sec">左侧肾上腺处超声扫查，可见大小约 x{_size_0}mm 的肿块声像，形状呈圆形，边界清楚明亮，光滑整齐，内部为均匀的点状低回声肿块与肾包膜回声构成“海鸥征”。</div>',
+        'fields': {"_size_0": "见大小约 x"},
+    },
+    '双侧肾上腺正常（附二）': {
+        'html': '<div class="rpt-sec">双侧肾上腺部位多切面超声扫查，未见明显肿块结节声像。</div>',
+        'fields': {},
+    },
+    '正常颈部淋巴结（单独）': {
+        'html': '<div class="rpt-sec">双侧颈部未见明显淋巴结回声。</div>',
+        'fields': {},
+    },
+    '双乳小叶增生1类（淋巴结）': {
+        'html': '<div class="rpt-sec">双乳组织增厚、增粗，回声分布不均，见多个粗大点片状低回声区，呈“豹纹征”，内未见明显肿块声像。</div>',
+        'fields': {},
+    },
+    '淋巴结肿大。（陈）': {
+        'html': '<div class="rpt-sec">左/右/双侧颈部可见低回声结节，大小约。</div>',
+        'fields': {},
+    },
+    'ABUS': {
+        'html': '<b class="rpt-label">123</b>',
+        'fields': {},
+    },
+    '乳低回声结节，BI-RADS 3类(考虑纤维腺瘤可能)': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '双乳多发低回声结节，BI-RADS3类(考虑纤维腺瘤可能)': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '乳 点位实性低回声肿块，BI-RADS 4c类': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '颈部淋巴结肿大（陈）': {
+        'html': '<div class="rpt-sec">颈部左/右/两侧可见低回声结节，大小约。</div>',
+        'fields': {},
+    },
+    '颈部左/右/两侧低回声结节，考虑淋巴结。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '部分淋巴结增大（陈）': {
+        'html': '<div class="rpt-sec">颈部左/右/两侧可见多个低回声结节，较大者位于左/右侧，大小约x{_size_0}mm。</div>',
+        'fields': {"_size_0": "侧，大小约x"},
+    },
+    '颈部左/右/两侧部分淋巴结稍大。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '颈部淋巴结（异常）': {
+        'html': '<div class="rpt-sec">左/右/双侧颈部可见低回声结节，大小约 x{_size_0}mm，形态规则，边界清，内回声均匀。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '左/右/双侧颈部低回声结节，考虑淋巴结。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '心动过缓': {
+        'html': '<b class="rpt-label">HR：次/分</b>',
+        'fields': {},
+    },
+    '结石或钙化灶': {
+        'html': '<div class="rpt-sec">肾内见一强回声点，后伴声影，大小约 x{_size_0}mm。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '宫腔积液': {
+        'html': '<div class="rpt-sec">宫腔内可见宽{_width_0}mm液性暗区。</div>',
+        'fields': {"_width_0": "宫腔内可见宽"},
+    },
+    '肾柱肥大': {
+        'html': '<div class="rpt-sec">肾集合系统与实质之间可见一大小约 x{_size_0}mm的等回声结节，与肾实质相连无明显分界。</div>',
+        'fields': {"_size_0": "一大小约 x"},
+    },
+    '肾结石CH': {
+        'html': '<div class="rpt-sec">左肾/右肾上/中/下盏可见一强回声点，后伴声影，大小约 x{_size_0}mm，无液性暗区。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '颈部淋巴结异常': {
+        'html': '<div class="rpt-sec">左/右侧颈部可见低回声结节，大小约 x{_size_0}mm，形态规则/不规则，边界清/欠清/不清，淋巴门样结构存在/消失。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '左/右侧颈部低回声结节，考虑淋巴结。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '正常肾动脉': {
+        'html': '<b class="rpt-label">双侧主肾动脉起始段管腔血流信号充盈可，测得频谱：</b>',
+        'fields': {},
+    },
+    '双侧主肾动脉血流未见明显异常。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '异常肾动脉（血流速度增快）': {
+        'html': '<div class="rpt-sec">双侧主肾动脉起始段管腔血流信号充盈可，左/右侧主肾动脉局部可见五彩血流信号，测得频谱：</div>',
+        'fields': {},
+    },
+    '左/右侧主肾动脉血流速度增快，请结合临床，建议进一步检查。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '异常肾动脉（阻力指数增高）': {
+        'html': '<b class="rpt-label">双侧主肾动脉起始段管腔血流信号充盈可，测得频谱：</b>',
+        'fields': {},
+    },
+    '左/右侧主肾动脉阻力指数增高，请结合临床，建议进一步检查。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '颈部双侧淋巴结': {
+        'html': '<div class="rpt-sec">颈部两侧可见低回声结节，大小分别约 x{_size_0}mm（右）、x{_右_1}mm（左），形态规则/不规则，边界清/欠清/不清，淋巴门样结构存在/消失。</div>\n<div class="rpt-sec">。</div>',
+        'fields': {"_size_0": "小分别约 x", "_右_1": "m（右）、x"},
+    },
+    '颈部两侧低回声结节，考虑淋巴结。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '主动脉弹性减退': {
+        'html': '<div class="rpt-sec">AO波幅低平，重博波消失。</div>',
+        'fields': {},
+    },
+    '肾囊肿': {
+        'html': '<div class="rpt-sec">左肾/右肾实质内可见一无回声区，壁薄，内透声可，后壁回声增强，大小约 x{_size_0}mm。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '肾多发囊肿': {
+        'html': '<div class="rpt-sec">左肾/右肾实质内可见多个无回声区，壁薄，内透声可，后壁回声增强，其一大小约 x{_size_0}mm。</div>',
+        'fields': {"_size_0": "一大小约 x"},
+    },
+    '结石或钙化灶（边缘）': {
+        'html': '<div class="rpt-sec">左肾/右肾集合系边缘可见一强回声点，后方声影不明显，大小约 x{_size_0}mm，无液性暗区。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '气体干扰（LD）': {
+        'html': '<div class="rpt-sec">受气体干扰图像质量差，部分数据于非标准切面下获得，所示切面：</div>',
+        'fields': {},
+    },
+    '肾多发结石': {
+        'html': '<div class="rpt-sec">左肾/右肾集合系内见多个强回声点，后伴声影，无液性暗区，其一大小约x{_size_0}mm。</div>',
+        'fields': {"_size_0": "其一大小约x"},
+    },
+    '肾囊肿CH': {
+        'html': '<div class="rpt-sec">左/右肾上/中/下部可见一无回声区，壁薄，后壁回声增强，内透声可，大小约 x{_size_0}mm。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '输尿管上段扩张并积水': {
+        'html': '<div class="rpt-sec">右肾/左肾集合系统可见宽{_width_0}mm的分离液暗区，输尿管上段内径{_diameter_1}mm，距肾门{_diameter_2}mm内未见明显强回声团，中下段大量肠气干扰显示不清。</div>',
+        'fields': {"_width_0": "合系统可见宽", "_diameter_1": "尿管上段内径", "_diameter_2": "mm，距肾门"},
+    },
+    '右侧/左侧输尿管上段扩张并积水/集合系统分离。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '肾多发囊肿-CH': {
+        'html': '<div class="rpt-sec">左/右肾可见多个无回声区，壁薄，后壁回声增强，内透声可，较大位于上/中/下部，大小约 x{_size_0}mm。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '肾多发结石-CH': {
+        'html': '<div class="rpt-sec">左肾/右肾可见多个强回声点，后伴声影，较大位于上/中/下盏，大小约 x{_size_0}mm，无液性暗区。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '腹主动脉内未见明显异常声像。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '肝岛': {
+        'html': '<div class="rpt-sec">肝内可见低回声区，大小约x{_size_0}mm，形态不规则，边界清，回声欠均匀。</div>',
+        'fields': {"_size_0": "区，大小约x"},
+    },
+    '肝内低回声区，考虑肝岛。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '静脉曲张': {
+        'html': '<div class="rpt-sec">左下肢大隐静脉小腿段及小隐静脉迂曲走形，内径增宽，大隐静脉最宽内径{_width_0}mm，小隐静脉最宽处内径{_width_1}mm，左小腿表浅静脉迂曲走形，较宽处{_width_2}mm，内见血流信号，加压探头可压瘪，余左下肢静脉血流通畅，充盈可，内未见异常回声，探头加压后管腔可压瘪。</div>\n<div class="rpt-sec">双下肢大腿远端内侧大隐静脉呈“曼状”改变，较宽处内径{_width_3}mm，下肢浅静脉管腔内血彩充盈可，未见明显充盈缺损，浅静脉瓣处可见自发返流信号，持续时间2s,深静脉瓣处暂未见明显病理性返流信号，频谱边缘尚规整，可见呼吸相。</div>',
+        'fields': {"_width_0": "静脉最宽内径", "_width_1": "脉最宽处内径", "_width_2": "走形，较宽处", "_width_3": "，较宽处内径"},
+    },
+    'E-E间距不等，请结合临床。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '起搏器': {
+        'html': '<div class="rpt-sec">右房内可见起搏器导丝。</div>',
+        'fields': {},
+    },
+    '左房粘液瘤。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '人工瓣膜置换术后': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '残余尿量': {
+        'html': '<div class="rpt-sec">嘱排尿后测残余尿量约ml。</div>',
+        'fields': {},
+    },
+    '残余尿量约ml。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '脾血管瘤？（附二）': {
+        'html': '<div class="rpt-sec">脾切面形态正常，脾{_常脾_0}mm，脾长{_thick_1}mm，左肋缘下可探及，体积增大，回声不均，脾内可见一个大小约 ×{_size_2}mm的肿块图像，形状呈圆形，内部为强回声，并可见圆点状结构，分布均质，周边清楚，有边缘裂开征，似口筛状改变，后方回声无变化。</div>',
+        'fields': {"_常脾_0": "形态正常，脾", "_thick_1": "厚mm，脾长", "_size_2": "个大小约 ×"},
+    },
+    '脾内实质性占位病变，性质待查，考虑脾血管瘤？其它疾患待排。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '肺动脉高压': {
+        'html': '<div class="rpt-sec">心房：右房稍大，左房大小正常，右房收缩末面积约  平方厘米。</div>',
+        'fields': {},
+    },
+    '先心病：房间隔膨出瘤并继发孔型房缺': {
+        'html': '<div class="rpt-sec">房间隔中部可见一“风袋样”结构，随心动周期左右摆动，基底{_基底_0}mm，向右房面膨出高度{_高度_1}mm，向左房面膨出高度{_高度_2}mm，其顶部可见宽{_width_3}mm的回声中断，回声中断处距中心纤维体{_维体_4}mm，距心底{_心底_5}mm，距上腔静脉{_静脉_6}mm，距下腔静脉{_静脉_7}mm，回声中断处探及左向右过隔血彩，Vmax:  m/s。</div>',
+        'fields': {"_基底_0": "右摆动，基底", "_高度_1": "房面膨出高度", "_高度_2": "房面膨出高度", "_width_3": "其顶部可见宽", "_维体_4": "距中心纤维体", "_心底_5": "mm，距心底", "_静脉_6": "，距上腔静脉", "_静脉_7": "，距下腔静脉"},
+    },
+    'PCI术后': {
+        'html': '<div class="rpt-sec">房间隔：中部探及宽{_width_0}mm的回声中断，回声中断处距中心纤维体{_维体_1}mm（硬边），距房底部{_底部_2}mm（硬边），距房后壁{_后壁_3}mm，距上腔静脉{_静脉_4}mm，距下腔静脉{_静脉_5}mm，房间隔最大伸展径{_diameter_6}mm，回声中段处探及左向右过隔血彩，Vmax：m/s。</div>',
+        'fields': {"_width_0": "：中部探及宽", "_维体_1": "距中心纤维体", "_底部_2": "），距房底部", "_后壁_3": "），距房后壁", "_静脉_4": "，距上腔静脉", "_静脉_5": "，距下腔静脉", "_diameter_6": "隔最大伸展径"},
+    },
+    '腹主动脉部分节段瘤样扩张,考虑：腹主动脉瘤。': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+    '局限肾盏积液？囊肿不排（申）': {
+        'html': '<div class="rpt-sec">右/左肾皮髓交界处可见一无回声区，壁薄，内透声可，后壁回声增强，大小约</div>',
+        'fields': {},
+    },
+    '局限性肾盏积液？囊肿不排（申）': {
+        'html': '<div class="rpt-sec">右/左肾皮髓交界处可见一无回声区，壁薄，内透声可，后壁回声增强，大小{_size_0}mm</div>',
+        'fields': {"_size_0": "声增强，大小"},
+    },
+    '肝血管瘤（申）': {
+        'html': '<div class="rpt-sec">肝内可见稍高/稍低/等回声结节，大小约 x{_size_0}mm，形态规则，边界尚清，内部回声欠均匀，后方回声无衰减。</div>',
+        'fields': {"_size_0": "，大小约 x"},
+    },
+    '肝内稍高/稍低/等回声结节，考虑：肝血管瘤': {
+        'html': '<b class="rpt-label">0</b>',
+        'fields': {},
+    },
+}
+
+register_templates(_TPL, category='其他')

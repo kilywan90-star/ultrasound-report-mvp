@@ -332,6 +332,11 @@ load_templates()
 
 
 def _get_client(provider: str = "deepseek"):
+    if provider == "volc":
+        return OpenAI(
+            api_key="ark-70272cfb-cdc5-42f4-bb67-e8e721557010-bf3e6",
+            base_url="https://ark.cn-beijing.volces.com/api/v3",
+        )
     if provider == "dashscope":
         return OpenAI(
             api_key=os.getenv("DASHSCOPE_API_KEY"),

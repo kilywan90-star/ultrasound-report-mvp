@@ -7,7 +7,7 @@ _log = logging.getLogger(__name__)
 
 # 加载超声热词表（670个医学术语），提升ASR识别准确率
 _HOTWORDS_CACHE = None
-def _load_hotwords() -> list[str]:
+def _load_hotwords() -> list[dict]:
     global _HOTWORDS_CACHE
     if _HOTWORDS_CACHE is not None:
         return _HOTWORDS_CACHE
@@ -15,15 +15,12 @@ def _load_hotwords() -> list[str]:
     try:
         with open(hw_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        words = [item["word"] for item in data.get("hotwords", []) if "word" in item]
+        words = data.get("hotwords", [])
         _HOTWORDS_CACHE = words
-        print(f"[ASR热词] 已加载 {len(words)} 个超声术语")
+        print(f"[ASR热词] 已加载 {len(words)} 个超声术语 (含weight)")
         _log.info(f"ASR热词已加载: {len(words)}个")
-
-        # 验证: 打印一些热词的注入格式
-        sample = words[:5]
-        print(f"[ASR热词] 即将注入到qwen3-asr-flash: {sample}")
-        print(f"[ASR热词] 总计 {len(words)} 个词, 来源: {data.get('_source','unknown')}")
+        sample = [w.get("word","") for w in words[:3]]
+        print(f"[ASR热词] 注入qwen3-asr-flash: {sample}...")
     except Exception as e:
         _log.warning(f"ASR热词加载失败: {e}")
         _HOTWORDS_CACHE = []
