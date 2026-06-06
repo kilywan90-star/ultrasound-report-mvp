@@ -32,10 +32,19 @@ def init_db():
             age         INTEGER,
             exam_type   TEXT    NOT NULL,
             exam_part   TEXT,
-            status      TEXT    NOT NULL DEFAULT '已缴费' CHECK(status IN ('已缴费','检查中','已完成')),
+            outpatient_id TEXT,             -- 门诊号 (PACS)
+            inpatient_id  TEXT,             -- 住院号 (PACS)
+            department    TEXT,             -- 申请科室 (PACS)
+            clinical_diag TEXT,             -- 临床诊断 (PACS)
+            tenant_id     INTEGER,          -- 租户ID (api_platform)
+            status      TEXT    NOT NULL DEFAULT '待检' CHECK(status IN ('待检','检查中','已完成')),
             created_at  TEXT    NOT NULL DEFAULT (datetime('now','localtime')),
             updated_at  TEXT    NOT NULL DEFAULT (datetime('now','localtime'))
         );
+
+        CREATE INDEX IF NOT EXISTS idx_patients_outpatient ON patients(outpatient_id);
+        CREATE INDEX IF NOT EXISTS idx_patients_inpatient ON patients(inpatient_id);
+        CREATE INDEX IF NOT EXISTS idx_patients_status ON patients(status);
 
         CREATE TABLE IF NOT EXISTS reports (
             id          INTEGER PRIMARY KEY AUTOINCREMENT,
