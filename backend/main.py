@@ -37,12 +37,13 @@ from fixed_template_engine import process_with_fixed_template, TEMPLATE_TAGS, DE
 from asr_correction import correct_ASR_text
 from template_fetal import fill_fetal_template
 from api_section_templates import router as section_templates_router
+from api_pacs import router as pacs_router
 import db
 
 app = FastAPI(title="超声报告语音结构化", version="3.0.0.ABCDEF")
 
-# Register section templates API
 app.include_router(section_templates_router)
+app.include_router(pacs_router)
 
 # CORS: 允许常见来源但不回显任意Origin（避免creds问题）
 app.add_middleware(
