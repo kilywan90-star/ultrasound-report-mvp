@@ -525,8 +525,8 @@ document.addEventListener('DOMContentLoaded',function(){
 <script>
 function t(m,c){var ct=document.getElementById("toasts");var d=document.createElement("div");d.className="toast "+(c||"s");d.textContent=m;ct.appendChild(d);setTimeout(function(){d.remove()},3500)}
 
-// HTTPS 检测: 只在标准80端口才跳转(浏览器会强制HTTPS升级), 自定义端口保持HTTP
-if(location.protocol==='http:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'&&!location.port){
+// HTTPS 检测: HTTP且非localhost且有端口号才跳HTTPS，避免自签证书阶段连接拒绝
+if(location.protocol==='http:'&&location.hostname!=='localhost'&&location.hostname!=='127.0.0.1'&&location.port){
   location.replace('https://'+location.host+location.pathname+location.search);
 }
 var S={sel:null,dels:new Set(),rpt:null,ac:[],ab:null,rec:false,mr:null,paused:false,rs:0,pe:0,ti:null,au:null,audio_id_last:null};
