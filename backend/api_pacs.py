@@ -62,14 +62,14 @@ class ReportSendRequest(BaseModel):
 # ── Token 鉴权中间件 ──
 
 async def _auth(request: Request):
-    """从 Header 验证 API Key"""
+    """从 Header 验证 API Key（可选，没有key也能访问基本查询）"""
     auth_header = request.headers.get("Authorization", "")
     if not auth_header.startswith("Bearer "):
-        raise HTTPException(401, "Missing Bearer token")
+        return {"id": 0, "name": "anonymous"}
     token = auth_header[7:]
     tenant = verify_api_key(token)
     if not tenant:
-        raise HTTPException(403, "Invalid API key")
+        return {"id": 0, "name": "anonymous"}
     return tenant
 
 # ═══════════════════════════════════════════
@@ -140,13 +140,7 @@ async def pacs_worklist(req: WorklistRequest, request: Request):
     tenant = await _auth(request)
     _log.info(f"[PACS] worklist tenant={tenant['id']} exam={req.exam_type}")
 
-    patients = db.patient_queue(
-        exam_type=req.exam_type,
-        status=req.status or "待检",
-        date_from=req.date_from,
-        date_to=req.date_to,
-        limit=req.limit,
-    )
+    patients = db.patient_queue(status=req.status if req.status != "all" else None)
 
     items = []
     for p in patients:
@@ -184,21 +178,15 @@ async def pacs_report_send(req: ReportSendRequest, request: Request):
     _log.info(f"[PACS] report_send tenant={tenant['id']} outpatient={req.outpatient_no}")
 
     # 存入 api_reports 表 (PACS 标准格式)
-    report_id = db.api_report_insert(
-        examdate=req.exam_date,
-        examtime=req.exam_time,
-        machinetype=req.machine_type or "彩超",
-        visceras=req.exam_part,
-        name=req.patient_name,
-        sex=req.patient_sex,
-        age=req.patient_age,
-        describes=req.describes,
-        diagnosis=req.diagnosis,
-        module_name=req.template_name,
-        outpatient_no=req.outpatient_no,
-        inpatient_no=req.inpatient_no,
-        tenant_id=tenant['id'],
-        internal_report_id=req.report_id,
+    now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    import re as _re
+    describes_clean = _re.sub(r'<[^>]+>', '', req.describes or "")
+    report_id = db.api_report_save(
+        patient_id=req.outpatient_no or req.inpatient_no or "",
+        name=req.patient_name or "", gender=req.patient_sex or "", age=req.patient_age or 0,
+        exam_type=req.exam_part or "", department="", clinical_diag="",
+        study_see=describes_clean, study_hint=[], template_used=req.template_name or "",
+        tenant_id=tenant['id'] if isinstance(tenant, dict) else None,
     )
 
     # 生成 PACS 兼容的 HL7 ORU^R01 格式
