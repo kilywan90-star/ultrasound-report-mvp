@@ -138,10 +138,9 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
 
     scored: dict[str, int] = {}
 
-    from rule_engine import get_rule as _gr
-    organ_words = _gr("templates.organ_words", ["肝脏","胆囊","胰腺","脾脏","肾脏","子宫","卵巢"])
-
     # 策略1: DISCNAME关键词精确匹配
+    # 器官词列表（用于全搜索函数）
+    _ORGAN_WORDS = ["肝脏","胆囊","胰腺","脾脏","肾脏","子宫","卵巢","前列腺","甲状腺","乳腺","心脏","颈动脉","椎动脉","胎儿","膀胱","睾丸","附睾","淋巴结","阑尾","胸腔","腹腔","盆腔","胆总管","门静脉","胎心","胎盘","羊水","脐带"]
     for keyword in sorted(_keyword_index.keys(), key=len, reverse=True):
         if keyword in text and len(keyword) >= 2:
             name = _keyword_index[keyword]
@@ -171,7 +170,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
                 scored[name] = max(scored.get(name, 0), 120)
             # 文本含器官词且模板名含"正常"时保底加分
             if "正常" in name:
-                for organ in organ_words:
+                for organ in _ORGAN_WORDS:
                     if organ in text and organ in (entry.get("info1","") + entry.get("name","")):
                         scored[name] = max(scored.get(name, 0), 80)
                         break
@@ -188,29 +187,46 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
                     if "集合系统" in (entry.get("info1","") + entry.get("name",""))[:300]:
                         scored[name] = max(scored.get(name, 0), 140)
 
-        # 策略1.5: 模板匹配关键词精确匹配 (master_rules.json)
-    from rule_engine import get_rule as _gr2
-    match_kw_dict = _gr2("templates.match_keywords", {})
+        # 策略1.5: 模板匹配关键词精确匹配 (固定规则)
+    match_kw_dict = {
+        "结石":["结石","强回声","声影"],
+        "肾结石":["肾","结石","强回声","声影","肾盂"],
+        "囊肿":["囊肿","囊性","无回声"],
+        "子宫肌瘤":["子宫","肌瘤","低回声","肌层"],
+        "胆囊结石":["胆囊","结石","强回声","声影","随体位"],
+        "脂肪肝":["脂肪肝","回声增粗","回声增强","肝肾反差"],
+        "前列腺增生":["前列腺增生","突入膀胱","残余尿"],
+        "甲状腺结节":["甲状腺","低回声","结节","TI-RADS","边界","实性"],
+        "乳腺结节":["乳腺","结节","BI-RADS","低回声","边界","CDFI","血流"],
+        "肝囊肿":["肝","囊肿","无回声","边界清","后方增强"],
+        "胆囊息肉":["胆囊","息肉","附壁","不移动"],
+        "正常心脏":["心脏","室壁","瓣膜","室间隔","心包","未见异常","运动正常"],
+        "正常乳腺":["乳腺","未见异常","腺体层","未见结节","导管","腋窝","BI-RADS"],
+        "正常甲状腺":["甲状腺","峡部","腺体","未见结节","血流分布","未见异常","腺体内"],
+        "正常妇科":["子宫","内膜","卵巢","宫颈","盆腔","宫腔","附件","未见异常"],
+        "腹部正常":["肝","胆囊","胰腺","脾脏","未见异常","正常","未见结石","未见占位"],
+        "早孕":["早孕","孕囊","胚芽","卵黄囊","心管搏动","胎心"],
+        "中孕":["中孕","双顶径","股骨长","头围","腹围","羊水","胎盘"],
+    }
     if match_kw_dict:
         for tpl_name, keywords in match_kw_dict.items():
+            if tpl_name not in _template_index:
+                continue
             for kw in keywords:
                 if kw in text and len(kw) >= 2:
-                    if tpl_name in _template_index:
-                        scored[tpl_name] = max(scored.get(tpl_name, 0), 200)  # 最高优先级
-                        break
+                    scored[tpl_name] = max(scored.get(tpl_name, 0), 200)
+                    break
 
-    # 策略2: 器官词匹配INFO1 (从规则引擎加载)
-    from rule_engine import get_rule as _gr
-    organ_words = _gr("templates.organ_words", ["肝脏","胆囊","胰腺","脾脏","肾脏","子宫","卵巢"])
+    # 策略2: 器官词匹配INFO1 (复用_ORGAN_WORDS)
     for name, entry in _template_index.items():
         info1 = entry.get("info1", "")
-        for organ in organ_words:
+        for organ in _ORGAN_WORDS:
             if organ in text and organ in info1:
                 scored[name] = scored.get(name, 0) + 20
                 break
 
-    # 策略3: 疾病词匹配
-    disease_words = _gr("templates.disease_words", ["结石","囊肿","肌瘤","息肉","增生","钙化"])
+    # 策略3: 疾病词匹配 (硬编码)
+    disease_words = ["结石","囊肿","肌瘤","息肉","增生","钙化","血管瘤","脂肪肝","结节","积液","占位","弥漫","斑块","狭窄","血栓","积水","腹水","脾大","肝硬化","畸胎瘤","腺肌症"]
     for name, entry in _template_index.items():
         info1 = entry.get("info1", "") + entry.get("info2", "")
         for disease in disease_words:
@@ -218,8 +234,14 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
                 scored[name] = scored.get(name, 0) + 15
                 break
 
-    # 策略4: 检查类型模糊匹配模块名 (从规则引擎加载)
-    module_map = _gr("templates.module_map", {"腹部": ["UIS"]})
+    # 策略4: 检查类型模糊匹配模块名 (硬编码)
+    module_map = {"产科":["产科"],"胎儿":["产科"],"孕":["产科"],"心脏":["心脏","心脏血管"],"心超":["心脏"],
+        "心包":["心脏"],"瓣":["心脏"],"甲状腺":["甲状腺"],"乳腺":["甲状腺","乳腺"],
+        "血管":["周围血管"],"颈动脉":["周围血管"],"动脉":["周围血管"],"TCD":["TCI"],
+        "腹部":["UIS","肝脏","胰腺","脾脏","肾脏"],"肝胆":["UIS","肝脏"],
+        "妇科":["子宫","UIS","附件"],"子宫":["子宫"],"卵巢":["子宫","附件"],
+        "泌尿":["泌尿生殖系","肾脏"],"前列腺":["肾脏"],"膀胱":["肾脏"],
+        "睾丸":["男生殖系"],"附睾":["男生殖系"],"肺":["胸部"],"胸":["胸部"]}
     matched_modules = set()
     for kw, mods in module_map.items():
         if kw in exam_type or kw in text[:80]:
@@ -260,7 +282,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
                     tpl_categories.add(cat)
             # 更严格的守卫: 如果模板INFO1中没有任何文本中的器官词 → 强扣分
             # 注意: text中有"双肾"但organ_words是"肾脏", 需额外检查"肾"
-            tpl_has_text_organ = any(o in tpl_text for o in organ_words)
+            tpl_has_text_organ = any(o in tpl_text for o in _ORGAN_WORDS)
             # 补充检查: text中的"肾"类词（双肾/左肾/右肾/肾实质）在模板中是否存在
             if not tpl_has_text_organ:
                 kidney_variants = ["双肾", "左肾", "右肾", "实质回声", "集合"]
@@ -293,7 +315,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
         mod = entry.get("module", "")
         if not mod or not mod.strip():
             # 无模块名模板必须同时命中器官词+疾病词才保留
-            has_organ = any(o in (entry.get("info1","") + entry.get("name","")) for o in organ_words)
+            has_organ = any(o in (entry.get("info1","") + entry.get("name","")) for o in _ORGAN_WORDS)
             has_disease = any(d in (entry.get("info1","") + entry.get("name","") + entry.get("info2","")) for d in disease_words)
             if not (has_organ and has_disease):
                 scored[name] = scored.get(name, 0) - 30

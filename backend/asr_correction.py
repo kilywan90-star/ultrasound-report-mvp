@@ -214,16 +214,7 @@ CONFUSION_DICT = {
     "S/D":["S D", "S  D", "S/D"],
 }
 
-
-
-# 构建快速查表: wrong → correct
-CONFUSION_MAP = {}
-for correct, wrongs in CONFUSION_DICT.items():
-    for w in wrongs:
-        if w not in CONFUSION_MAP or len(correct) <= len(CONFUSION_MAP.get(w, "")):
-            CONFUSION_MAP[w] = correct
-
-# 幻觉词语列表
+# 幻觉词语列表（放在dialect加载之前）
 HALLUCINATION = [
     "建板郎","见板郎","见板囊","建板囊",
     "相三三","香三三","象三三",
@@ -233,6 +224,38 @@ HALLUCINATION = [
     "压缩到","压缩","压到",
     "做做","左左","采做",
 ]
+
+# ========== 加载 dialect_term_map.json 方言/口语词典 ==========
+import json as _json
+import os as _os
+_dialect_path = _os.path.join(_os.path.dirname(__file__), "knowledge", "dialect_term_map.json")
+try:
+    with open(_dialect_path, "r", encoding="utf-8") as _f:
+        _dialect = _json.load(_f)
+    _dialect_added = 0
+    for _cat, _items in _dialect.get("categories", {}).items():
+        if isinstance(_items, dict):
+            for _dialect_wrong, _dialect_correct in _items.items():
+                if _dialect_correct not in CONFUSION_DICT:
+                    CONFUSION_DICT[_dialect_correct] = []
+                if _dialect_wrong not in CONFUSION_DICT[_dialect_correct]:
+                    CONFUSION_DICT[_dialect_correct].append(_dialect_wrong)
+                    _dialect_added += 1
+        elif isinstance(_items, list):
+            for _w in _items:
+                if _w not in HALLUCINATION:
+                    HALLUCINATION.append(_w)
+                    _dialect_added += 1
+    print(f"[dialect_map] 已合并 {_dialect_added} 条方言映射到纠错词典")
+except Exception as _e:
+    print(f"[dialect_map] 加载失败: {_e}")
+
+# 构建快速查表: wrong -> correct
+CONFUSION_MAP = {}
+for correct, wrongs in CONFUSION_DICT.items():
+    for w in wrongs:
+        if w not in CONFUSION_MAP or len(correct) <= len(CONFUSION_MAP.get(w, "")):
+            CONFUSION_MAP[w] = correct
 
 
 
