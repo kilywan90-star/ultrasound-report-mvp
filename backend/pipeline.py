@@ -2,7 +2,7 @@
 超声语音报告系统 - 自动化处理管线 v2 (LLM增强版)
 接收语音文本 → ASR修正 → 意图识别 → 模板匹配(LLM+关键词) → 变量提取 → LLM填充 → 报告生成
 """
-import re, json, time, uuid
+import re, json, time, uuid, threading
 from datetime import datetime
 from knowledge_engine import knowledge
 from engine import Matcher
@@ -87,7 +87,7 @@ class Pipeline:
         llm_diagnosis = getattr(self.matcher, '_llm_diagnosis', '')
         llm_normalized = getattr(self.matcher, '_llm_normalized_text', '')
 
-        # LLM模板填充占位符（仅1次API，诊断已由analyze_and_match生成）
+        # LLM模板填充占位符(并发: 分析阶段已经获取诊断, 只需要填充数值)
         filled_description = ''
         if best and best.get('description') and not filled_description:
             try:

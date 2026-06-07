@@ -136,11 +136,14 @@ def _parse_info1_to_html(info1: str) -> tuple[str, dict[str, str], list, list, d
 
             # 生成上下文提取正则
             ctx = re.sub(r'\s*[×xX\*乘]\s*$', '', prefix.strip())  # 去掉尾部x符号
+            # 取最后一段汉字: 过滤掉x、mm、数字等非汉字
             ctx_chars = re.findall(r'[一-鿿]+', ctx)
             if ctx_chars:
                 search_ctx = ctx_chars[-1]
                 if len(search_ctx) >= 1:
+                    # 关键: 用 search_ctx 匹配后面的数字 + 可选的单位
                     pat = f"(?:{re.escape(search_ctx)})\\s*(?:约|为|是|大)?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:mm|毫米|cm|厘米)"
+                    # 如果这个正则和已有的一样, 跳过
                     if not any(p[1] == field_key for p in measurements_patterns):
                         measurements_patterns.append((pat, field_key))
 

@@ -312,8 +312,7 @@ class Matcher:
 
             if candidates:
                 result = llm_analyze_and_match(text, candidates)
-                if result and result.get('confidence', 0) >= 0.4:
-                    # 保存规范化文本和诊断给pipeline用
+                if result and result.get('confidence', 0) >= 0.4 and result.get('template_name', ''):
                     self._llm_normalized_text = result.get('normalized_text', '')
                     self._llm_diagnosis = result.get('diagnosis', '')
                     return result
