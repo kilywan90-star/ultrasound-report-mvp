@@ -124,12 +124,14 @@ class Pipeline:
         r = result['report']
         rid = 'AUTO-' + datetime.now().strftime('%Y%m%d%H%M%S') + '-' + uuid.uuid4().hex[:4].upper()
         conn = get_db()
-        conn.execute("""INSERT INTO reports(id,doctor,voice_text,template_id,template_name,
-                        description,diagnosis,match_score,matched_sites,variables,status)
-                        VALUES(?,?,?,?,?,?,?,?,?,?,'draft')""",
-                     (rid, doctor, r['voice_text'], r['template_id'], r['template_name'],
-                      r['description'], r['diagnosis'], r['match_score'],
-                      r['matched_sites'], r['variables']))
+        conn.execute("""INSERT INTO reports(patient_id,template,status,doctor,voice_text,
+                        template_id,template_name,description,diagnosis,match_score,matched_sites,variables)
+                        VALUES(1,'','草稿',?,?,?,?,?,?,?,?,?)""",
+                     (str(doctor), str(r['voice_text'] or ''),
+                      str(r['template_id'] or ''), str(r['template_name'] or ''),
+                      str(r['description'] or ''), str(r['diagnosis'] or ''),
+                      float(r['match_score'] or 0),
+                      str(r['matched_sites'] or ''), str(r['variables'] or '{}')))
         conn.commit()
         conn.close()
         result['report_id'] = rid

@@ -3,29 +3,11 @@
 
 ## 文件结构对比
 
-- 旧项目文件数: 204
+- 旧项目文件数: 256
 - 新版文件数: 22
 
 ### 新版新增文件
 
-- `backend\asr_service.py`
-- `backend\database.py`
-- `backend\engine.py`
-- `backend\knowledge_engine.py`
-- `backend\llm_engine.py`
-- `backend\medical_hotwords.json`
-- `backend\models.py`
-- `backend\pipeline.py`
-- `backend\routers\auto.py`
-- `backend\routers\doctors.py`
-- `backend\routers\match.py`
-- `backend\routers\patients.py`
-- `backend\routers\reports.py`
-- `backend\routers\stats.py`
-- `backend\routers\templates.py`
-- `backend\routers\voice.py`
-- `backend\routing_rules.py`
-- `start.bat`
 
 ### 旧版有但新版无的文件
 
@@ -36,7 +18,7 @@
 ```diff
 --- old/backend/main.py
 +++ new/backend/main.py
-@@ -1,1059 +1,87 @@
+@@ -1,1185 +1,87 @@
 -"""超声报告语音结构化 MVP — FastAPI 后端 v0.3"""
 +"""
 +超声语音报告系统 - FastAPI 主入口
@@ -103,8 +85,8 @@
 +with open(RULEBASE_PATH, 'r', encoding='utf-8') as f:
 +    rb = json.load(f)
  
--BUILD = "20260607-1452"
--VERSION = f"v3.2.{BUILD}"
+-BUILD = "20260607-2103"
+-VERSION = f"v3.3.{BUILD}"
 +# ===== 匹配引擎 =====
 +matcher = Matcher(rb)
  
@@ -114,7 +96,7 @@
 +from pipeline import init_pipeline
 +pipeline = init_pipeline(matcher)
  
-... (truncated, 1130 lines total)
+... (truncated, 1256 lines total)
 ```
 
 ### backend/db.py
@@ -206,84 +188,84 @@
 ```diff
 --- old/frontend/index.html
 +++ new/frontend/index.html
-@@ -3,1107 +3,714 @@
+@@ -2,7 +2,6 @@
+ <html lang="zh-CN">
  <head>
  <meta charset="UTF-8">
+-<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
  <meta name="viewport" content="width=device-width, initial-scale=1.0">
--<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
--<meta http-equiv="Pragma" content="no-cache">
--<meta http-equiv="Expires" content="0">
--<title>超声报告语音结构化</title>
-+<title>超声语音报告系统 v3.0</title>
+ <title>超声语音报告系统 v3.0</title>
  <style>
--/* === Design Tokens === */
--:root{
--  --primary:#2563eb;--primary-light:#eff6ff;--primary-dark:#1d4ed8;
--  --danger:#dc2626;--danger-light:#fef2f2;
--  --success:#16a34a;--success-light:#f0fdf4;
--  --warn:#f59e0b;--purple:#7c3aed;--purple-light:#ede9fe;
--  --bg:#f1f5f9;--surface:#fff;--surface-alt:#f8fafc;
--  --border:#e2e8f0;--text:#0f172a;--text-secondary:#64748b;--text-muted:#94a3b8;
--  --sp-xs:4px;--sp-sm:6px;--sp-md:10px;--sp-lg:16px;
--  --shadow-sm:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
--  --shadow-md:0 4px 6px rgba(0,0,0,.05),0 2px 4px rgba(0,0,0,.04);
--  --shadow-lg:0 10px 15px rgba(0,0,0,.06),0 4px 6px rgba(0,0,0,.04);
--  --radius-sm:4px;--radius-md:6px;--radius-lg:8px;
--  --font-sans:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;
--  --font-mono:'Courier New','Consolas',monospace;
--}
--
--/* === Reset & Base === */
--*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
--body{font-family:var(--font-sans);background:var(--bg);color:var(--text);height:100vh;display:flex;flex-direction:column}
--
--/* === Top Bar === */
--.bar{background:linear-gradient(135deg,#1e3a5f 0%,var(--primary) 100%);color:white;padding:10px 20px;font-size:14px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0;box-shadow:var(--shadow-md);position:relative;z-index:10}
--.bar kbd{background:rgba(255,255,255,.15);border-radius:3px;padding:1px 6px;font-size:10px;margin:0 2px;font-family:var(--font-sans)}
--.bar .ver{font-size:10px;color:rgba(255,255,255,.6);font-weight:400;margin-left:8px}
--
--/* === App Layout === */
--.app{display:flex;flex:1;overflow:hidden}
--
--/* === Sidebar === */
--.side{width:240px;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;box-shadow:2px 0 8px rgba(0,0,0,.04)}
--.side h3{padding:10px 12px;font-size:13px;border-bottom:1px solid var(--border);background:var(--surface-alt);font-weight:600;letter-spacing:.3px}
--.qa{padding:8px;border-bottom:1px solid var(--border)}
--.qa input,.qa select{padding:5px 7px;border:1px solid var(--border);border-radius:var(--radius-sm);font-size:12px;width:100%;margin-bottom:4px;font-family:var(--font-sans);transition:border-color .15s}
--.qa input:focus,.qa select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(37,99,235,.1)}
--.qa .row{display:flex;gap:4px;margin-bottom:4px}
--.qa .row:last-child{margin-bottom:0}
--.qa button{padding:5px 12px;border:none;border-radius:var(--radius-sm);background:var(--primary);color:white;font-size:11px;cursor:pointer;white-space:nowrap;font-weight:500;transition:background .15s}
--.qa button:hover{background:var(--primary-dark)}
--.plist{flex:1;overflow-y:auto}
--.pi{padding:8px 10px;border-bottom:1px solid var(--border);cursor:pointer;font-size:12px;border-left:3px solid transparent;transition:background .1s}
--.pi:hover{background:var(--surface-alt)}
--.pi.on{background:var(--primary-light);border-left-color:var(--primary)}
--.pi .n{font-weight:600}
--.pi .e{color:var(--primary);font-size:11px}
--.pi .s{font-size:9px;color:var(--text-secondary)}
--
--/* === Main Content === */
--.main{flex:1;overflow-y:auto;padding:10px;display:flex;flex-direction:column;gap:8px}
--.main-cols{flex-direction:row;gap:10px;padding:10px}
--
--/* === Column Layout === */
--.col-input{flex:1.5;min-width:360px}
--.col-report{flex:1.2;min-width:360px}
--.col-preview{flex:1;min-width:280px;max-width:400px}
--
--/* === Panel Card === */
--.pn{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden;box-shadow:var(--shadow-sm);transition:box-shadow .2s}
--.pn h4{padding:9px 14px;background:var(--surface-alt);font-size:12px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);font-weight:600;user-select:none}
--.pn h4:hover{background:#f1f5f9}
--.pn .b{padding:12px;display:block}
--.pn.coll .b{display:none}
--.pn-num{display:inline-flex;width:20px;height:20px;border-radius:50%;background:var(--primary);color:white;align-items:center;justify-content:center;font-size:10px;font-weight:600;margin-right:8px;flex-shrink:0}
--
--
--/* === Recording === */
--.rec-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
--.rec-btn{width:52px;height:52px;border-radius:50%;border:3px solid var(--danger);background:white;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:transform .2s,box-shadow .2s}
-... (truncated, 1789 lines total)
+@@ -11,6 +10,7 @@
+ html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg)}
+ ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
+ .app{display:flex;height:100vh}
++/* Sidebar */
+ .sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#001529,#002140);color:#fff;display:flex;flex-direction:column;flex-shrink:0}
+ .sidebar .logo{padding:18px 20px;font-size:16px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px}
+ .sidebar .logo .v{font-size:10px;background:var(--primary);padding:2px 8px;border-radius:10px}
+@@ -20,6 +20,7 @@
+ .sidebar .nav-item.on{color:#fff;background:var(--primary);border-left-color:#fff}
+ .sidebar .nav-item .icon{font-size:16px;width:20px;text-align:center}
+ .sidebar .ver{border-top:1px solid rgba(255,255,255,.1);padding:12px 20px;font-size:11px;color:rgba(255,255,255,.4)}
++/* Main */
+ .main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+ .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:54px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
+ .topbar .title{font-size:16px;font-weight:600}
+@@ -29,14 +30,17 @@
+ .topbar .right .badge.online{background:#f0fdf4;color:#15803d}
+ .content{flex:1;padding:16px 24px;overflow-y:auto}
+ .page{display:none}.page.on{display:block}
++/* Card */
+ .card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px}
+ .card-hd{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600}
+ .card-bd{padding:14px 20px}
++/* Stats */
+ .stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
+ .stat-card{padding:16px 20px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
+ .stat-card .num{font-size:26px;font-weight:700;color:var(--primary)}
+ .stat-card .label{font-size:13px;color:var(--text2);margin-top:2px}
+ .stat-card.green .num{color:var(--success)}.stat-card.orange .num{color:var(--warning)}.stat-card.purple .num{color:#8b5cf6}
++/* Voice input */
+ .voice-row{display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px}
+ .voice-row .mic-btn{width:42px;height:42px;border-radius:50%;border:2px solid var(--primary);background:var(--card);color:var(--primary);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+ .voice-row .mic-btn:hover{background:var(--primary-bg)}
+@@ -48,6 +52,7 @@
+ .voice-row .btn:hover{background:var(--primary-hover)}
+ .voice-row .btn.green{background:var(--success)}.voice-row .btn.green:hover{filter:brightness(1.1)}
+ .voice-row .btn.gray{background:#f3f4f6;color:var(--text2)}.voice-row .btn.gray:hover{background:#e5e7eb}
++/* Match area */
+ .match-area{display:flex;gap:14px;min-height:400px}
+ .match-left{flex:1;min-width:0}.match-right{width:300px;flex-shrink:0}
+ @media(max-width:900px){.match-right{display:none}}
+@@ -56,6 +61,7 @@
+ .st.warn{background:#fffbeb;color:#b45309;border-left:3px solid var(--warning)}
+ .st.err{background:#fef2f2;color:#b91c1c;border-left:3px solid var(--danger)}
+ .st.info{background:var(--primary-bg);color:var(--primary);border-left:3px solid var(--primary)}
++/* Edit area */
+ .edit-area label{font-size:11px;font-weight:600;color:var(--text2);margin-top:10px;display:block}
+ .edit-area label:first-child{margin-top:0}
+ .edit-area textarea{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font);resize:vertical;outline:none;background:#f9fafb;line-height:1.5;margin-top:4px}
+@@ -65,6 +71,7 @@
+ .patient-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0}
+ .patient-bar input{padding:6px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;flex:1}
+ .patient-bar input:focus{border-color:var(--primary)}
++/* Candidate list */
+ .cl{display:flex;flex-direction:column;gap:4px;max-height:520px;overflow-y:auto}
+ .c{padding:10px 14px;background:var(--card);border-radius:6px;box-shadow:var(--shadow);cursor:pointer;border:2px solid transparent}
+ .c:hover{border-color:var(--primary)}.c.on{border-color:var(--primary);background:var(--primary-bg)}
+@@ -74,6 +81,7 @@
+ .c .meta .tag.high{background:#f0fdf4;color:#15803d}
+ .c .meta .tag.med{background:#fffbeb;color:#b45309}
+ .c .meta .tag.low{background:#fef2f2;color:#b91c1c}
++/* Table */
+ table.data{width:100%;border-collapse:collapse;font-size:13px}
+ table.data th{padding:9px 12px;text-align:left;font-weight:600;color:var(--text2);border-bottom:2px solid var(--border);background:#fafafa;position:sticky;top:0;font-size:12px}
+ table.data td{padding:8px 12px;border-bottom:1px solid #f3f4f6}
+@@ -81,10 +89,12 @@
+ .badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:500}
+ .badge.confirmed{background:#f0fdf4;color:#15803d}
+ .badge.draft{background:#fffbeb;color:#b45309}
+... (truncated, 343 lines total)
 ```
 

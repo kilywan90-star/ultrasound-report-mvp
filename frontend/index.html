@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>超声语音报告系统 v3.0</title>
 <style>
@@ -157,10 +158,16 @@ table.data tr:hover td{background:#f9fafb;cursor:pointer}
             <div class="card"><div class="card-bd" style="padding:10px 16px">
               <div class="patient-bar">
                 <span style="font-size:12px;color:var(--text2);font-weight:500">患者:</span>
-                <input id="patientSearch" placeholder="搜索患者..." style="max-width:180px">
-                <button class="btn-sm primary" onclick="searchPatient()">查找</button>
+                <input id="patientQuickName" placeholder="姓名" style="max-width:70px">
+                <select id="patientQuickSex" style="max-width:50px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:11px">
+                  <option value="">性</option><option value="男">男</option><option value="女">女</option>
+                </select>
+                <input id="patientQuickAge" placeholder="年龄" type="number" min="0" max="200" style="max-width:55px">
+                <input id="patientQuickExam" placeholder="检查类型(腹部超声)" style="max-width:130px">
+                <button class="btn-sm primary" onclick="quickAddPatient()">入队</button>
+                <input id="patientSearch" placeholder="搜索..." style="max-width:100px">
+                <button class="btn-sm gray" onclick="searchPatient()">查找</button>
                 <span id="patientDisplay" style="font-size:12px;color:var(--text2)">未选择</span>
-                <button class="btn-sm gray" onclick="showPatientForm()">+新建</button>
                 <input type="hidden" id="patientId" value="0">
               </div>
             </div></div>
@@ -455,6 +462,20 @@ async function loadPatients(){
 async function delPatient(id){if(!confirm('确认删除?'))return;await del(`/api/patients/${id}`);msg('已删除');loadPatients()}
 function showPatientForm(data){$('patientModal').classList.add('on');$('pEditId').value=data?.id||0;$('pName').value=data?.name||'';$('pSex').value=data?.sex||'男';$('pAge').value=data?.age||'';$('pOutNo').value=data?.outpatient_no||'';$('pDept').value=data?.dept_name||'超声科';$('modalTitle').textContent=data?.id?'编辑患者':'新建患者'}
 function closeModal(id){$(id).classList.remove('on')}
+async function quickAddPatient(){
+  const n=$('patientQuickName').value.trim(),g=$('patientQuickSex').value,a=parseInt($('patientQuickAge').value)||0,e=$('patientQuickExam').value.trim();
+  if(!n||!g||!a||!e){msg('填写完整姓名/性别/年龄/检查类型','error');return}
+  try{
+    const r=await post('/api/patients/quick-add',{name:n,gender:g,age:a,exam_type:e});
+    if(r.success){
+      $('patientId').value=r.patient.id;
+      S.currentPatient={id:r.patient.id,name:r.patient.name};
+      $('patientDisplay').textContent=`${r.patient.name}(${g}${a})`;
+      msg(`✅ 已入队: ${r.patient.name}`,'success',3000);
+      $('patientQuickName').value='';$('patientQuickSex').value='';$('patientQuickAge').value='';$('patientQuickExam').value='';
+    }
+  }catch(e){msg('入队失败','error')}
+}
 async function savePatient(){
   const d={name:$('pName').value,sex:$('pSex').value,age:parseInt($('pAge').value)||0,outpatient_no:$('pOutNo').value,dept_name:$('pDept').value};
   const id=$('pEditId').value;

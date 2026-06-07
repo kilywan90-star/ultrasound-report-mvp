@@ -242,7 +242,8 @@ const S = {
 const $ = id => document.getElementById(id);
 let toastTimer = null;
 const API_BASE = '';
-const DEBOUNCE = 180;
+const DEBOUNCE = 80;  // 防抖80ms
+const MIN_INPUT_LEN = 2;  // 最少2字触发匹配
 
 function msg(text, type='success', duration=2500) {
   const el = $('toast'), inner = $('toastInner');

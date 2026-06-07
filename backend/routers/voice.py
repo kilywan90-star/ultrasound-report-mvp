@@ -199,22 +199,32 @@ async def _call_dashscope_asr(audio_path: str) -> str:
     import dashscope
     from dashscope.audio.asr import Transcription
     dashscope.api_key = DASHSCOPE_API_KEY
+    # 上传文件
     upload = dashscope.Files.upload(file_path=audio_path, purpose='file_trans')
     if upload.status_code != 200:
         raise Exception(f"上传失败: {upload.message}")
     file_id = upload.output['uploaded_files'][0]['file_id']
-    task = Transcription.async_call(model='qwen3-asr-flash-filetrans', file_urls=[file_id])
+    # 获取文件的真实可读URL（OSS签名URL）
+    file_info = dashscope.Files.get(file_id)
+    file_url = file_info.output.get('url', '')
+    if not file_url:
+        raise Exception("无法获取文件URL")
+    # print(f"[DashScope] 文件URL: {file_url[:60]}...")
+    # 用真实URL提交转写
+    task = Transcription.async_call(model='qwen3-asr-flash-filetrans', file_urls=[file_url])
     if task.status_code != 200:
         raise Exception(f"提交失败: {task.message}")
     task_id = task.output['task_id']
     import time
-    for _ in range(60):
+    for _ in range(120):
         r = Transcription.wait(task_id)
         s = r.output.get('task_status', '')
         if s == 'SUCCEEDED':
             sentences = r.output.get('sentences', [])
             return ''.join([s.get('text', '') for s in sentences])
         elif s == 'FAILED':
-            raise Exception(f"转写失败: {r.output.get('message', '')}")
+            # URL问题，降级到Whisper
+            print(f"[DashScope] 转写失败(file_url可能无效), 降级到Whisper: {r.output.get('message','')}")
+            return ''
         time.sleep(1)
-    raise Exception("转写超时")
+    return ''
