@@ -86,14 +86,14 @@ def _detect_option_groups(info1: str) -> list[tuple[int, int, str, str, str]]:
     return found
 
 
-def _parse_info1_to_html(info1: str) -> tuple[str, dict[str, str], list, list, dict]:
+def _parse_info1_to_html(info1: str) -> tuple[str, dict[str, str], list, list, dict, set]:
     """将原始INFO1转换为结构化HTML
 
     Returns:
-        (html, fields, measurements_patterns, options_list, opt_reset)
+        (html, fields, measurements_patterns, options_list, opt_reset, option_keys)
     """
     if not info1:
-        return "", {}, [], [], {}
+        return "", {}, [], [], {}, set()
 
     fields = {}
     measurements_patterns = []
@@ -127,30 +127,58 @@ def _parse_info1_to_html(info1: str) -> tuple[str, dict[str, str], list, list, d
                 option_keys.add(f"{key}_B")
 
         # --- 处理测量槽位 ---
-        # 模式1: 空格+mm (如 "约 mm")
+        # 模式1: 数值+mm/毫米 (如 "约 5 mm" → 提取"5"为示例值后删掉)
         def _replace_meas(m):
+            nonlocal meas_counter
+            prefix = current[max(0, m.start()-12):m.start()]
+            key = _infer_key_from_context(prefix)
+            field_key = f"_{key}_{meas_counter}"
+
+            # 生成上下文提取正则
+            ctx = re.sub(r'\s*[×xX\*乘]\s*$', '', prefix.strip())  # 去掉尾部x符号
+            ctx_chars = re.findall(r'[一-鿿]+', ctx)
+            if ctx_chars:
+                search_ctx = ctx_chars[-1]
+                if len(search_ctx) >= 1:
+                    pat = f"(?:{re.escape(search_ctx)})\\s*(?:约|为|是|大)?\\s*(\\d+(?:\\.\\d+)?)\\s*(?:mm|毫米|cm|厘米)"
+                    if not any(p[1] == field_key for p in measurements_patterns):
+                        measurements_patterns.append((pat, field_key))
+
+            fields[field_key] = ctx[-8:] if ctx else f"测量{meas_counter}"
+            meas_counter += 1
+            return f"{{{field_key}}}mm"
+
+        # 先清理残留的旧格式"x"占位符和空格分隔的mm（如 "x mm" → "mm", " x mm" → "mm"）
+        current = re.sub(r'[×xX\*乘]\s*(?=\{|mm|毫米)', '', current)
+        current = re.sub(r'\b[×xX\*乘]\s*', '', current)
+
+        current = re.sub(r'(?:约|大小|厚|长|宽|深|内径|径)?\s*(?:\d+(?:\.\d+)?)?\s*(?:mm|毫米)', _replace_meas, current)
+
+        # 模式2: × 模式 (如 "约 × mm" 或 "约 5×3 mm")
+        def _replace_x(m):
             nonlocal meas_counter
             prefix = current[max(0, m.start()-10):m.start()]
             key = _infer_key_from_context(prefix)
             field_key = f"_{key}_{meas_counter}"
-            fields[field_key] = prefix.strip()[-6:] if prefix.strip() else f"测量{meas_counter}"
-            meas_counter += 1
-            return f"{{{field_key}}}mm"
 
-        current = re.sub(r'(?:约|大小|厚|长|宽|深|内径|径)?\s*(?:mm|毫米)', _replace_meas, current)
+            ctx = re.sub(r'\s*[×xX\*乘]\s*$', '', prefix.strip())
+            ctx_chars = re.findall(r'[一-鿿]+', ctx)
+            if ctx_chars:
+                search_ctx = ctx_chars[-1]
+                if len(search_ctx) >= 1:
+                    pat = f"(?:{re.escape(search_ctx)})\\s*(?:约|为|是|大)?\\s*(\\d+(?:\\.\\d+)?)\\s*[×xX\\*乘]\\s*(\\d+(?:\\.\\d+)?)"
+                    if not any(p[1] == field_key for p in measurements_patterns):
+                        measurements_patterns.append((pat, field_key))
 
-        # 模式2: × 模式 (如 "约 × mm")
-        def _replace_x(m):
-            nonlocal meas_counter
-            prefix = current[max(0, m.start()-8):m.start()]
-            key = _infer_key_from_context(prefix)
-            field_key = f"_{key}_{meas_counter}"
-            fields[field_key] = prefix.strip()[-4:] if prefix.strip() else f"测量{meas_counter}"
+            fields[field_key] = ctx[-6:] if ctx else f"测量{meas_counter}"
             meas_counter += 1
-            # 保留 × 号
-            return f"× {field_key}mm"
+            return f"× {{{field_key}}}mm"
 
         current = re.sub(r'[×xX\*乘]\s*mm', _replace_x, current)
+
+        # 清理示例数值 (如 "5{_size_0}mm" → "{_size_0}mm")
+        current = re.sub(r'(\d+(?:\.\d+)?)(?=\{[^}]+\}mm)', '', current)
+        current = re.sub(r'(\d+(?:\.\d+)?)(?=\{[^}]+\}mm)', '', current)  # 再跑一遍清理残余
 
         # 包裹段落
         if is_label:
@@ -168,7 +196,7 @@ def _parse_info1_to_html(info1: str) -> tuple[str, dict[str, str], list, list, d
                 option_keys.add(f"_norm_{kw_neg}")
                 break
 
-    return html, fields, measurements_patterns, options_list, opt_reset
+    return html, fields, measurements_patterns, options_list, opt_reset, option_keys
 
 
 def _categorize_template(name: str, info1: str, group: str, module: str) -> str:
@@ -214,7 +242,7 @@ def _generate_module(templates: list[dict], module_name: str, category: str) -> 
         name = tpl["name"]
         info1 = tpl.get("info1", "")
         info2 = tpl.get("info2", "")
-        html, fields, meas, opts, opt_reset = _parse_info1_to_html(info1)
+        html, fields, meas, opts, opt_reset, option_keys = _parse_info1_to_html(info1)
 
         # 转义HTML
         html_escaped = html.replace('\\', '\\\\').replace("'", "\\'").replace('\n', '\\n')
@@ -222,6 +250,31 @@ def _generate_module(templates: list[dict], module_name: str, category: str) -> 
         lines.append(f"    '{name}': {{")
         lines.append(f"        'html': '{html_escaped}',")
         lines.append(f"        'fields': {json.dumps(fields, ensure_ascii=False)},")
+
+        # 测量提取正则
+        if meas:
+            meas_json = json.dumps(meas, ensure_ascii=False)
+            lines.append(f"        'measurements': {meas_json},")
+        else:
+            lines.append(f"        'measurements': [],")
+
+        # 选项提取
+        if opts:
+            opts_json = json.dumps(opts, ensure_ascii=False)
+            lines.append(f"        'options': {opts_json},")
+        else:
+            lines.append(f"        'options': [],")
+
+        # 互斥组
+        opt_reset_json = {}
+        for k, v in opt_reset.items():
+            opt_reset_json[k] = list(v) if isinstance(v, tuple) else v
+        lines.append(f"        'opt_reset': {json.dumps(opt_reset_json, ensure_ascii=False)},")
+
+        # option_keys
+        ok_json = json.dumps(list(option_keys), ensure_ascii=False)
+        lines.append(f"        'option_keys': {ok_json},")
+
         lines.append(f"    }},")
 
     lines.append('}')

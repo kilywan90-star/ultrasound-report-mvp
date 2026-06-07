@@ -741,8 +741,8 @@ fetch('/api/structure',{method:'POST',headers:{'Content-Type':'application/json'
 function showMethodBadge(d){
   var method=d.method||'';var badge=document.getElementById('method_badge');
   if(!badge)return;
-  var labels={'section_match':'段落匹配','abcdef_v3':'ABCDEF v3','rule_fallback':'规则引擎兜底','fetal_template':'胎儿模板','regex_fill':'规则引擎','anchored_llm':'模板锚定LLM','anchored_regex':'模板锚定Regex'};
-  var colors={'section_match':'#16a34a','abcdef_v3':'#7c3aed','rule_fallback':'#f59e0b','fetal_template':'#16a34a','regex_fill':'#2563eb','anchored_llm':'#0891b2','anchored_regex':'#6366f1'};
+  var labels={'section_match':'段落匹配','abcdef_v3':'ABCDEF v3','rule_fallback':'规则引擎兜底','fetal_template':'胎儿模板','converted_fill':'模板填充','rule_fill':'规则填充','template_fill':'LLM填充','llm_free':'自由生成','llm_multi':'多器官LLM','regex_fill':'规则引擎','anchored_llm':'模板锚定LLM','anchored_regex':'模板锚定Regex'};
+  var colors={'section_match':'#16a34a','abcdef_v3':'#7c3aed','rule_fallback':'#f59e0b','fetal_template':'#16a34a','converted_fill':'#059669','rule_fill':'#2563eb','template_fill':'#0891b2','llm_free':'#64748b','llm_multi':'#7c3aed','regex_fill':'#2563eb','anchored_llm':'#0891b2','anchored_regex':'#6366f1'};
   badge.textContent=labels[method]||method;badge.style.background=colors[method]||'#64748b';badge.style.display='inline-block';
   var conf=document.getElementById('confidence_badge');
   if(conf&&d.confidence!==undefined){
@@ -779,7 +779,7 @@ function showABCDEFPanel(d){
   if(b&&(b.study_see||b.study_hint)){
     bRow.style.background='';
     bSee.style.cssText='padding:3px 4px;'+STY_OK;
-    bSee.textContent=(b.study_see||'').substring(0,250)||'-';
+    bSee.innerHTML=(b.study_see||'').substring(0,250)||'-';
     bHint.style.cssText='padding:3px 4px;font-size:9px;'+STY_OK;
     var bHints=(b.study_hint||[]).map(function(h){return h.diagnosis||''}).filter(Boolean);
     bHint.textContent=bHints.length?bHints.join('; '):'-';
@@ -799,7 +799,7 @@ function showABCDEFPanel(d){
   if(c&&(c.study_see||c.study_hint)){
     cRow.style.background='';
     cSee.style.cssText='padding:3px 4px;'+STY_OK;
-    cSee.textContent=(c.study_see||'').substring(0,250)||'-';
+    cSee.innerHTML=(c.study_see||'').substring(0,250)||'-';
     cHint.style.cssText='padding:3px 4px;font-size:9px;'+STY_OK;
     var cHints=(c.study_hint||[]).map(function(h){return h.diagnosis||''}).filter(Boolean);
     cHint.textContent=cHints.length?cHints.join('; '):'-';
@@ -819,7 +819,7 @@ function showABCDEFPanel(d){
   if(dd&&(dd.study_see||dd.study_hint)){
     dRow.style.background='';
     dSee.style.cssText='padding:3px 4px;'+STY_OK;
-    dSee.textContent=(dd.study_see||'').substring(0,250)||'-';
+    dSee.innerHTML=(dd.study_see||'').substring(0,250)||'-';
     dHint.style.cssText='padding:3px 4px;font-size:9px;'+STY_OK;
     var dHints=(dd.study_hint||[]).map(function(h){return h.diagnosis||''}).filter(Boolean);
     dHint.textContent=dHints.length?dHints.join('; '):'-';
@@ -839,7 +839,7 @@ function showABCDEFPanel(d){
   if(ef&&(ef.filled||ef.template_name)){
     eRow.style.background='';
     eFilled.style.cssText='padding:3px 4px;'+STY_OK;
-    eFilled.textContent=(ef.filled||'').substring(0,250)||'-';
+    eFilled.innerHTML=(ef.filled||'').substring(0,250)||'-';
     eTpl.style.cssText='padding:3px 4px;font-size:9px;'+STY_OK;
     eTpl.textContent=ef.template_name||'-';
   }else{
@@ -1042,6 +1042,23 @@ function copyTemplateText(){
   if(!txt.trim()){t('暂无可复制的模板内容','e');return}
   navigator.clipboard.writeText(txt).then(function(){t('模板已复制到剪贴板','s')}).catch(function(){t('复制失败','e')});
 }
+
+// 快速测试数据
+var TEST_TEXTS=[
+  '胆囊大小形态正常，壁欠光滑，内见多个强回声团，后伴声影，较大约5mm，胆总管上段内径正常。',
+  '肝脏形态规则，大小正常，表面光滑，实质回声分布均匀，肝内管系尚清。',
+  '子宫前位，形态规则，大小正常，实质回声均匀，宫腔线居中，内膜厚约8mm，双侧附件未见明显异常声像。',
+  '二尖瓣形态回声正常，启闭可。主动脉瓣回声正常，启闭可。三尖瓣回声正常，启闭可。房室间隔未见连续中断。',
+  '甲状腺左叶可见低回声结节，大小约1.5cm，边界清晰，内部回声欠均匀。',
+  '前列腺大小约4.2×3.5×3.0cm，形态规则，边界清晰，实质回声欠均匀，内见点状强回声。',
+  '胎儿双顶径8cm，头围30cm，腹围32cm，股骨长6cm，胎心144次/分，心律齐。胎盘附着于子宫前壁，成熟度I级。',
+  '双侧乳腺切面形态轮廓正常，层次清楚，边界光滑完整，内部回声分布均匀，未见明显结节及其它异常回声。',
+  '双侧颈总动脉内膜光滑，内-中膜无增厚，管腔内无明显斑块回声，血流速度正常范围。',
+  '大脑中动脉血流速度正常范围，搏动指数正常，阻力指数正常。频谱形态未见异常。',
+];
+var TEST_EXAM_TYPES=[
+  '腹部超声','腹部超声','妇科超声','心脏超声','甲状腺超声','泌尿超声','产科超声','乳腺超声','血管超声','血管超声',
+];
 
 function fillTest(i){
   if(i<0||i>=TEST_TEXTS.length)return;

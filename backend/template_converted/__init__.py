@@ -15,13 +15,13 @@ def register_templates(templates: dict[str, dict], category: str = ""):
         tpl.setdefault("measurements", [])
         tpl.setdefault("options", [])
         tpl.setdefault("opt_reset", {})
-        tpl.setdefault("option_keys", set())
+        tpl.setdefault("option_keys", [])
         tpl.setdefault("fields", {})
         tpl.setdefault("category", category)
         _TEMPLATE_REGISTRY[name] = tpl
 
 
-# 导入所有自动生成的模板模块（在register_templates定义之后）
+# 导入所有自动生成的模板模块
 from template_converted.abdomen import *   # 79 templates
 from template_converted.gynecology import *  # 52 templates
 from template_converted.thyroid import *   # 42 templates
@@ -55,18 +55,6 @@ def _load_csv():
                 "info1": info1,
                 "info2": info2,
             }
-
-
-def register_templates(templates: dict[str, dict], category: str = ""):
-    """注册一批模板到注册表"""
-    for name, tpl in templates.items():
-        tpl.setdefault("measurements", [])
-        tpl.setdefault("options", [])
-        tpl.setdefault("opt_reset", {})
-        tpl.setdefault("option_keys", set())
-        tpl.setdefault("fields", {})
-        tpl.setdefault("category", category)
-        _TEMPLATE_REGISTRY[name] = tpl
 
 
 def setup():

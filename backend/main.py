@@ -412,12 +412,16 @@ async def structure(req: StructureRequest):
 
     if converted and best_score >= 100:
         from template_converted.fill import fill_converted_template
-        from template_converted.measurements import ALL as _ALL_MEAS
-        from template_converted.options import ALL as _ALL_OPTS
         cat = _route_result.get("category", "abdomen")
-        measurements = _ALL_MEAS.get(cat, _ALL_MEAS.get("abdomen", []))
-        options_list = _ALL_OPTS.get(cat, []) + _ALL_OPTS.get("common", [])
-        report = fill_converted_template(A, converted.get("html", template_info1), converted.get("fields", {}), measurements, options_list, {}, set())
+        report = fill_converted_template(
+            A,
+            converted.get("html", template_info1),
+            converted.get("fields", {}),
+            converted.get("measurements", []),
+            converted.get("options", []),
+            converted.get("opt_reset", {}),
+            set(converted.get("option_keys", [])),
+        )
         method = "converted_fill"
     elif best_score >= 200 and template_info1 and len(template_info1) >= 20:
         from template_filler import match_and_fill as _rule_fill

@@ -103,10 +103,10 @@ def load_templates() -> OrderedDict[str, dict]:
                     if kw not in _keyword_index:
                         _keyword_index[kw] = name
             # 额外: 如果模板名含"正常"且info1含"双肾"+"集合系统"，增加专属关键词
+            # 注意: 不覆盖"双肾"本身，让疾病模板也能匹配
             if '正常' in name and info1 and ('双肾' in info1 or '集合系统' in info1):
                 _keyword_index['肾正常'] = name
                 _keyword_index['双肾正常'] = name
-                _keyword_index['双肾'] = name  # 覆盖"双肾"指向，保障优先命中正常肾模板
 
             # 类别索引
             if group:
@@ -147,12 +147,14 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
             name = _keyword_index[keyword]
             # P0-2: 异常模板需证据——DISCNAME含疾病词时必须有ASR文本证据
             abnormal_kw = ["癌","瘤","结石","囊肿","增生","钙化","硬化","异位","梗塞","血栓","积水","腹水","畸形","占位","肿物","团块"]
+            # 超声描述词也可作为疾病证据（如"强回声团"→结石）
+            evidence_extras = ["强回声","无声影","声影","光团","光带","回声团","暗区"]
             entry = _template_index.get(name, {})
             is_abnormal = any(kw in keyword for kw in abnormal_kw)
             extra_bonus = 0
             if is_abnormal:
-                # 检查文本中是否有匹配的疾病关键词
-                has_evidence = any(kw in text for kw in abnormal_kw)
+                # 检查文本中是否有匹配的疾病关键词或超声描述证据
+                has_evidence = any(kw in text for kw in abnormal_kw + evidence_extras)
                 if has_evidence:
                     extra_bonus = 20  # 有证据加成
                 else:
@@ -160,7 +162,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
             scored[name] = max(scored.get(name, 0), 100 + len(keyword) * 5 + extra_bonus)
 
         # P0-3: "正常"关键词匹配——文本含"正常"时给正常模板加成
-    normal_words = ["正常", "大小正常", "光滑", "光整", "规则", "均匀", "清晰", "通畅", "可"]
+    normal_words = ["正常", "大小正常", "光滑", "光整", "规则", "均匀", "清晰", "通畅"]
     has_normal_signal = any(w in text for w in normal_words)
     if has_normal_signal:
         for name, entry in _template_index.items():
@@ -257,7 +259,13 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
                 if any(o in tpl_text for o in organs):
                     tpl_categories.add(cat)
             # 更严格的守卫: 如果模板INFO1中没有任何文本中的器官词 → 强扣分
+            # 注意: text中有"双肾"但organ_words是"肾脏", 需额外检查"肾"
             tpl_has_text_organ = any(o in tpl_text for o in organ_words)
+            # 补充检查: text中的"肾"类词（双肾/左肾/右肾/肾实质）在模板中是否存在
+            if not tpl_has_text_organ:
+                kidney_variants = ["双肾", "左肾", "右肾", "实质回声", "集合"]
+                if any(v in text for v in kidney_variants) and any(v in tpl_text for v in kidney_variants):
+                    tpl_has_text_organ = True
             if not tpl_has_text_organ:
                 scored[name] -= 70
             elif tpl_categories and not tpl_categories.intersection(text_organ_categories):

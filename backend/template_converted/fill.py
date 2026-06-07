@@ -19,7 +19,7 @@ def fill_converted_template(
     Args:
         raw_text: ASR文本
         template_html: 结构化HTML模板（含{_key}和[选项]组）
-        fields: {_key: 中文标签} 映射
+        fields: {_key: 上下文标签} 映射
         measurements: [(regex, key), ...] 测量提取规则
         options: [(regex, key), ...] 选项检测规则
         opt_reset: {key: (mutual_keys...)} 互斥组
@@ -30,15 +30,55 @@ def fill_converted_template(
     text = re.sub(r'(\d+(?:\.\d+)?)\s*公斤', lambda m: str(int(float(m.group(1))*1000))+'克', text)
     text = re.sub(r'(\d+(?:\.\d+)?)\s*(?:kg|千克)', lambda m: str(int(float(m.group(1))*1000))+'克', text, flags=re.IGNORECASE)
 
-    # 提取数值
+    # 提取数值 (优先用模板的自带提取正则)
     vals = {}
     for pat, key in measurements:
-        m = re.search(pat, text)
-        if m:
-            try:
-                vals[key] = m.group(1)
-            except IndexError:
-                pass  # 无捕获组的模式（如状态描述）
+        try:
+            m = re.search(pat, text)
+            if m:
+                try:
+                    vals[key] = m.group(1)
+                except IndexError:
+                    pass  # 无捕获组的模式
+        except Exception:
+            pass
+
+    # 回退: 用fields的上下文标签做简单数值提取
+    # 策略: 尝试完整上下文→尾部递减→通用关键词
+    if not vals:
+        for fkey, ctx in sorted(fields.items(), key=lambda x: -len(x[0])):
+            if fkey in vals:
+                continue
+            clean_ctx = ctx.replace('{', '').replace('}', '').strip('x×X*乘~- \n\r')
+            if not clean_ctx or len(clean_ctx) < 1:
+                continue
+
+            # 尝试1: 完整上下文
+            esc_ctx = re.escape(clean_ctx)
+            m = re.search(rf'{esc_ctx}\s*(?:约|为|是|大)?\s*(\d+(?:\.\d+)?)', text)
+            if m:
+                vals[fkey] = m.group(1)
+                continue
+
+            # 尝试2: 从末尾递减切片（5→4→3→2字）
+            found = False
+            for tail_len in range(min(5, len(clean_ctx)), 1, -1):
+                tail = clean_ctx[-tail_len:]
+                m = re.search(rf'(?:{re.escape(tail)})\s*(?:约|为|是|大)?\s*(\d+(?:\.\d+)?)', text)
+                if m:
+                    vals[fkey] = m.group(1)
+                    found = True
+                    break
+            if found:
+                continue
+
+            # 尝试3: 通用测量关键词匹配
+            for meas_kw in ["大小", "约", "厚", "长", "宽", "深", "径"]:
+                if meas_kw in clean_ctx:
+                    m = re.search(rf'(?:{re.escape(meas_kw)})\s*(?:约|为|是|大)?\s*(\d+(?:\.\d+)?)', text)
+                    if m:
+                        vals[fkey] = m.group(1)
+                        break
 
     # 提取选项
     opts = {}
