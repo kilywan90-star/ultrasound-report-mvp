@@ -356,9 +356,9 @@ async def structure(req: StructureRequest):
     A = correct_ASR_text(req.text)
     warnings = []
 
-    # L0: short text gate
+    # L0: short text gate (放宽到3字, 给LLM展开机会)
     _meaningful = _re.sub(r'[\s嗯啊哦呃额呢吧啦噢哦\W]', '', A)
-    if len(_meaningful) < 8:
+    if len(_meaningful) < 3:
         raise HTTPException(400, f"录音内容过短（有效字符仅{len(_meaningful)}个），请重新录音")
 
     # Route: 预分类
@@ -423,6 +423,15 @@ async def structure(req: StructureRequest):
             set(converted.get("option_keys", [])),
         )
         method = "converted_fill"
+
+        # 智能补全: 只有unfill超过阈值时才调用LLM
+        _see = report.get("study_see", "")
+        _unfill_count = _see.count("unfill")
+        _voice_count = _see.count("voice")
+        if _unfill_count >= 4 and _unfill_count > _voice_count * 2:
+            report = _llm_complete_report(A, best_name, converted, report)
+            method = "converted_fill_llm"
+            logging.info(f"LLM补全: {best_name} unfill={_unfill_count} voice={_voice_count}")
     elif best_score >= 200 and template_info1 and len(template_info1) >= 20:
         from template_filler import match_and_fill as _rule_fill
         rule_result = _rule_fill(A)
@@ -458,23 +467,28 @@ async def structure(req: StructureRequest):
 
 
 def _llm_fill_template(asr_text, exam_type, tpl_name, info1):
-    """1 LLM call: verify template + fill variables + extra content append"""
+    """1 LLM call: 将短文本片段展开为完整超声报告"""
     from llm_client import _get_client, _parse_json
-    client = _get_client(provider="deepseek" if os.getenv("DEEPSEEK_API_KEY") else "dashscope")
-    model = "deepseek-v4-flash" if os.getenv("DEEPSEEK_API_KEY") else "qwen-plus"
+    # 使用火山方舟 doubao-seed (1.6s 快速模型)
+    client = _get_client(provider="volc")
+    model = "doubao-seed-1-6-flash-250615"
 
-    system = f"""超声科主任医师。将ASR口述填入固定模板。
+    system = f"""超声科主任医师。基于口述片段生成完整规范的超声报告。
 
-模板名: {tpl_name}
-模板正文:
+参考模板名: {tpl_name}
+模板正文参考:
 {info1[:1000]}
 
 规则:
-1. ASR数值填入模板变量({{变量}})和占位符(___mm)
-2. [选项A;选项B]只保留ASR提到的选项
-3. ASR有但模板没有的内容追加到末尾, 用"补充: ..."标记
-4. ASR缺失的变量保留 ___mm 不编造
-5. 只输出JSON: {{"study_see":"...", "study_hint":[{{"rank":1,"diagnosis":"...","icd10":"..."}}], "recommendation":"..."}}"""
+1. ASR明确提到的异常描述 → 原样保留
+2. ASR没说的正常部分 → 根据模板上下文和医学常识, 合理补全为正常描述
+   (如"大小形态正常"、"回声均匀"、"边界清晰"等)
+3. ASR提到的数值 → 填入对应位置, 用<b class="voice">值</b>标记
+4. 不要让报告看起来有缺失——ASR没提到的器官/测量按正常处理
+5. 输出3色HTML格式:
+   - ASR填入/推理的正常值: <b class="voice">值</b>
+   - 无法确定的保留: <i class="unfill">__</i>
+6. 只输出JSON: {{"study_see":"完整HTML...", "study_hint":[{{"rank":1,"diagnosis":"..."}}], "recommendation":"..."}}"""
 
     try:
         resp = client.chat.completions.create(
@@ -486,11 +500,74 @@ def _llm_fill_template(asr_text, exam_type, tpl_name, info1):
         )
         content = resp.choices[0].message.content
         if content:
-            return _parse_json(content)
+            parsed = _parse_json(content)
+            if parsed and parsed.get("study_see"):
+                return parsed
+            # JSON解析失败, 尝试直接提取HTML
+            if "<div" in content or "study_see" in content[:100]:
+                import re as _re7
+                html_match = _re7.search(r'<div[^>]*class=.rpt-html.*?>.*?</div>', content, _re7.DOTALL)
+                if html_match:
+                    return {"study_see": html_match.group(0), "study_hint": [], "recommendation": ""}
+                # 兜底: content本身作为文本报告
+                return {"study_see": f"<div class='rpt-html'>{_re7.sub(r'[\"{}\n\r]', ' ', content[:2000])}</div>", "study_hint": [], "recommendation": ""}
     except Exception as e:
         logging.warning(f"LLM fill failed: {e}")
 
     return {"study_see": f"<div class='rpt-html'>{asr_text}</div>", "study_hint": [], "recommendation": ""}
+
+
+def _llm_complete_report(asr_text, tpl_name, template, report):
+    """LLM智能补全: 推理医生没说但可推导的正常值(unfill→voice)"""
+    if not report.get("study_see"):
+        return report
+    from llm_client import _get_client, _parse_json
+    client = _get_client(provider="volc")
+    model = "doubao-seed-1-6-flash-250615"
+    import re as _re4
+
+    _current_see = report["study_see"]
+    _plain = _re4.sub(r'<[^>]+>', '', _current_see)
+    _fields_text = "\n".join(f"  {k}: {v}" for k, v in sorted(template.get("fields", {}).items())[:30])
+
+    system = f"""超声科主任医师。补全报告的空白字段(unfill)。
+
+ASR原文: {asr_text[:600]}
+模板名: {tpl_name}
+模板字段:
+{_fields_text}
+
+规则:
+1. ASR数值 → 保留原值不动
+2. <i class="unfill">__</i> → 根据模板字段名推理合理值
+   - 大小/直径/径 → 若ASR没说, 推理为正常范围值或留空
+   - 回声/形态/边界 → 推理为"正常"、"清晰"、"规则"
+   - 血流/CDFI → 推理为"未见异常血流信号"
+   - 厚度 → 若没说, 推理为正常参考值
+3. 置信度: 能确定的填值, 不确定的保留___
+4. 只输出修改后的完整study_see HTML! 不要包裹在JSON中!"""
+
+    try:
+        resp = client.chat.completions.create(
+            model=model, temperature=0.1, max_tokens=4096, timeout=15,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": f"当前报告:\n{_current_see}"},
+            ],
+        )
+        content = resp.choices[0].message.content.strip()
+        if content and "unfill" in _current_see:
+            # 只取LLM返回的HTML部分
+            if "<div" in content:
+                report["study_see"] = content
+            elif content.startswith("{"):
+                parsed = _parse_json(content)
+                if parsed and "study_see" in parsed:
+                    report["study_see"] = parsed["study_see"]
+        return report
+    except Exception as e:
+        logging.warning(f"LLM智能补全失败: {e}")
+        return report
 
 
 def _llm_multi_organ_fill(asr_text, exam_type):
