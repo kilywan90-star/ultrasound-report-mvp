@@ -141,6 +141,8 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
     # 策略1: DISCNAME关键词精确匹配
     # 器官词列表（用于全搜索函数）
     _ORGAN_WORDS = ["肝脏","胆囊","胰腺","脾脏","肾脏","子宫","卵巢","前列腺","甲状腺","乳腺","心脏","颈动脉","椎动脉","胎儿","膀胱","睾丸","附睾","淋巴结","阑尾","胸腔","腹腔","盆腔","胆总管","门静脉","胎心","胎盘","羊水","脐带"]
+    # 否定词: 如果ASR含有这些词 → 降低对应异常模板的得分
+    _NEGATION_WORDS = {"已切除":"切除","未探及":"无正常","未扪及":"无","未见":"无"}
     for keyword in sorted(_keyword_index.keys(), key=len, reverse=True):
         if keyword in text and len(keyword) >= 2:
             name = _keyword_index[keyword]
