@@ -365,8 +365,8 @@ async def structure(req: StructureRequest):
     from routing import classify as _route
     _route_result = _route(A, req.exam_type)
 
-    # Fetal fast path (路由优先)
-    if _route_result["is_fetal"] and req.patient_gender != "男":
+    # Fetal fast path (路由优先) — 如果患者性别不是明确'男', 走胎儿路径
+    if _route_result["is_fetal"] and (req.patient_gender or "").strip() not in ("男", "M", "male"):
         report = fill_fetal_template(A)
         report = _wrap_hints_with_toggle(report)
         if req.patient_id and req.patient_id.strip():

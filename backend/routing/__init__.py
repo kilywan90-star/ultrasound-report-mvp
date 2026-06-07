@@ -34,7 +34,7 @@ ROUTES = [
     },
     {
         "name": "liver_gall",
-        "keywords": ["肝脏","肝内","门静脉","胆囊","胆总管","胰腺","脾脏"],
+        "keywords": ["肝脏","肝内","肝","门静脉","胆囊","胆总管","胰腺","脾脏","脾"],
         "exam_types": ["腹部超声"],
         "category": "abdomen",
         "priority": 60,
@@ -69,7 +69,7 @@ ROUTES = [
     },
     {
         "name": "abdomen",
-        "keywords": ["腹部","肝肾","腹部"],
+        "keywords": ["腹部","肝肾","肝胆","肝","脾","胰","腹腔"],
         "exam_types": ["腹部超声"],
         "category": "abdomen",
         "priority": 30,
@@ -111,9 +111,10 @@ def classify(text: str, exam_type: str = "") -> dict:
     for r in sorted(ROUTES, key=lambda x: -x["priority"]):
         kw_hits = sum(1 for kw in r["keywords"] if kw in text)
         if kw_hits > 0:
-            if r["priority"] > best.get("priority", 0):
+            # liver_gall和kidney都对应abdomen时, 优先选命中多的
+            if kw_hits > best.get("_kw_hits", 0):
                 best = r
-            break
+                best["_kw_hits"] = kw_hits
 
     # 3. 多器官检测
     organ_count = sum(1 for o in ORGAN_KEYWORDS if o in text)
