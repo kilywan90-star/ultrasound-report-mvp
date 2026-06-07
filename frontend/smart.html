@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超声报告智能匹配系统 v2.0</title>
+<style>
+:root{
+  --primary:#1677ff;--primary-hover:#4096ff;--primary-bg:#e6f4ff;
+  --success:#52c41a;--warning:#faad14;--danger:#ff4d4f;
+  --bg:#f0f2f5;--card:#fff;--text:#1f1f1f;--text2:#6b7280;
+  --border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.08);--radius:10px;
+  --sidebar-w:200px;
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","Microsoft YaHei",sans-serif;
+  --mono:"SF Mono","Fira Code","Consolas",monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg)}
+.app{display:flex;height:100vh}
+.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#001529,#002140);color:#fff;display:flex;flex-direction:column;flex-shrink:0}
+.sidebar .logo{padding:16px 18px;font-size:15px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px}
+.sidebar .logo .badge{font-size:9px;background:var(--primary);padding:1px 6px;border-radius:8px;margin-left:auto}
+.sidebar .nav{flex:1;padding:4px 0;overflow-y:auto}
+.sidebar .nav-item{display:flex;align-items:center;gap:10px;padding:10px 18px;color:rgba(255,255,255,.65);cursor:pointer;border-left:3px solid transparent;font-size:13px;transition:all .15s}
+.sidebar .nav-item:hover{color:#fff;background:rgba(255,255,255,.06)}
+.sidebar .nav-item.on{color:#fff;background:var(--primary);border-left-color:#fff}
+.sidebar .ver{border-top:1px solid rgba(255,255,255,.08);padding:10px 18px;font-size:10px;color:rgba(255,255,255,.35)}
+.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:50px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
+.topbar .title{font-size:15px;font-weight:600}
+.topbar .right{display:flex;align-items:center;gap:12px}
+.topbar select{padding:4px 10px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--card);cursor:pointer;font-family:var(--font)}
+.badge-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.badge-dot.green{background:var(--success)}.badge-dot.orange{background:var(--warning)}.badge-dot.red{background:var(--danger)}
+.content{flex:1;padding:14px 20px;overflow-y:auto;display:flex;flex-direction:column;gap:12px}
+/* 语音输入区 */
+.input-section{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px 18px}
+.input-row{display:flex;align-items:center;gap:10px}
+.mic-btn{width:44px;height:44px;border-radius:50%;border:2px solid var(--primary);background:var(--card);color:var(--primary);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.mic-btn:hover{background:var(--primary-bg);transform:scale(1.05)}
+.mic-btn.recording{border-color:var(--danger);color:#fff;background:var(--danger);animation:pulse 1s ease infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,77,79,.4)}70%{box-shadow:0 0 0 16px rgba(255,77,79,0)}100%{box-shadow:0 0 0 0 rgba(255,77,79,0)}}
+.input-wrapper{flex:1;position:relative}
+.input-wrapper input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:8px;font-size:14px;outline:none;background:#f9fafb;transition:all .2s}
+.input-wrapper input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(22,119,255,.12);background:var(--card)}
+.btn{padding:8px 18px;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primary-hover)}
+.btn.success{background:var(--success);color:#fff}
+.btn.success:hover{filter:brightness(1.1)}
+.btn.danger{background:var(--danger);color:#fff}
+.btn.gray{background:#f3f4f6;color:var(--text2)}
+.btn.gray:hover{background:#e5e7eb}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+/* 置信度视图 */
+.confidence-section{display:flex;gap:12px}
+.confidence-main{flex:1;min-width:0}
+.confidence-sidebar{width:320px;flex-shrink:0}
+@media(max-width:900px){.confidence-sidebar{display:none}}
+/* 置信度环形图 */
+.gauge-wrap{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:14px;display:flex;align-items:center;gap:16px}
+.gauge-ring{position:relative;width:90px;height:90px;flex-shrink:0}
+.gauge-ring svg{transform:rotate(-90deg)}
+.gauge-ring .bg{fill:none;stroke:#f0f0f0;stroke-width:6}
+.gauge-ring .progress{fill:none;stroke:var(--primary);stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset .5s ease}
+.gauge-ring .center-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge-ring .center-text .pct{font-size:22px;font-weight:700;color:var(--text)}
+.gauge-ring .center-text .label{font-size:10px;color:var(--text2)}
+.gauge-info{flex:1}
+.gauge-info .match-name{font-size:16px;font-weight:600;color:var(--text)}
+.gauge-info .match-detail{font-size:12px;color:var(--text2);margin-top:4px}
+.gauge-info .trigger-badge{display:inline-block;margin-top:6px;padding:3px 12px;border-radius:12px;font-size:12px;font-weight:500}
+.trigger-badge.active{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.trigger-badge.waiting{background:#fffbeb;color:#b45309;border:1px solid #fde68a}
+/* 候选列表 */
+.candidate-list{display:flex;flex-direction:column;gap:4px;max-height:380px;overflow-y:auto}
+.candidate-item{display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.candidate-item:hover{border-color:var(--primary-bg);background:#fafafa}
+.candidate-item.active{border-color:var(--primary);background:var(--primary-bg)}
+.candidate-item .c-bar-wrap{flex:1;max-width:80px}
+.candidate-item .c-bar{height:6px;border-radius:3px;background:#f0f0f0;overflow:hidden}
+.candidate-item .c-bar .fill{height:100%;border-radius:3px;transition:width .3s ease}
+.candidate-item .c-rank{font-size:12px;font-weight:600;color:var(--text2);width:20px}
+.candidate-item .c-name{font-size:13px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.candidate-item .c-conf{font-size:13px;font-weight:700;color:var(--primary);width:40px;text-align:right}
+/* 报告预览 */
+.report-preview{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px}
+.report-preview h3{font-size:14px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.report-preview h3 .tag{font-size:11px;padding:2px 10px;border-radius:10px;background:var(--primary-bg);color:var(--primary)}
+.report-section{background:#f9fafb;border-radius:6px;padding:10px 12px;margin-bottom:8px;font-size:13px;line-height:1.6}
+.report-section .label{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px}
+.report-section .content{color:var(--text)}
+.report-section .content .hl{background:#fef3c7;padding:1px 4px;border-radius:3px}
+.report-actions{display:flex;gap:8px;margin-top:10px;justify-content:flex-end}
+/* 空状态 */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px;color:var(--text2)}
+.empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.5}
+.empty-state .text{font-size:14px}
+/* Toast */
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}
+.toast-inner{padding:10px 24px;border-radius:8px;font-size:13px;box-shadow:0 4px 16px rgba(0,0,0,.15)}
+.toast-inner.success{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
+.toast-inner.error{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
+.toast-inner.info{background:var(--primary-bg);color:var(--primary);border:1px solid #b2d9ff}
+.toast-inner.trigger{background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;font-weight:500}
+/* 光标动画 */
+.cursor-blink{display:inline-block;width:2px;height:16px;background:var(--primary);margin-left:2px;animation:blink 1s step-end infinite;vertical-align:middle}
+.cursor-blink.gray{background:var(--text2)}
+@keyframes blink{50%{opacity:0}}
+/* 滚动条 */
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:2px}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="logo">AI 超声报告 <span class="badge">v2</span></div>
+    <div class="nav">
+      <div class="nav-item on" data-page="smart"><span>🎯</span>智能匹配</div>
+      <div class="nav-item" data-page="dashboard"><span>📊</span>统计</div>
+      <div class="nav-item" data-page="reports"><span>📋</span>报告列表</div>
+      <div class="nav-item" data-page="about"><span>ℹ️</span>关于</div>
+    </div>
+    <div class="ver">40万数据驱动 | 实时AI匹配</div>
+  </div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div class="title" id="pageTitle">🎯 智能匹配</div>
+      <div class="right">
+        <select id="doctorSelect"><option>加载医生...</option></select>
+        <span><span class="badge-dot green"></span><span id="statusText" style="font-size:12px;color:var(--text2)">引擎就绪</span></span>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- ===== 智能匹配页面 ===== -->
+      <div class="page on" id="page-smart">
+        <!-- 输入区 -->
+        <div class="input-section">
+          <div class="input-row">
+            <button class="mic-btn" id="micBtn" title="录音">🎤</button>
+            <div class="input-wrapper">
+              <input id="textInput" placeholder="说或输入超声描述，系统自动匹配..." autofocus>
+              <span class="cursor-blink" id="cursorBlink" style="display:none"></span>
+            </div>
+            <button class="btn gray" id="clearBtn">✕</button>
+          </div>
+          <div style="font-size:11px;color:var(--text2);margin-top:8px;display:flex;gap:16px;flex-wrap:wrap">
+            <span>💡 示例: "子宫前位肌层1.5x1.2低回声边界清"</span>
+            <span id="charCount" style="margin-left:auto">0 字</span>
+          </div>
+        </div>
+
+        <!-- 置信度 + 候选 -->
+        <div class="confidence-section">
+          <div class="confidence-main">
+            <!-- 环形仪表 -->
+            <div class="gauge-wrap" id="gaugeWrap">
+              <div class="gauge-ring">
+                <svg width="90" height="90" viewBox="0 0 90 90">
+                  <circle class="bg" cx="45" cy="45" r="38"/>
+                  <circle class="progress" id="gaugeProgress" cx="45" cy="45" r="38"
+                    stroke-dasharray="238.76" stroke-dashoffset="238.76"/>
+                </svg>
+                <div class="center-text">
+                  <span class="pct" id="gaugePct">--</span>
+                  <span class="label">置信度</span>
+                </div>
+              </div>
+              <div class="gauge-info">
+                <div class="match-name" id="matchName">等待输入...</div>
+                <div class="match-detail" id="matchDetail">智能引擎将根据语音实时匹配 40 万条数据</div>
+                <div>
+                  <span class="trigger-badge waiting" id="triggerBadge">⏳ 输入中...</span>
+                  <span style="font-size:11px;color:var(--text2);margin-left:8px" id="matchTime"></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- 报告预览 -->
+            <div class="report-preview" id="reportPreview" style="display:none">
+              <h3>
+                📋 报告预览
+                <span class="tag" id="previewDiscgroup"></span>
+                <span class="tag" id="previewScore" style="background:#f0fdf4;color:#15803d"></span>
+              </h3>
+              <div class="report-section">
+                <div class="label">🏥 诊断名称</div>
+                <div class="content" id="previewDiscname" style="font-weight:600;font-size:15px"></div>
+              </div>
+              <div class="report-section">
+                <div class="label">📝 超声所见（完整版）</div>
+                <div class="content" id="previewFull"></div>
+              </div>
+              <div class="report-section">
+                <div class="label">📄 模板扩展信息</div>
+                <div class="content" id="previewTpl" style="font-size:12px"></div>
+              </div>
+              <div class="report-actions">
+                <button class="btn gray" id="editBtn">✏️ 编辑</button>
+                <button class="btn success" id="confirmBtn">✅ 确认报告</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- 候选列表侧栏 -->
+          <div class="confidence-sidebar">
+            <div class="card" style="margin-bottom:0;box-shadow:var(--shadow)">
+              <div class="card-hd" style="padding:10px 14px;font-size:13px">
+                <span>📌 候选结果</span>
+                <span style="font-size:11px;color:var(--text2)" id="candidateCount"></span>
+              </div>
+              <div class="card-bd" style="padding:6px">
+                <div class="candidate-list" id="candidateList">
+                  <div class="empty-state" style="padding:20px"><span class="text">等待输入...</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== Dashboard ===== -->
+      <div class="page" id="page-dashboard">
+        <div style="padding:20px;color:var(--text2);text-align:center">📊 统计页面 - 开发中</div>
+      </div>
+
+      <!-- ===== Reports ===== -->
+      <div class="page" id="page-reports">
+        <div style="padding:20px;color:var(--text2);text-align:center">📋 报告列表 - 开发中</div>
+      </div>
+
+      <!-- ===== About ===== -->
+      <div class="page" id="page-about">
+        <div class="card"><div class="card-bd" style="padding:20px">
+          <h3 style="margin-bottom:12px">超声报告智能匹配系统 v2.0</h3>
+          <div style="font-size:13px;color:var(--text2);line-height:1.8">
+            <p>数据源: 40 万条已清洗真实临床超声报告</p>
+            <p>引擎: SmartMatcher - 关键词倒排索引 + 7维评分</p>
+            <p>响应: 1-5ms/次</p>
+            <p>自动触发: Top1 ≥ 80% 且领先后者 ≥ 5%</p>
+            <p>方言支持: 川渝/湖南方言映射</p>
+            <p style="margin-top:12px;padding:10px;background:#f0fdf4;border-radius:6px;color:#15803d">
+              💡 医生只需说出超声所见(精简版)内容，系统自动匹配完整模板!
+            </p>
+          </div>
+        </div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><div class="toast-inner" id="toastInner"></div></div>
+
+<script>
+// ===== State =====
+const S = {
+  text: '',
+  matches: [],
+  selectedIdx: 0,
+  doctor: '',
+  triggerConfirmed: false,
+};
+const $ = id => document.getElementById(id);
+let toastTimer = null;
+let typingTimer = null;
+let recording = false;
+let mediaRecorder = null;
+
+function msg(text, type='success', duration=2500) {
+  const el = $('toast'), inner = $('toastInner');
+  inner.textContent = text;
+  inner.className = 'toast-inner ' + type;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), duration);
+}
+
+// ===== API =====
+const API = {
+  async get(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  },
+  async post(url, data) {
+    const r = await fetch(url, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data),
+    });
+    if (!r.ok) throw new Error(await r.text());
+    return r.json();
+  }
+};
+
+// ===== Navigation =====
+function switchPage(name) {
+  document.querySelectorAll('.page, .nav-item').forEach(el => el.classList.remove('on'));
+  document.querySelector(`[data-page="${name}"]`).classList.add('on');
+  const page = $('page-' + name);
+  if (page) page.classList.add('on');
+  const titles = {smart: '🎯 智能匹配', dashboard: '📊 统计', reports: '📋 报告列表', about: 'ℹ️ 关于'};
+  $('pageTitle').textContent = titles[name] || name;
+}
+document.querySelectorAll('.nav-item').forEach(el => el.addEventListener('click', () => switchPage(el.dataset.page)));
+
+// ===== Doctors =====
+async function loadDoctors() {
+  try {
+    const {doctors} = await API.get('/api/doctors');
+    const sel = $('doctorSelect');
+    if (!doctors || !doctors.length) {
+      for (const n of ['陈慧','曾宁花','毛媛媛','刘丹','陈莺语','尹定国','任欢','唐娟']) {
+        try { await API.post('/api/doctors', {name: n, department: '超声科'}); } catch(e) {}
+      }
+      return loadDoctors();
+    }
+    sel.innerHTML = doctors.map(d => `<option value="${d.name}">${d.name}</option>`).join('');
+    sel.value = doctors[0].name;
+    S.doctor = doctors[0].name;
+  } catch(e) { console.error(e); }
+}
+$('doctorSelect').addEventListener('change', () => { S.doctor = $('doctorSelect').value; });
+
+// ===== Smart Matching =====
+const DEBOUNCE_MS = 150;  // 增量匹配防抖
+let matchId = 0;
+
+function onInputChange() {
+  const input = $('textInput').value;
+  $('charCount').textContent = input.length + ' 字';
+
+  clearTimeout(typingTimer);
+  S.triggerConfirmed = false;
+
+  if (!input.trim()) {
+    resetMatch();
+    return;
+  }
+
+  typingTimer = setTimeout(() => doMatch(input), DEBOUNCE_MS);
+}
+
+async function doMatch(text) {
+  const id = ++matchId;
+  try {
+    const result = await API.post('/v2/smart/match', {text, doctor: S.doctor});
+    if (id !== matchId) return;  // 已经过期
+
+    // 显示光标动画
+    $('cursorBlink').style.display = 'none';
+
+    S.matches = result.matches || [];
+    S.selectedIdx = 0;
+    renderGauge(result);
+    renderCandidates(result);
+
+    // 自动触发
+    if (result.auto_trigger && !S.triggerConfirmed) {
+      S.triggerConfirmed = true;
+      triggerFill(result);
+    }
+  } catch(e) {
+    console.error(e);
+  }
+}
+
+function renderGauge(result) {
+  const matches = result.matches || [];
+  const gaugePct = $('gaugePct');
+  const gaugeProgress = $('gaugeProgress');
+  const matchName = $('matchName');
+  const matchDetail = $('matchDetail');
+  const triggerBadge = $('triggerBadge');
+  const matchTime = $('matchTime');
+
+  matchTime.textContent = result.elapsed_ms ? `${result.elapsed_ms}ms` : '';
+
+  if (!matches.length) {
+    gaugePct.textContent = '--';
+    matchName.textContent = '无匹配';
+    matchDetail.textContent = '请继续输入更多内容...';
+    triggerBadge.className = 'trigger-badge waiting';
+    triggerBadge.textContent = '⏳ 输入中...';
+    return;
+  }
+
+  const top = matches[0];
+  const pct = Math.min(top.confidence, 100);
+  const circumference = 238.76;
+  const offset = circumference - (pct / 100) * circumference;
+
+  gaugePct.textContent = Math.round(pct);
+  gaugeProgress.style.strokeDashoffset = offset;
+  gaugeProgress.style.stroke = pct >= 85 ? 'var(--success)' : pct >= 60 ? 'var(--warning)' : 'var(--primary)';
+
+  matchName.textContent = top.discname || top.see_simple.slice(0, 30) || '待匹配';
+  matchDetail.textContent = top.discgroup ? `分组: ${top.discgroup}` : '';
+  if (matches.length > 1) {
+    matchDetail.textContent += ` | 领先Top2: ${(pct - matches[1].confidence).toFixed(1)}%`;
+  }
+
+  if (result.auto_trigger) {
+    triggerBadge.className = 'trigger-badge active';
+    triggerBadge.textContent = '✅ 自动填充已触发';
+  } else {
+    triggerBadge.className = 'trigger-badge waiting';
+    triggerBadge.textContent = `⏳ Top1=${pct.toFixed(0)}% 继续输入...`;
+  }
+}
+
+function renderCandidates(result) {
+  const list = $('candidateList');
+  const count = $('candidateCount');
+  const matches = result.matches || [];
+
+  count.textContent = `${matches.length} 个`;
+
+  if (!matches.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:20px"><span class="text">无匹配结果</span></div>';
+    return;
+  }
+
+  list.innerHTML = matches.map((m, i) => {
+    const pct = Math.min(m.confidence, 100);
+    const active = i === S.selectedIdx ? 'active' : '';
+    const barColor = pct >= 85 ? 'var(--success)' : pct >= 60 ? 'var(--warning)' : 'var(--primary)';
+    return `<div class="candidate-item ${active}" data-idx="${i}">
+      <span class="c-rank">#${m.rank}</span>
+      <div class="c-bar-wrap">
+        <div class="c-bar"><div class="fill" style="width:${pct}%;background:${barColor}"></div></div>
+      </div>
+      <span class="c-name" title="${m.discname || ''}">${m.discname || '(待匹配)'}</span>
+      <span class="c-conf">${pct.toFixed(0)}%</span>
+    </div>`;
+  }).join('');
+
+  // 点击选中
+  list.querySelectorAll('.candidate-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.idx);
+      S.selectedIdx = idx;
+      renderCandidates(result);
+      // 显示该候选的详情
+    });
+  });
+}
+
+function triggerFill(result) {
+  const top = result.matches[0];
+  if (!top) return;
+
+  const preview = $('reportPreview');
+  preview.style.display = 'block';
+
+  $('previewDiscname').textContent = top.discname || '(无诊断)';
+  $('previewDiscgroup').textContent = top.discgroup || '未分组';
+  $('previewScore').textContent = top.confidence.toFixed(0) + '%';
+
+  // 高亮完整版中的诊断词
+  let fullText = top.see_full || '(无完整版)';
+  $('previewFull').innerHTML = fullText;
+
+  $('previewTpl').textContent = (top.tpl_info1 || '').slice(0, 300) || '(无模板信息)';
+
+  msg('✅ 自动匹配成功, 已生成完整报告!', 'trigger', 4000);
+}
+
+function resetMatch() {
+  S.text = '';
+  S.matches = [];
+  S.selectedIdx = 0;
+  S.triggerConfirmed = false;
+
+  // 重置仪表
+  $('gaugePct').textContent = '--';
+  $('gaugeProgress').style.strokeDashoffset = 238.76;
+  $('matchName').textContent = '等待输入...';
+  $('matchDetail').textContent = '智能引擎将根据语音实时匹配 40 万条数据';
+  $('triggerBadge').className = 'trigger-badge waiting';
+  $('triggerBadge').textContent = '⏳ 输入中...';
+  $('matchTime').textContent = '';
+  $('candidateList').innerHTML = '<div class="empty-state" style="padding:20px"><span class="text">等待输入...</span></div>';
+  $('candidateCount').textContent = '';
+  $('reportPreview').style.display = 'none';
+  $('cursorBlink').style.display = 'none';
+}
+
+// ===== Input Events =====
+$('textInput').addEventListener('input', onInputChange);
+$('clearBtn').addEventListener('click', () => {
+  $('textInput').value = '';
+  $('textInput').focus();
+  resetMatch();
+});
+
+// 键盘快捷键
+$('textInput').addEventListener('keydown', e => {
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (S.matches.length > 0) {
+      S.selectedIdx = Math.min(S.selectedIdx + 1, S.matches.length - 1);
+      // Re-render candidates highlight
+      document.querySelectorAll('.candidate-item').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.idx) === S.selectedIdx);
+      });
+    }
+  }
+  if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (S.matches.length > 0) {
+      S.selectedIdx = Math.max(S.selectedIdx - 1, 0);
+      document.querySelectorAll('.candidate-item').forEach(el => {
+        el.classList.toggle('active', parseInt(el.dataset.idx) === S.selectedIdx);
+      });
+    }
+  }
+  if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    if (S.matches[S.selectedIdx]) {
+      triggerFill({matches: S.matches, auto_trigger: true});
+    }
+  }
+});
+
+// ===== Microphone =====
+$('micBtn').addEventListener('click', async () => {
+  if (mediaRecorder && mediaRecorder.state === 'recording') {
+    mediaRecorder.stop();
+    $('micBtn').classList.remove('recording');
+    $('micBtn').textContent = '🎤';
+    recording = false;
+    return;
+  }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+    mediaRecorder = new MediaRecorder(stream, {mimeType});
+    const chunks = [];
+    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+      const blob = new Blob(chunks, {type: mimeType});
+      stream.getTracks().forEach(t => t.stop());
+      const fd = new FormData();
+      fd.append('file', blob, 'voice.webm');
+      fd.append('doctor', S.doctor);
+      msg('🎤 ASR 识别中...', 'info', 10000);
+      try {
+        const resp = await fetch('/api/voice/ali-asr', {method: 'POST', body: fd});
+        const r = await resp.json();
+        if (r.text && r.text.trim()) {
+          $('textInput').value = r.text.trim();
+          msg('✅ 语音识别成功', 'success', 2000);
+          doMatch(r.text.trim());
+        } else {
+          msg('未识别到有效文字', 'error');
+        }
+      } catch(e) {
+        msg('ASR 识别失败: ' + e.message, 'error');
+      }
+      $('micBtn').textContent = '🎤';
+    };
+    mediaRecorder.start();
+    $('micBtn').classList.add('recording');
+    $('micBtn').textContent = '⏹';
+    recording = true;
+    msg('🎤 录音中... 说完点击停止', 'info');
+  } catch(e) {
+    msg('麦克风不可用: ' + e.message, 'error');
+  }
+});
+
+// ===== Confirm Report =====
+$('confirmBtn').addEventListener('click', async () => {
+  const top = S.matches[S.selectedIdx];
+  if (!top) { msg('请先输入超声描述', 'info'); return; }
+  try {
+    const payload = {
+      doctor: S.doctor,
+      description: top.see_full || top.see_simple,
+      diagnosis: top.discname || '',
+      template_name: top.discname || '',
+      match_score: top.confidence / 100,
+      matched_sites: top.discgroup || '',
+    };
+    await API.post('/api/reports', payload);
+    msg('✅ 报告已确认保存', 'success');
+  } catch(e) {
+    msg('保存失败: ' + e.message, 'error');
+  }
+});
+
+// ===== Init =====
+loadDoctors();
+</script>
+</body>
+</html>

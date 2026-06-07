@@ -75,12 +75,19 @@ from fastapi.responses import FileResponse, HTMLResponse
 import os as _os
 
 FRONTEND_INDEX = FRONTEND_DIR / "index.html"
+FRONTEND_SMART = FRONTEND_DIR / "smart.html"
 
 @app.get("/", include_in_schema=False)
 def serve_frontend():
     if FRONTEND_INDEX.exists():
         return HTMLResponse(content=open(str(FRONTEND_INDEX), 'r', encoding='utf-8').read())
     return HTMLResponse("<h1>超声语音报告系统</h1><p>前端文件未找到</p>")
+
+@app.get("/smart", include_in_schema=False)
+def serve_smart():
+    if FRONTEND_SMART.exists():
+        return HTMLResponse(content=open(str(FRONTEND_SMART), 'r', encoding='utf-8').read())
+    return HTMLResponse("<h1>智能匹配系统</h1><p>前端文件未找到</p>")
 
 # ===== 启动 =====
 if __name__ == "__main__":

@@ -27,11 +27,28 @@ DIALECT_MAP = {
 ORGANS = ['乳腺','甲状腺','胆囊','肝脏','肾','子宫','心脏','颈动脉','膀胱','前列腺','脾','胰腺']
 
 def _load_csv():
-    """从CSV加载并预索引"""
+    """从CSV或JSON索引加载"""
     global _RECORDS, _BY_ORGAN, _LOADED
     if _LOADED:
         return
 
+    # 优先加载预构建的JSON索引(更快, 适合远程部署)
+    json_path = _HERE / "knowledge" / "40w_match_index.json"
+    if json_path.exists():
+        try:
+            import json as _json
+            with open(json_path, 'r', encoding='utf-8') as f:
+                raw = _json.load(f)
+            by_organ = {k: v for k, v in raw.items()}
+            _BY_ORGAN = by_organ
+            _LOADED = True
+            total = sum(len(v) for v in by_organ.values())
+            print(f"[匹配引擎] 加载JSON索引 {total} 条, {len(by_organ)} 个器官")
+            return
+        except Exception as e:
+            print(f"[匹配引擎] JSON加载失败: {e}")
+
+    # 回退: 从CSV加载
     csv_path = _CSV_PATH.parent / "全字段40万-matching_result_clean.csv"
     if not csv_path.exists():
         # 尝试桌面路径
@@ -90,13 +107,16 @@ def _normalize(text: str) -> str:
 
 def score_match(input_text: str, rec: dict) -> int:
     """评分: ASR输入 vs 数据库记录"""
+    # 兼容JSON短名格式
+    def _get(k, fb=''): return rec.get(k, rec.get({'see':'s','info1':'i','see_full':'f','discname':'d','discgroup':'g'}.get(k,k), fb))
+
     s = 0
     # 方言加分
     for wrong, right in DIALECT_MAP.items():
-        if wrong in input_text and right in rec['see']:
+        if wrong in input_text and right in _get('see',''):
             s += 15
     text = _normalize(input_text)
-    see = _normalize(rec['see'])
+    see = _normalize(_get('see',''))
 
     # 关键词评分(2-3字分片)
     for i in range(len(text)-1):
@@ -135,16 +155,31 @@ def score_match(input_text: str, rec: dict) -> int:
 def search(input_text: str, top_n: int = 5) -> list[dict]:
     """搜索接口: 返回TopN候选"""
     _load_csv()
-    if not _RECORDS:
+    if not _BY_ORGAN:
         return []
 
-    # 确定器官范围
-    target_organs = [o for o in ORGANS if o[:2] in input_text]
+    # 确定器官范围(支持简写: 乳→乳腺, 甲→甲状腺等)
+    organ_short = {'乳':'乳腺','甲':'甲状腺','胆':'胆囊','肝':'肝脏',
+                   '肾':'肾','宫':'子宫','膀':'膀胱','颈':'颈动脉','脾':'脾','胰':'胰腺'}
+    target_organs = []
+    for o in ORGANS:
+        if o[:2] in input_text or o in input_text:
+            target_organs.append(o)
+    for s, full in organ_short.items():
+        if s in input_text and full not in target_organs:
+            target_organs.append(full)
     candidates = []
     for o in (target_organs if target_organs else ORGANS):
         candidates.extend(_BY_ORGAN.get(o, [])[:500])
 
     # 评分
+    def _get(rec, k, fallback=''):
+        if k in rec: return rec[k]
+        # JSON索引用短名
+        short_map = {'see':'s','info1':'i','see_full':'f','discname':'d','discgroup':'g'}
+        sk = short_map.get(k, k)
+        return rec.get(sk, fallback)
+
     scored = [(score_match(input_text, rec), rec) for rec in candidates]
     scored.sort(key=lambda x: -x[0])
 
@@ -154,11 +189,11 @@ def search(input_text: str, top_n: int = 5) -> list[dict]:
             results.append({
                 'confidence': min(round(score / 70 * 100), 98),
                 'score': score,
-                'discname': rec['discname'],
-                'discgroup': rec['discgroup'],
-                'see': rec['see'][:200],
-                'info1': rec['info1'][:500],
-                'see_full': rec['see_full'][:500],
+                'discname': _get(rec, 'discname'),
+                'discgroup': _get(rec, 'discgroup'),
+                'see': _get(rec, 'see')[:200],
+                'info1': _get(rec, 'info1')[:500],
+                'see_full': _get(rec, 'see_full')[:500],
             })
 
     return results
