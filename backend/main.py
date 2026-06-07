@@ -1183,14 +1183,3 @@ if __name__ == "__main__":
                     ssl_keyfile=str(ssl_keyfile), ssl_certfile=str(ssl_certfile))
     else:
         uvicorn.run("main:app", host="0.0.0.0", port=8700, reload=True)
-
-if __name__ == "__main__":
-    import uvicorn
-    # 自签名证书，解决浏览器 HTTPS 安全上下文要求（语音识别需要 HTTPS 或 localhost）
-    ssl_keyfile = Path(__file__).parent / "key.pem"
-    ssl_certfile = Path(__file__).parent / "cert.pem"
-    if ssl_keyfile.exists() and ssl_certfile.exists():
-        uvicorn.run("main:app", host="0.0.0.0", port=8700, reload=True,
-                    ssl_keyfile=str(ssl_keyfile), ssl_certfile=str(ssl_certfile))
-    else:
-        uvicorn.run("main:app", host="0.0.0.0", port=8700, reload=True)

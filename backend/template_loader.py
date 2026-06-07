@@ -16,13 +16,22 @@ _module_index: dict[str, list[str]] = defaultdict(list)
 # 路由分类 → 模板模块 映射表 (用于category过滤)
 # routing/__init__.py 的 category 值 → template_loader 的 module 名
 CATEGORY_MODULE_MAP: dict[str, list[str]] = {
+    # 心脏: 专用模块25条
     "cardiac": ["心脏"],
+    # 甲状腺: 专用模块29条
     "thyroid": ["甲状腺"],
+    # 乳腺: 专用模块32条
     "breast": ["乳腺"],
-    "abdomen": ["UIS", "肝脏", "胆囊", "胰腺", "脾脏", "肾脏"],  # UIS=腹部超声主模块
-    "gynecology": ["子宫"],
-    "urology": ["前列腺", "男生殖系"],
+    # 腹部: UIS(147条含肝胆胰脾肾) + 肝脏(4) + 胆囊(3) + 肾脏(17)
+    "abdomen": ["UIS", "肝脏", "胆囊", "肾脏"],
+    # 妇科: 子宫(22专用) + UIS(含子宫/卵巢分组)
+    "gynecology": ["子宫", "UIS"],
+    # 泌尿/前列腺: 前列腺(14专用) + 泌尿(12) + 男生殖系(5) + UIS(含前列腺分组)
+    "urology": ["前列腺", "泌尿", "男生殖系", "UIS"],
+    # 血管: 周围血管(34条)+部分UIS血管分组已包含在UIS中
     "vascular": ["周围血管"],
+    # 脾脏: 专用模块12条
+    "spleen": ["脾"],
     # fetal: 胎儿路径独立处理, 不走template_loader
     # other: 不限分类, 全量搜索
 }
@@ -159,23 +168,30 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
             name for name, entry in _template_index.items()
             if entry.get("module", "") in _target_modules
         }
-        # 即使限制了category, 也保留至少保留最基础的关键词命中模板
-        # (防止category映射不完整导致丢失模板)
+        # 空结果兜底: category过滤后没有模板 → 降级为全量搜索
         if not _valid_names:
             _valid_names = None  # fallback: 不限
     # 注: category=None/"other" 时不限, 保留340条全量搜索
 
-    # 策略1: DISCNAME关键词精确匹配
+    # 策略1: DISCNAME关键词精确匹配 (预过滤关键字列表, 加速category模式)
+    _keyword_names = _keyword_index
+    if _valid_names:
+        # 建立反向索引: name → [keywords] 只需构建一次
+        _name_to_keywords: dict[str, list[str]] = {}
+        for kw, n in _keyword_index.items():
+            _name_to_keywords.setdefault(n, []).append(kw)
+        # 仅保留_valid_names中模板的关键词
+        _keyword_names = {}
+        for name in _valid_names:
+            for kw in _name_to_keywords.get(name, []):
+                _keyword_names[kw] = name
     # 器官词列表（用于全搜索函数）
     _ORGAN_WORDS = ["肝脏","胆囊","胰腺","脾脏","肾脏","子宫","卵巢","前列腺","甲状腺","乳腺","心脏","颈动脉","椎动脉","胎儿","膀胱","睾丸","附睾","淋巴结","阑尾","胸腔","腹腔","盆腔","胆总管","门静脉","胎心","胎盘","羊水","脐带"]
     # 否定信号检测: "已切除""未探及"等 → 降低正常模板得分
     _has_negation = any(kw in text for kw in ["已切除","切除","未探及","未扪及","术后"])
-    for keyword in sorted(_keyword_index.keys(), key=len, reverse=True):
+    for keyword in sorted(_keyword_names.keys(), key=len, reverse=True):
         if keyword in text and len(keyword) >= 2:
-            name = _keyword_index[keyword]
-            # category过滤: 跳过不在有效范围内的模板
-            if _valid_names and name not in _valid_names:
-                continue
+            name = _keyword_names[keyword]
             # P0-2: 异常模板需证据——DISCNAME含疾病词时必须有ASR文本证据
             abnormal_kw = ["癌","瘤","结石","囊肿","增生","钙化","硬化","异位","梗塞","血栓","积水","腹水","畸形","占位","肿物","团块","结节"]
             # 超声描述词也可作为疾病证据（如"强回声团"→结石）

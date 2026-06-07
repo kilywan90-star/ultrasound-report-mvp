@@ -561,15 +561,166 @@ $('textInput').addEventListener('keydown', e => {
 });
 
 // ===== 渲染函数 =====
-function renderGauge(data, mode) {
-  const prefix = mode === 'web' ? 'web' : mode === 'ali' ? 'ali' : 'text';
-  // 找到对应容器 (复杂: 当前页面只有一个仪表,简化处理)
-  // 因为3个页面切换, 每次只显示当前页面
+function getCurrentMode() {
+  if (document.getElementById('page-smart-web')?.classList.contains('on')) return 'web';
+  if (document.getElementById('page-smart-ali')?.classList.contains('on')) return 'ali';
+  return 'text';
 }
 
-function renderCandidates(data, mode) { /* TODO: 简化 */ }
-function triggerFill(data, mode) { msg('自动触发! 诊断: ' + (data.matches?.[0]?.discname || ''), 'trigger', 5000); }
-function resetMatch(mode) { S.matches[mode] = []; S.selectedIdx[mode] = 0; S.triggerConfirmed[mode] = false; }
+function renderGauge(data, mode) {
+  const m = mode || getCurrentMode();
+  const prefix = m === 'web' ? 'web' : m === 'ali' ? 'ali' : 'text';
+  const parentId = m === 'web' ? 'webResults' : m === 'ali' ? 'aliResults' : 'textResults';
+  const parent = $(parentId);
+  if (!parent) return;
+
+  const matches = data.matches || [];
+  const gaugeWrap = parent.querySelector('.gauge-wrap');
+  const gaugePct = gaugeWrap?.querySelector('.pct');
+  const gaugeProgress = gaugeWrap?.querySelector('.progress');
+  const matchName = gaugeWrap?.querySelector('.match-name');
+  const matchDetail = gaugeWrap?.querySelector('.match-detail');
+  const triggerBadge = gaugeWrap?.querySelector('.trigger-badge');
+  const matchTime = gaugeWrap?.querySelector('.match-time');
+
+  if (!gaugeWrap) return;
+
+  if (!matches.length) {
+    if (gaugePct) gaugePct.textContent = '--';
+    if (matchName) matchName.textContent = '无匹配';
+    if (matchDetail) matchDetail.textContent = '请继续输入更多内容...';
+    if (triggerBadge) { triggerBadge.className = 'trigger-badge waiting'; triggerBadge.textContent = '输入中...'; }
+    return;
+  }
+
+  const top = matches[0];
+  const pct = Math.min(top.confidence, 100);
+  const circumference = 238.76;
+  const offset = circumference - (pct / 100) * circumference;
+
+  if (gaugePct) gaugePct.textContent = Math.round(pct);
+  if (gaugeProgress) {
+    gaugeProgress.style.strokeDashoffset = offset;
+    gaugeProgress.style.stroke = pct >= 85 ? 'var(--success)' : pct >= 60 ? 'var(--warning)' : 'var(--primary)';
+  }
+  if (matchName) matchName.textContent = top.discname || top.see_simple?.slice(0, 30) || '待匹配';
+  if (matchDetail) {
+    let d = top.discgroup ? '分组: ' + top.discgroup : '';
+    if (matches.length > 1) d += ' | 领先: ' + (pct - matches[1].confidence).toFixed(1) + '%';
+    matchDetail.textContent = d;
+  }
+  if (matchTime) matchTime.textContent = data.elapsed_ms ? data.elapsed_ms + 'ms' : '';
+  if (triggerBadge) {
+    if (data.auto_trigger) {
+      triggerBadge.className = 'trigger-badge active';
+      triggerBadge.textContent = '自动填充已触发';
+    } else {
+      triggerBadge.className = 'trigger-badge waiting';
+      triggerBadge.textContent = 'Top1=' + pct.toFixed(0) + '% 继续输入...';
+    }
+  }
+
+  renderCandidates(data, m);
+}
+
+function renderCandidates(data, mode) {
+  const m = mode || getCurrentMode();
+  const prefix = m === 'web' ? 'web' : m === 'ali' ? 'ali' : 'text';
+  const parentId = m === 'web' ? 'webResults' : m === 'ali' ? 'aliResults' : 'textResults';
+  const parent = $(parentId);
+  if (!parent) return;
+
+  const matches = data.matches || [];
+  const list = parent.querySelector('.candidate-list');
+  const count = parent.querySelector('.cand-count');
+  if (!list) return;
+
+  if (count) count.textContent = matches.length + ' 个';
+
+  if (!matches.length) {
+    list.innerHTML = '<div class="empty-state" style="padding:20px"><span>无匹配结果</span></div>';
+    return;
+  }
+
+  list.innerHTML = matches.map((m, i) => {
+    const pct = Math.min(m.confidence, 100);
+    const active = i === S.selectedIdx[m] ? 'active' : '';
+    const barColor = pct >= 85 ? 'var(--success)' : pct >= 60 ? 'var(--warning)' : 'var(--primary)';
+    return '<div class="candidate-item ' + active + '" data-idx="' + i + '" data-mode="' + m + '">' +
+      '<span class="c-rank">#' + m.rank + '</span>' +
+      '<div class="c-bar-wrap"><div class="c-bar"><div class="fill" style="width:' + pct + '%;background:' + barColor + '"></div></div></div>' +
+      '<span class="c-name" title="' + (m.discname || '') + '">' + (m.discname || '(待匹配)') + '</span>' +
+      '<span class="c-conf">' + pct.toFixed(0) + '%</span></div>';
+  }).join('');
+
+  list.querySelectorAll('.candidate-item').forEach(el => {
+    el.addEventListener('click', () => {
+      const idx = parseInt(el.dataset.idx);
+      const mode = el.dataset.mode || getCurrentMode();
+      S.selectedIdx[mode] = idx;
+      renderCandidates(data, mode);
+    });
+  });
+}
+
+function triggerFill(data, mode) {
+  const top = data.matches?.[0];
+  if (!top) { msg('无匹配结果', 'info'); return; }
+
+  const m = mode || getCurrentMode();
+  const parentId = m === 'web' ? 'webResults' : m === 'ali' ? 'aliResults' : 'textResults';
+  const parent = $(parentId);
+  if (!parent) return;
+
+  const preview = parent.querySelector('.report-preview');
+  if (preview) {
+    preview.style.display = 'block';
+    const nameEl = preview.querySelector('.prep-name');
+    const groupEl = preview.querySelector('.prep-group');
+    const scoreEl = preview.querySelector('.prep-score');
+    const fullEl = preview.querySelector('.prep-full');
+    const tplEl = preview.querySelector('.prep-tpl');
+
+    if (nameEl) nameEl.textContent = top.discname || '(无诊断)';
+    if (groupEl) groupEl.textContent = top.discgroup || '未分组';
+    if (scoreEl) scoreEl.textContent = top.confidence.toFixed(0) + '%';
+    if (fullEl) fullEl.textContent = top.see_full || '(无完整版)';
+    if (tplEl) tplEl.textContent = (top.tpl_info1 || '').slice(0, 300) || '(无模板)';
+  }
+
+  msg('自动匹配成功! 诊断: ' + top.discname, 'trigger', 5000);
+}
+
+function resetMatch(mode) {
+  const m = mode || getCurrentMode();
+  S.matches[m] = [];
+  S.selectedIdx[m] = 0;
+  S.triggerConfirmed[m] = false;
+
+  const parentId = m === 'web' ? 'webResults' : m === 'ali' ? 'aliResults' : 'textResults';
+  const parent = $(parentId);
+  if (!parent) return;
+
+  const gaugePct = parent.querySelector('.pct');
+  const gaugeProgress = parent.querySelector('.progress');
+  const matchName = parent.querySelector('.match-name');
+  const matchDetail = parent.querySelector('.match-detail');
+  const triggerBadge = parent.querySelector('.trigger-badge');
+  const matchTime = parent.querySelector('.match-time');
+  const list = parent.querySelector('.candidate-list');
+  const preview = parent.querySelector('.report-preview');
+  const count = parent.querySelector('.cand-count');
+
+  if (gaugePct) gaugePct.textContent = '--';
+  if (gaugeProgress) gaugeProgress.style.strokeDashoffset = 238.76;
+  if (matchName) matchName.textContent = '等待输入...';
+  if (matchDetail) matchDetail.textContent = '系统将根据输入实时匹配 40 万条数据';
+  if (triggerBadge) { triggerBadge.className = 'trigger-badge waiting'; triggerBadge.textContent = '输入中...'; }
+  if (matchTime) matchTime.textContent = '';
+  if (list) list.innerHTML = '<div class="empty-state" style="padding:20px"><span>等待输入...</span></div>';
+  if (count) count.textContent = '';
+  if (preview) preview.style.display = 'none';
+}
 
 // ===== 键盘快捷键 =====
 document.addEventListener('keydown', e => {
