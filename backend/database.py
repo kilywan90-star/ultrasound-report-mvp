@@ -18,6 +18,7 @@ def init_db():
     conn = get_db()
     c = conn.cursor()
     c.executescript("""
+        -- ===== 医生档案 =====
         CREATE TABLE IF NOT EXISTS doctors (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE NOT NULL,
@@ -28,6 +29,7 @@ def init_db():
             updated_at TEXT DEFAULT (datetime('now','localtime'))
         );
 
+        -- ===== 患者档案 =====
         CREATE TABLE IF NOT EXISTS patients (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
@@ -45,6 +47,7 @@ def init_db():
             updated_at TEXT DEFAULT (datetime('now','localtime'))
         );
 
+        -- ===== 录音原始数据 =====
         CREATE TABLE IF NOT EXISTS audio_recordings (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             filename TEXT NOT NULL,
@@ -59,6 +62,7 @@ def init_db():
             created_at TEXT DEFAULT (datetime('now','localtime'))
         );
 
+        -- ===== ASR识别日志 =====
         CREATE TABLE IF NOT EXISTS asr_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             audio_file TEXT DEFAULT '',
@@ -73,6 +77,7 @@ def init_db():
             created_at TEXT DEFAULT (datetime('now','localtime'))
         );
 
+        -- ===== 意图识别日志 =====
         CREATE TABLE IF NOT EXISTS intent_logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             text TEXT NOT NULL,
@@ -85,6 +90,7 @@ def init_db():
             created_at TEXT DEFAULT (datetime('now','localtime'))
         );
 
+        -- ===== 模板匹配日志 =====
         CREATE TABLE IF NOT EXISTS match_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             voice_text TEXT NOT NULL,
@@ -100,6 +106,7 @@ def init_db():
             created_at TEXT DEFAULT (datetime('now','localtime'))
         );
 
+        -- ===== 报告主表 =====
         CREATE TABLE IF NOT EXISTS reports (
             id TEXT PRIMARY KEY,
             doctor TEXT NOT NULL,
@@ -112,6 +119,7 @@ def init_db():
             template_name TEXT DEFAULT '',
             description TEXT DEFAULT '',
             diagnosis TEXT DEFAULT '',
+            -- 业务路径记录
             audio_file TEXT DEFAULT '',
             asr_raw_text TEXT DEFAULT '',
             asr_corrected_text TEXT DEFAULT '',
@@ -120,18 +128,22 @@ def init_db():
             intent_sites TEXT DEFAULT '',
             intent_findings TEXT DEFAULT '',
             intent_is_normal INTEGER DEFAULT 0,
+            -- 匹配信息
             match_score REAL DEFAULT 0,
             matched_sites TEXT DEFAULT '',
             match_candidates TEXT DEFAULT '',
             variables TEXT DEFAULT '{}',
+            -- 状态
             status TEXT DEFAULT 'draft',
             created_at TEXT DEFAULT (datetime('now','localtime')),
             updated_at TEXT DEFAULT (datetime('now','localtime')),
             confirmed_at TEXT,
+            -- 外部系统对接
             his_report_id TEXT DEFAULT '',
             external_ref TEXT DEFAULT ''
         );
 
+        -- ===== 报告编辑历史 =====
         CREATE TABLE IF NOT EXISTS report_edits (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             report_id TEXT NOT NULL,
@@ -142,6 +154,7 @@ def init_db():
             created_at TEXT DEFAULT (datetime('now','localtime'))
         );
 
+        -- ===== 操作审计日志 =====
         CREATE TABLE IF NOT EXISTS audit_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             doctor TEXT NOT NULL,
@@ -153,6 +166,7 @@ def init_db():
             created_at TEXT DEFAULT (datetime('now','localtime'))
         );
 
+        -- ===== 知识库版本 =====
         CREATE TABLE IF NOT EXISTS kb_versions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             filename TEXT NOT NULL,
@@ -162,15 +176,27 @@ def init_db():
             created_at TEXT DEFAULT (datetime('now','localtime'))
         );
 
+        -- ===== 模板分类 =====
         CREATE TABLE IF NOT EXISTS template_categories (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT NOT NULL,
             parent_id INTEGER DEFAULT 0
         );
 
+        -- ===== 初始化默认模板分类 =====
         INSERT OR IGNORE INTO template_categories(id,name,parent_id) VALUES
             (1,'腹部',0),(2,'心脏',0),(3,'甲状腺',0),(4,'乳腺',0),(5,'颈动脉',0),
             (6,'前列腺',0),(7,'子宫附件',0),(8,'双肾',0),(9,'其他',0);
     """)
+    # template_categories表可能被旧的database.py创建了，尝试创建
+    try:
+        conn.execute("""CREATE TABLE IF NOT EXISTS template_categories (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            parent_id INTEGER DEFAULT 0
+        )""")
+        conn.commit()
+    except:
+        pass
     conn.commit()
     conn.close()

@@ -26,6 +26,7 @@ def get_stats():
     status_dist = conn.execute("""SELECT status,COUNT(*) as cnt FROM reports
                                    GROUP BY status ORDER BY cnt DESC""").fetchall()
 
+    # 今日各医生
     today_doctors = conn.execute("""SELECT doctor,COUNT(*) as cnt FROM reports
                                      WHERE date(created_at)=date('now','localtime')
                                      GROUP BY doctor ORDER BY cnt DESC LIMIT 10""").fetchall()

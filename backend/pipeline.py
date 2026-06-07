@@ -1,5 +1,6 @@
 """
 超声语音报告系统 - 自动化处理管线
+接收语音文本 → 意图识别 → 模板匹配 → 变量提取 → 报告生成
 """
 import re, json, time, uuid
 from datetime import datetime
@@ -15,6 +16,7 @@ class Pipeline:
     def __init__(self, matcher: Matcher):
         self.matcher = matcher
 
+    # ====== 变量提取 ======
     EXTRACTORS = [
         ('尺寸_长x宽', r'(\d+\.?\d*)\s*[xX×乘]\s*(\d+\.?\d*)(?:\s*[xX×乘]\s*(\d+\.?\d*))?\s*mm'),
         ('尺寸_mm', r'(\d+\.?\d*)\s*mm'),
@@ -32,7 +34,9 @@ class Pipeline:
                 result[name] = m
         return result
 
+    # ====== 意图识别 ======
     def detect_intent(self, text: str) -> dict:
+        """从文本中识别检查意图"""
         t = re.sub(r'\s+', '', text)
         sites = detect_site(t)
 
@@ -43,12 +47,14 @@ class Pipeline:
             'measurements': [],
         }
 
+        # 判断是否正常/阴性报告
         normal_kws = ['未见明显异常', '未见异常', '大小正常', '形态规则', '回声均匀', '表面光滑']
         for kw in normal_kws:
             if kw in t:
                 intent['is_normal'] = True
                 break
 
+        # 提取异常关键词
         abnormal_signs = {
             '结石': ['结石', '强回声团', '强光团', '伴声影'],
             '囊肿': ['囊肿', '无回声区', '囊性'],
@@ -68,19 +74,28 @@ class Pipeline:
 
         return intent
 
+    # ====== 完整管线 ======
     def process(self, voice_text: str, doctor: str = '') -> dict:
+        """
+        完整管线：ASR修正 → 意图识别 → 路由匹配 → 变量提取 → 报告生成
+        """
         start = time.time()
 
+        # 1. ASR修正
         corrected = knowledge.correct_asr_text(voice_text)
 
+        # 2. 意图识别
         intent = self.detect_intent(corrected)
 
+        # 3. 模板匹配
         matches = self.matcher.match(corrected)
         best = matches[0] if matches else None
 
+        # 4. 变量提取
         variables = self.extract_vars(voice_text)
         variables.update(self.extract_vars(corrected))
 
+        # 5. 生成报告内容
         report = {
             'description': best['description'] if best else corrected,
             'diagnosis': best['diagnosis'] if best else '',
@@ -98,12 +113,13 @@ class Pipeline:
         return {
             'report': report,
             'intent': intent,
-            'matches': matches,
             'matches_count': len(matches),
             'elapsed_ms': round(elapsed * 1000),
         }
 
+    # ====== 自动写入数据库 ======
     def process_and_save(self, voice_text: str, doctor: str = '') -> dict:
+        """处理并自动保存到数据库"""
         result = self.process(voice_text, doctor)
         r = result['report']
 
@@ -122,6 +138,7 @@ class Pipeline:
         return result
 
 
+# 全局管线实例
 pipeline = None
 
 

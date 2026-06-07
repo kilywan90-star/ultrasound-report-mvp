@@ -4,10 +4,12 @@
 """
 import json, os, re, urllib.request, time
 
+# DeepSeek API 配置
 LLM_API_KEY = "sk-43ffc7dafcec4369a039436377694820"
 LLM_MODEL = "deepseek-v4-flash"
 LLM_URL = "https://api.deepseek.com/chat/completions"
 
+# 系统提示词（告诉LLM如何理解超声语音）
 SYSTEM_PROMPT = """你是超声科医生助手。你的任务是根据语音识别文本，输出结构化JSON报告。
 
 规则：
@@ -28,6 +30,10 @@ SYSTEM_PROMPT = """你是超声科医生助手。你的任务是根据语音识�
 
 
 def llm_enhance(voice_text: str, retries=2) -> dict:
+    """
+    用LLM理解语音文本，输出结构化信息
+    返回: {"sites":[], "description":"", "diagnosis":"", "is_normal":false}
+    """
     if not voice_text or len(voice_text.strip()) < 3:
         return {"sites": [], "description": voice_text or "", "diagnosis": "", "is_normal": False}
 
@@ -79,6 +85,11 @@ def llm_enhance(voice_text: str, retries=2) -> dict:
 
 
 def llm_match_template(voice_text: str, templates_list: list) -> dict:
+    """
+    LLM辅助模板匹配：从候选模板中选择最匹配的
+    返回: {"template_name": "", "template_id": "", "confidence": 0}
+    """
+    # 准备候选模板列表（取前20个）
     candidates = [{"id": t.get("id", ""), "name": t.get("name", ""), "site": t.get("site", "")}
                   for t in templates_list[:30]]
 

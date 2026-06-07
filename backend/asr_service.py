@@ -1,5 +1,10 @@
 """
 超声语音报告系统 - ASR服务 v3 (无GPU优化版)
+核心改进:
+1. 结构化的initial_prompt构建（按部位分类注入热词）
+2. 中文犹豫词/废话过滤（嗯啊呃那个这个）
+3. 拼音混淆补充（声母韵母相似导致的识别错误）
+4. 质量置信度评分（低分结果触发匹配增强）
 """
 import os, tempfile, time, json, re
 from pathlib import Path
@@ -7,6 +12,7 @@ from collections import Counter
 
 HOTWORD_PATH = Path(__file__).parent / "medical_hotwords.json"
 
+# ===== 中文犹豫词/废话过滤 =====
 FILLER_WORDS = [
     "嗯", "呃", "啊", "哦", "嘛", "呗", "啦", "哟",
     "那个", "这个", "那个那个", "这个这个",
@@ -15,17 +21,21 @@ FILLER_WORDS = [
     "我们", "咱们", "就是说呢",
 ]
 
+# ===== 拼音混淆对（声母/韵母相似导致的误识别）=====
 PINYIN_CONFUSIONS = [
+    # 声母相似
     ("z", "zh"), ("c", "ch"), ("s", "sh"),
     ("l", "n"), ("r", "l"), ("f", "h"),
     ("b", "p"), ("d", "t"), ("g", "k"),
     ("j", "q"), ("q", "x"), ("j", "x"),
+    # 韵母相似
     ("an", "ang"), ("en", "eng"), ("in", "ing"),
     ("ian", "iang"), ("uan", "uang"),
     ("ui", "ei"), ("iu", "ou"), ("ie", "ue"),
     ("ai", "ei"), ("ao", "ou"), ("ia", "ie"),
 ]
 
+# ===== 超声场景高频词组（用于initial_prompt结构化注入）=====
 SITE_PROMPTS = {
     "腹部": [
         "肝脏大小正常形态规则表面光滑实质回声分布均匀",
@@ -77,6 +87,7 @@ SITE_PROMPTS = {
     ],
 }
 
+# ===== 医学单位标准化映射 =====
 UNIT_NORMALIZE = {
     '豪米': 'mm', '毫米': 'mm', '公厘': 'mm',
     '离米': 'cm', '厘米': 'cm', '公分': 'cm',
@@ -132,17 +143,25 @@ class ASREngine:
         return medical[:500]
 
     def build_structured_prompt(self, text_hint: str = "") -> str:
+        """
+        构建结构化的initial_prompt
+        如果检测到部位关键词，注入对应部位的高频描述
+        否则注入通用超声描述
+        """
         prompts = []
-        site = "腹部"
+        # 检测部位
+        site = "腹部"  # 默认
         if text_hint:
             for s in ['心脏','甲状腺','乳腺','前列腺','子宫附件','颈动脉','腹部']:
                 if s in text_hint:
                     site = s
                     break
 
+        # 注入部位特定的描述
         site_phrases = SITE_PROMPTS.get(site, SITE_PROMPTS['腹部'])
         prompts.extend(site_phrases)
 
+        # 注入通用热词
         hotwords = self.get_hotwords()
         prompts.extend(hotwords[:30])
 
@@ -159,6 +178,8 @@ class ASREngine:
 
     def transcribe(self, audio_bytes: bytes, language='zh', text_hint: str = "") -> dict:
         model = self.load_model()
+
+        # 构建结构化的initial_prompt
         prompt = self.build_structured_prompt(text_hint)
 
         tmp = tempfile.NamedTemporaryFile(suffix='.wav', delete=False)
@@ -187,6 +208,7 @@ class ASREngine:
             text = result['text'].strip()
             text = self._post_process(text)
 
+            # 质量评分
             quality = self._score_quality(text)
 
             return {
@@ -203,27 +225,36 @@ class ASREngine:
             except: pass
 
     def _post_process(self, text: str) -> str:
+        """增强版后处理"""
         if not text: return text
+
+        # 1. 去空白
         text = re.sub(r'\s+', '', text)
 
+        # 2. 去犹豫词/废话
         for fw in sorted(FILLER_WORDS, key=len, reverse=True):
             text = text.replace(fw, "")
 
+        # 3. 去重复标点
         text = re.sub(r'[，,]{2,}', '，', text)
         text = re.sub(r'[。.]{2,}', '。', text)
 
+        # 4. 单位标准化
         for wrong, correct in UNIT_NORMALIZE.items():
             if wrong in text:
                 text = text.replace(wrong, correct)
 
+        # 5. 数值格式修正
         text = re.sub(r'(\d)\s*[xX\*乘×]\s*(\d)', r'\1×\2', text)
         text = re.sub(r'(\d+)点(\d+)', r'\1.\2', text)
 
+        # 6. 医学符号修正
         text = text.replace('x', '×')
         text = re.sub(r'(?<!\d)EF(\d+)', r'EF：\1%', text)
         text = re.sub(r'(?<!\d)FS(\d+)', r'FS：\1%', text)
         text = re.sub(r'(\d+)％', r'\1%', text)
 
+        # 7. 问句清洗（医生可能口语化提问，需清理）
         text = re.sub(r'.*?[吗嘛呢]', '', text)
         text = re.sub(r'你看|你看一下|你看看|你帮我|帮我', '', text)
         text = re.sub(r'好了|行了吧|可以了吧|好嘞|好的', '', text)
@@ -231,12 +262,17 @@ class ASREngine:
         return text.strip()
 
     def _score_quality(self, text: str) -> dict:
+        """
+        ASR输出质量评分 (0-1)
+        用于判断是否需要额外的知识库修正或匹配增强
+        """
         if not text:
             return {'score': 0.0, 'detail': '空文本'}
 
         score = 1.0
         issues = []
 
+        # 过短
         if len(text) < 5:
             score -= 0.3
             issues.append('过短')
@@ -244,6 +280,7 @@ class ASREngine:
             score -= 0.1
             issues.append('偏短')
 
+        # 检查是否有中文
         cn_chars = len(re.findall(r'[一-鿿]', text))
         if cn_chars == 0:
             score -= 0.5
@@ -252,16 +289,19 @@ class ASREngine:
             score -= 0.2
             issues.append('中文字符过少')
 
+        # 检查是否含有数字/单位但无中文
         if cn_chars == 0 and re.search(r'[\d.]+', text):
             score -= 0.3
             issues.append('纯数值文本')
 
+        # 检查是否有超声关键词
         us_kw = ['肝','胆','脾','肾','心','甲状腺','乳腺','子宫','回声','mm','cm']
         kw_hits = sum(1 for kw in us_kw if kw in text)
         if kw_hits == 0:
             score -= 0.2
             issues.append('无超声关键词')
 
+        # 检查是否有重复字符
         repeats = re.findall(r'(.)\1{3,}', text)
         if repeats:
             score -= 0.3

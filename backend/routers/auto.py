@@ -42,8 +42,10 @@ def auto_batch(items: list = []):
             results.append({"error": f"处理失败: {text[:30]}"})
     return {"processed": len(results), "results": results}
 
+# ===== 医生语音提示卡 =====
 @router.get("/cheatsheet")
 def get_cheatsheet():
+    """返回医生语音提示卡数据（原硬编码在前端，现迁移到后端）"""
     data = [
         {"site":"肝脏","say":"肝脏大小正常，表面光滑，回声均匀","tpl":"正常肝脏（腹部全套）"},
         {"site":"肝脏","say":"肝内有囊肿","tpl":"肝囊肿（单发）"},

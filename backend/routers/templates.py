@@ -6,6 +6,7 @@ from engine import Matcher
 
 router = APIRouter(prefix="/api/templates", tags=["模板"])
 
+# 由 main.py 注入
 matcher: Matcher = None
 
 def init(m: Matcher):

@@ -37,18 +37,25 @@ class KnowledgeEngine:
         return {}
 
     def _load_all(self):
+        # ASR 热词
         hw = self._load_json("hotwords.json")
         self.hotwords = hw.get('terms', [])
 
+        # 自动热词（带权重）
         auto = self._load_json("asr_hotwords_auto.json")
         self.hotwords_auto = auto.get('hotwords', [])
 
+        # 混淆字典
         self.confusion_dict = self._load_json("confusion_dict.json")
+
+        # 混淆候选
         self.confusion_candidates = self._load_json("confusion_candidates.json")
 
+        # 方言映射
         dm = self._load_json("dialect_mapping.json")
         self.dialect_mapping = dm.get('mappings', {})
 
+        # 语言模型
         self.language_model = self._load_json("asr_language_model.json")
         lm = self.language_model
         ngram = lm.get('ngram_language_model', {})
@@ -56,23 +63,42 @@ class KnowledgeEngine:
         cr = lm.get('contextual_correction_rules', {})
         self.correction_rules = cr.get('rules', []) if isinstance(cr, dict) else []
 
+        # 主规则
         self.master_rules = self._load_json("master_rules.json")
+
+        # 检查部位目录
         self.exam_catalog = self._load_json("exam_part_catalog.json")
+
+        # 器官疾病矩阵
         self.organ_disease = self._load_json("organ_disease_matrix.json")
+
+        # 合并模板
         self.section_templates = self._load_json("section_templates_merged.json")
+
+        # 模板字段
         self.template_fields = self._load_json("template_fields.json")
 
     # ===== 对外接口 =====
 
     def correct_asr_text(self, text: str) -> str:
+        """
+        ASR后处理修正引擎 (v2.5) — 集成mvp项目的完整4层纠错
+        L1: 混淆词典替换 (word→word, 长词优先)
+        L2: 数值标准化 (单位/小数/数字格式)
+        L3: 模式修正 (结构/标点/医学符号)
+        L4: 幻觉清洗 (ASR流式重复/无意义串)
+        """
         if not text: return text
 
+        # ===== L1: 混淆词典替换（整合knowledge + mvp）=====
+        # 从mvp的CONFUSION_DICT中提取所有 wrong→correct 映射
         confusion_map = self._build_full_confusion_map()
 
         for wrong in sorted(confusion_map.keys(), key=len, reverse=True):
             if wrong in text and confusion_map[wrong] not in text:
                 text = text.replace(wrong, confusion_map[wrong])
 
+        # 额外单字修正
         char_fixes = {'干':'肝','甘':'肝','杆':'肝','郎':'胆','狼':'胆',
                       '线':'腺','月':'约','必':'壁','毕':'壁','币':'壁',
                       '课':'可','科':'可','建':'见','件':'见','好':'毫'}
@@ -80,12 +106,14 @@ class KnowledgeEngine:
             if w in text and c not in text:
                 text = text.replace(w, c)
 
+        # ===== L2: 数值标准化 =====
         text = re.sub(r"(\d+)点(\d+)", r"\1.\2", text)
         text = re.sub(r"(\d+(?:\.\d+)?)\s*公分", r"\1cm", text)
         text = re.sub(r"(\d+(?:\.\d+)?)\s*[豪毫]米", r"\1mm", text)
         text = re.sub(r"(\d+(?:\.\d+)?)\s*[离厘]米", r"\1cm", text)
         text = re.sub(r"(\d)\s*[xX\*乘×]\s*(\d)", r"\1×\2", text)
 
+        # ===== L3: 模式修正 =====
         text = re.sub(r"[Ss]\s*[/／]\s*[Dd]\s*[：:＝=]?\s*(\d)", r"S/D \1", text)
         text = re.sub(r"RI\s*[Ii1l]\s*[：:＝=]?\s*(\d)", r"RI \1", text)
         text = re.sub(r"PI\s*[：:＝=]?\s*(\d)", r"PI \1", text)
@@ -96,6 +124,7 @@ class KnowledgeEngine:
         text = re.sub(r"[三3]级", "III级", text)
         text = re.sub(r"([。，、，])\1+", r"\1", text)
 
+        # ===== L4: 幻觉清洗 =====
         hallucination = ["建板郎","见板郎","见板囊","建板囊",
                          "相三三","香三三","象三三",
                          "做做腹部彩超","采做腹部彩超","座座腹部彩超",
@@ -106,19 +135,23 @@ class KnowledgeEngine:
             text = text.replace(hw, "")
         text = re.sub(r"腹部\s*彩\s*超", "腹部彩超", text)
 
+        # 收尾
         text = re.sub(r"[ ]{2,}", " ", text)
         text = re.sub(r"([。，、；：])\s*", r"\1", text)
         return text.strip()
 
     def _build_full_confusion_map(self) -> dict:
+        """构建完整混淆映射（knowledge的 + mvp asr_correction.py的）"""
         result = {}
 
+        # 1. confusion_dict.json 中的
         for standard, candidates in self.confusion_dict.items():
             if isinstance(candidates, list):
                 for cand in candidates:
                     if cand and cand not in result:
                         result[cand] = standard
 
+        # 2. 当前correct_asr_text中用到的短语映射
         phrase_map = {
             '回声': ['回生', '会声'], '均匀': ['军匀', '君匀', '郡匀', '俊匀'],
             '形态': ['行态', '型态', '形太', '刑态'],
@@ -183,33 +216,50 @@ class KnowledgeEngine:
         return result
 
     def get_hotwords_for_asr(self) -> list:
+        """获取给Whisper的initial_prompt热词列表"""
+        # 合并热词源
         all_terms = []
+
+        # hotwords.json 的 terms
         all_terms.extend(self.hotwords)
+
+        # asr_hotwords_auto.json（带权重的优先）
         for item in self.hotwords_auto:
             word = item.get('word', '') if isinstance(item, dict) else str(item)
             if word and len(word) >= 2:
                 all_terms.append(word)
+
+        # 去重
         seen = set()
         unique = []
         for t in all_terms:
             if t not in seen:
                 seen.add(t)
                 unique.append(t)
+
+        # 按长度排序（长词优先）
         unique.sort(key=lambda x: -len(x))
         return unique[:500]
 
     def get_confusion_dict(self) -> dict:
+        """获取完整混淆字典"""
         return self.confusion_dict
 
     def get_exam_catalog(self) -> dict:
+        """获取检查部位目录"""
         return self.exam_catalog
 
     def match_with_rules(self, see_text: str, hint_text: str) -> list:
+        """
+        用knowledge中的规则做匹配
+        返回匹配结果列表
+        """
         if not see_text and not hint_text:
             return []
 
         results = []
 
+        # 1. 用模板字段匹配（template_fields.json）
         tf = self.template_fields
         if tf:
             tpl_list = tf.get('templates', tf.get('tpls', []))
@@ -224,6 +274,7 @@ class KnowledgeEngine:
                 if diag and hint_text and diag in hint_text:
                     score = 1.0
                 elif desc and see_text:
+                    # 关键词重叠度
                     desc_kws = set(re.findall(r'[一-鿿]{2,}', desc))
                     see_kws = set(re.findall(r'[一-鿿]{2,}', see_text))
                     if desc_kws and see_kws:
@@ -241,6 +292,7 @@ class KnowledgeEngine:
                         'diagnosis': diag[:200],
                     })
 
+        # 2. 用section_templates_merged.json补充
         st = self.section_templates
         if isinstance(st, dict):
             for tid, tpl in st.items():
@@ -277,6 +329,7 @@ class KnowledgeEngine:
                         'diagnosis': diag_clean[:200],
                     })
 
+        # 去重+排序
         seen_names = set()
         unique_results = []
         for r in sorted(results, key=lambda x: -x['score']):

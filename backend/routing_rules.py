@@ -31,6 +31,7 @@ SITE_KEYWORDS = {
     'ABUS': ['ABUS'],
 }
 
+# 二级路由规则
 ROUTING = OrderedDict()
 ROUTING['肝脏'] = [
     (['未见明显异常'], ['正常男性腹部全套（无门静脉）','正常腹部（门静脉）']),

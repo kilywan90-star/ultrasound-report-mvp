@@ -46,6 +46,7 @@ def get_report(rid: str):
     row = conn.execute("SELECT * FROM reports WHERE id=?", (rid,)).fetchone()
     if not row: conn.close(); raise HTTPException(404, "报告不存在")
     edits = conn.execute("SELECT * FROM report_edits WHERE report_id=? ORDER BY id", (rid,)).fetchall()
+    # 关联的录音
     recordings = conn.execute("SELECT * FROM audio_recordings WHERE report_id=? ORDER BY created_at DESC", (rid,)).fetchall()
     asr_logs = conn.execute("SELECT * FROM asr_logs WHERE report_id=? ORDER BY created_at DESC", (rid,)).fetchall()
     conn.close()
@@ -107,6 +108,7 @@ def delete_report(rid: str):
 # ===== 数据分析API =====
 @router.get("/analysis/daily")
 def daily_report_count(days: int = 30):
+    """每日报告量统计"""
     conn = get_db()
     rows = conn.execute("""
         SELECT date(created_at) as day, COUNT(*) as cnt,
@@ -120,6 +122,7 @@ def daily_report_count(days: int = 30):
 
 @router.get("/analysis/doctors")
 def doctor_report_stats():
+    """医生工作量统计"""
     conn = get_db()
     rows = conn.execute("""
         SELECT doctor, COUNT(*) as total, SUM(CASE WHEN status='confirmed' THEN 1 ELSE 0 END) as confirmed,
@@ -131,6 +134,7 @@ def doctor_report_stats():
 
 @router.get("/analysis/templates")
 def template_usage_stats():
+    """模板使用统计"""
     conn = get_db()
     rows = conn.execute("""
         SELECT template_name, COUNT(*) as cnt, AVG(match_score) as avg_score
@@ -141,6 +145,7 @@ def template_usage_stats():
 
 @router.get("/export")
 def export_reports(format: str = "json", date_from: str = "", date_to: str = "", limit: int = 1000):
+    """数据导出供外部系统调阅"""
     conn = get_db()
     sql = "SELECT * FROM reports WHERE 1=1"
     params = []
