@@ -147,9 +147,9 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
         if keyword in text and len(keyword) >= 2:
             name = _keyword_index[keyword]
             # P0-2: 异常模板需证据——DISCNAME含疾病词时必须有ASR文本证据
-            abnormal_kw = ["癌","瘤","结石","囊肿","增生","钙化","硬化","异位","梗塞","血栓","积水","腹水","畸形","占位","肿物","团块"]
+            abnormal_kw = ["癌","瘤","结石","囊肿","增生","钙化","硬化","异位","梗塞","血栓","积水","腹水","畸形","占位","肿物","团块","结节"]
             # 超声描述词也可作为疾病证据（如"强回声团"→结石）
-            evidence_extras = ["强回声","无声影","声影","光团","光带","回声团","暗区"]
+            evidence_extras = ["强回声","无声影","声影","光团","光带","回声团","暗区","无回声","混合回声","低回声","稍高回声"]
             entry = _template_index.get(name, {})
             is_abnormal = any(kw in keyword for kw in abnormal_kw)
             extra_bonus = 0
@@ -162,15 +162,36 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
                     extra_bonus = -50  # 无证据强扣分
             scored[name] = max(scored.get(name, 0), 100 + len(keyword) * 5 + extra_bonus)
 
-        # P0-3: "正常"关键词匹配——文本含"正常"时给正常模板加成
-        # 但如果文本有"已切除/未探及/术后"等否定词 → 抑制正常信号
-    _SUPPRESS_NORMAL_WORDS = ["已切除","切除","未探及","未扪及","术后","切除术后","全切"]
-    _suppress_normal = any(kw in text for kw in _SUPPRESS_NORMAL_WORDS)
+        # P0-2.5: 文本级异常信号检测 — 文本有"结节/回声/占位"等描述时, 对应疾病模板加分
+    _text_abnormal_signals = ["结节","无回声","低回声","混合回声","稍高回声","强回声","回声团","囊性"]
+    _text_has_abnormal = any(sig in text for sig in _text_abnormal_signals)
+    if _text_has_abnormal:
+        for name, entry in _template_index.items():
+            tpl_text = entry.get("name","") + entry.get("info1","")[:200]
+            # 如果模板和文本共享"异常信号词"+器官词 → 加分
+            for sig in _text_abnormal_signals:
+                if sig in text and sig in tpl_text:
+                    for organ in _ORGAN_WORDS:
+                        if organ in text and organ in tpl_text:
+                            scored[name] = max(scored.get(name, 0), 140)
+                            break
+                    break
+        # 同器官的正常模板扣分(文本有异常信号时正常模板不配同分)
+        for name, entry in _template_index.items():
+            if "正常" in name or "未见异常" in name:
+                for organ in _ORGAN_WORDS:
+                    if organ in text and organ in (entry.get("info1","") + entry.get("name","")):
+                        scored[name] = max(scored.get(name, 0) - 80, 60)
+                        break
+
+    # P0-2.6: 文本有异常信号时, 正常模板不再享受P0-3加分
+    _suppress_normal = any(kw in text for kw in ["已切除","切除","未探及","未扪及","术后","切除术后","全切"]) or _text_has_abnormal
+
+    # P0-3: "正常"关键词匹配——文本含"正常"时给正常模板加成
     normal_words = ["正常", "大小正常", "光滑", "光整", "规则", "均匀", "清晰", "通畅"]
     has_normal_signal = any(w in text for w in normal_words) and not _suppress_normal
     if has_normal_signal:
         for name, entry in _template_index.items():
-            entry_text = (entry.get("name", "") + entry.get("info1", ""))[:100]
             if "正常" in name and any(w in text for w in ["正常","大小正常","光滑"]):
                 scored[name] = max(scored.get(name, 0), 120)
             # 文本含器官词且模板名含"正常"时保底加分

@@ -1,6 +1,6 @@
 """
-超声语音报告系统 - 自动化处理管线
-接收语音文本 → 意图识别 → 模板匹配 → 变量提取 → 报告生成
+超声语音报告系统 - 自动化处理管线 v2 (LLM增强版)
+接收语音文本 → ASR修正 → 意图识别 → 模板匹配(LLM+关键词) → 变量提取 → LLM填充 → 报告生成
 """
 import re, json, time, uuid
 from datetime import datetime
@@ -11,12 +11,11 @@ from database import get_db
 
 
 class Pipeline:
-    """全自动处理管线"""
+    """全自动处理管线 (LLM增强版)"""
 
     def __init__(self, matcher: Matcher):
         self.matcher = matcher
 
-    # ====== 变量提取 ======
     EXTRACTORS = [
         ('尺寸_长x宽', r'(\d+\.?\d*)\s*[xX×乘]\s*(\d+\.?\d*)(?:\s*[xX×乘]\s*(\d+\.?\d*))?\s*mm'),
         ('尺寸_mm', r'(\d+\.?\d*)\s*mm'),
@@ -34,27 +33,20 @@ class Pipeline:
                 result[name] = m
         return result
 
-    # ====== 意图识别 ======
     def detect_intent(self, text: str) -> dict:
-        """从文本中识别检查意图"""
         t = re.sub(r'\s+', '', text)
         sites = detect_site(t)
-
         intent = {
             'sites': list(sites),
             'is_normal': False,
             'keywords': [],
             'measurements': [],
         }
-
-        # 判断是否正常/阴性报告
         normal_kws = ['未见明显异常', '未见异常', '大小正常', '形态规则', '回声均匀', '表面光滑']
         for kw in normal_kws:
             if kw in t:
                 intent['is_normal'] = True
                 break
-
-        # 提取异常关键词
         abnormal_signs = {
             '结石': ['结石', '强回声团', '强光团', '伴声影'],
             '囊肿': ['囊肿', '无回声区', '囊性'],
@@ -71,33 +63,37 @@ class Pipeline:
             if any(kw in t for kw in kws):
                 detected.append(name)
         intent['findings'] = detected
-
         return intent
 
-    # ====== 完整管线 ======
     def process(self, voice_text: str, doctor: str = '') -> dict:
         """
-        完整管线：ASR修正 → 意图识别 → 路由匹配 → 变量提取 → 报告生成
+        完整管线 v2: ASR修正 → 意图识别 → 模板匹配(LLM+关键词) → 变量提取 → LLM填充
         """
         start = time.time()
-
-        # 1. ASR修正
         corrected = knowledge.correct_asr_text(voice_text)
-
-        # 2. 意图识别
         intent = self.detect_intent(corrected)
 
-        # 3. 模板匹配
+        # 模板匹配（引擎内: 关键词→knowledge→LLM→路由）
         matches = self.matcher.match(corrected)
         best = matches[0] if matches else None
 
-        # 4. 变量提取
+        # 变量提取
         variables = self.extract_vars(voice_text)
         variables.update(self.extract_vars(corrected))
 
-        # 5. 生成报告内容
+        # LLM模板填充增强
+        filled_description = ''
+        if best and best.get('description'):
+            try:
+                from llm_engine import llm_fill_template
+                filled = llm_fill_template(best['description'], corrected, best.get('template_name', ''))
+                if filled and filled != best['description']:
+                    filled_description = filled
+            except:
+                pass
+
         report = {
-            'description': best['description'] if best else corrected,
+            'description': filled_description or (best['description'] if best else corrected),
             'diagnosis': best['diagnosis'] if best else '',
             'template_name': best['template_name'] if best else '',
             'template_id': best['template_id'] if best else '',
@@ -109,20 +105,17 @@ class Pipeline:
         }
 
         elapsed = time.time() - start
-
         return {
             'report': report,
             'intent': intent,
+            'matches': matches,
             'matches_count': len(matches),
             'elapsed_ms': round(elapsed * 1000),
         }
 
-    # ====== 自动写入数据库 ======
     def process_and_save(self, voice_text: str, doctor: str = '') -> dict:
-        """处理并自动保存到数据库"""
         result = self.process(voice_text, doctor)
         r = result['report']
-
         rid = 'AUTO-' + datetime.now().strftime('%Y%m%d%H%M%S') + '-' + uuid.uuid4().hex[:4].upper()
         conn = get_db()
         conn.execute("""INSERT INTO reports(id,doctor,voice_text,template_id,template_name,
@@ -133,12 +126,10 @@ class Pipeline:
                       r['matched_sites'], r['variables']))
         conn.commit()
         conn.close()
-
         result['report_id'] = rid
         return result
 
 
-# 全局管线实例
 pipeline = None
 
 

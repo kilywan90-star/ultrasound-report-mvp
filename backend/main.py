@@ -461,7 +461,7 @@ async def structure(req: StructureRequest):
 
     # L6: 多器官兜底 — 如果文本涉及≥2个器官且当前路径是单器官模板, 走llm_multi
     _all_organs = ["乳腺","甲状腺","胆囊","肝脏","胰腺","脾脏","双肾","子宫","卵巢","附件","前列腺","膀胱","心脏","颈动脉"]
-    _all_organs_short = {"乳":"乳腺","甲":"甲状腺","肝":"肝脏","胆":"胆囊","脾":"脾脏","肾":"肾脏","宫":"子宫","卵":"卵巢","膀":"膀胱","颈":"颈动脉"}
+    _all_organs_short = {"乳":"乳腺","甲":"甲状腺","肝":"肝脏","胆":"胆囊","脾":"脾脏","肾":"肾脏","宫":"子宫","卵":"卵巢","膀":"膀胱"}
     _organ_count = sum(1 for o in _all_organs if o in A)
     _organ_count += sum(1 for s, full in _all_organs_short.items() if s in A and full not in A)
     if _organ_count >= 2 and method in ("converted_fill", "template_fill", "llm_free") and not _route_result["is_multi"]:
