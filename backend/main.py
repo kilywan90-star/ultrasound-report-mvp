@@ -361,6 +361,15 @@ async def structure(req: StructureRequest):
     if len(_meaningful) < 3:
         raise HTTPException(400, f"录音内容过短（有效字符仅{len(_meaningful)}个），请重新录音")
 
+    # L0.5: "不对不对"口误检测 — 保留最后一个值
+    import re as _re_half
+    # 模式: 数值+不对不对+数值 → 只保留第二个数值
+    _correction_pattern = r'(\d+(?:\.\d+)?)\s*(?:×\s*\d+(?:\.\d+)?)?\s*不对不对\s*(\d+(?:\.\d+)?(?:\s*×\s*\d+(?:\.\d+)?)?)'
+    A = _re_half.sub(_correction_pattern, r'\2', A)
+    # 模式: 等一下/改成/改一下 → 只保留修改后的值
+    _change_pattern = r'(?:等一下|改一下|改成)[^。]*?(\d+(?:\.\d+)?)\s*(?:改成|改为)\s*(\d+(?:\.\d+)?)'
+    A = _re_half.sub(_change_pattern, r'\2', A)
+
     # Route: 预分类
     from routing import classify as _route
     _route_result = _route(A, req.exam_type)
@@ -449,6 +458,22 @@ async def structure(req: StructureRequest):
 
     # Numerical preservation
     report, warnings = _preserve_numbers(A, report, warnings)
+
+    # L6: 多器官兜底 — 如果文本涉及≥2个器官且当前路径是单器官模板, 走llm_multi
+    _all_organs = ["乳腺","甲状腺","胆囊","肝脏","胰腺","脾脏","双肾","子宫","卵巢","附件","前列腺","膀胱","心脏","颈动脉"]
+    _all_organs_short = {"乳":"乳腺","甲":"甲状腺","肝":"肝脏","胆":"胆囊","脾":"脾脏","肾":"肾脏","宫":"子宫","卵":"卵巢","膀":"膀胱","颈":"颈动脉"}
+    _organ_count = sum(1 for o in _all_organs if o in A)
+    _organ_count += sum(1 for s, full in _all_organs_short.items() if s in A and full not in A)
+    if _organ_count >= 2 and method in ("converted_fill", "template_fill", "llm_free") and not _route_result["is_multi"]:
+        import logging as _log
+        _log.info(f"多器官兜底触发: organ_count={_organ_count} method={method}")
+        report_llm = _llm_multi_organ_fill(A, req.exam_type)
+        if report_llm and report_llm.get("study_see"):
+            report = report_llm
+            report = _wrap_hints_with_toggle(report)
+            method = "llm_multi"
+            best_name = "多器官综合报告"
+            warnings.append(f"多器官({_organ_count}个)自动切换综合报告")
 
     # Save
     report_id = None; pid = None

@@ -1,12 +1,11 @@
 """
-超声语音报告系统 v3.0 — 模块化版本入口
-保持与旧版 main.py 共存，通过 start_v3.bat 启动
+超声语音报告系统 - FastAPI 主入口
 """
 import json
 from pathlib import Path
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
 
 from database import init_db, get_db
 from engine import Matcher
@@ -35,7 +34,7 @@ from pipeline import init_pipeline
 pipeline = init_pipeline(matcher)
 
 # ===== FastAPI =====
-app = FastAPI(title="超声语音报告系统 v3.0", version="3.0")
+app = FastAPI(title="超声语音报告系统", version="3.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # ===== 注册路由 =====
@@ -58,6 +57,7 @@ app.include_router(auto.router)
 @app.on_event("startup")
 def startup():
     conn = get_db()
+    # 默认医生
     default_docs = ['陈慧','曾宁花','毛媛媛','刘丹','陈莺语','尹定国','任欢','唐娟']
     for name in default_docs:
         try:
@@ -69,6 +69,10 @@ def startup():
     print(f"规则库: {len(rb['templates'])}模板, 医生: {len(default_docs)}默认")
 
 # ===== 前端静态文件 =====
+# 用普通路由替代StaticFiles挂载，避免覆盖API路由
+from fastapi.responses import FileResponse, HTMLResponse
+import os as _os
+
 FRONTEND_INDEX = FRONTEND_DIR / "index.html"
 
 @app.get("/", include_in_schema=False)
