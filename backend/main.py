@@ -459,6 +459,12 @@ async def structure(req: StructureRequest):
     # Numerical preservation
     report, warnings = _preserve_numbers(A, report, warnings)
 
+    # L7: LLM建议生成 — 所有路径最后都通过LLM生成建议(recommendation)
+    if method not in ("fetal_template", "llm_multi"):
+        _llm_suggestion = _generate_recommendation(A, best_name, report, req.exam_type)
+        if _llm_suggestion:
+            report["recommendation"] = _llm_suggestion
+
     # L6: 多器官兜底 — 如果文本涉及≥2个器官且当前路径是单器官模板, 走llm_multi
     _all_organs = ["乳腺","甲状腺","胆囊","肝脏","胰腺","脾脏","双肾","子宫","卵巢","附件","前列腺","膀胱","心脏","颈动脉"]
     _all_organs_short = {"乳":"乳腺","甲":"甲状腺","肝":"肝脏","胆":"胆囊","脾":"脾脏","肾":"肾脏","宫":"子宫","卵":"卵巢","膀":"膀胱"}
@@ -489,6 +495,40 @@ async def structure(req: StructureRequest):
     _save_trace_simple(req, pid, A, report, best_name, method, elapsed_ms, warnings)
 
     return _make_response(report, req, method, best_name, 0.85, warnings, A)
+
+
+def _generate_recommendation(asr_text, template_name, report, exam_type):
+    """LLM生成建议: 基于超声所见和模板, 给出临床建议"""
+    if not report or not report.get("study_see"):
+        return ""
+    import re as _re8
+    _study_see_plain = _re8.sub(r'<[^>]+>', '', report.get("study_see", ""))[:500]
+    from llm_client import _get_client, _parse_json
+    client = _get_client(provider="volc")
+    model = "doubao-seed-1-6-flash-250615"
+
+    system = """超声科主任医师。基于超声所见内容, 生成简短临床建议。
+
+规则:
+1. 根据异常发现给出针对性的建议(复查/随访/专科就诊等)
+2. 如果全部正常 → 建议"定期体检"
+3. 建议不超过30个字, 简洁明确
+4. 只输出建议文本, 不要JSON"""
+
+    try:
+        resp = client.chat.completions.create(
+            model=model, temperature=0.1, max_tokens=128, timeout=8,
+            messages=[
+                {"role": "system", "content": system},
+                {"role": "user", "content": f"模板: {template_name}\n超声所见: {_study_see_plain}"},
+            ],
+        )
+        content = resp.choices[0].message.content
+        if content:
+            return content.strip().strip('"').strip("'")[:60]
+    except Exception:
+        pass
+    return ""
 
 
 def _llm_fill_template(asr_text, exam_type, tpl_name, info1):
