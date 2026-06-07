@@ -51,12 +51,24 @@ class SmartMatcher:
         self.idf_scores = {}                        # keyword -> IDF weight
         self.site_index = defaultdict(list)         # site -> [record_ids]
         self._load_data(data_path)
+        self._calc_freq_penalty()
         self._build_index()
 
     def _load_data(self, data_path):
         with open(data_path, 'r', encoding='utf-8') as f:
             self.records = json.load(f)
         print(f"[SmartMatcher] 已加载 {len(self.records)} 条记录")
+
+    def _calc_freq_penalty(self):
+        from collections import Counter
+        text_freq = Counter()
+        for rec in self.records:
+            text = rec.get('see_simple', '')
+            if text:
+                text_freq[text] += 1
+        self.freq_weights = {text: 1.0 / max(1.0, freq ** 0.35) for text, freq in text_freq.items()}
+        uniq = len(text_freq)
+        print(f"[SmartMatcher] 唯一see_simple: {uniq}, 高频惩罚已计算")
 
     def _build_index(self):
         ts = time.time()
@@ -277,6 +289,10 @@ class SmartMatcher:
             word_count = len(word_kws)
             if word_count >= 2:
                 total *= (1 + word_count * 0.05)
+
+            # 8. 高频文本惩罚（如"膀胱充盈可"出现9691次）
+            freq_penalty = self.freq_weights.get(ref, 1.0)
+            total *= freq_penalty
 
             # 3字词直接命中诊断名奖励
             word3_set = {kw.replace('W:', '') for kw in word_kws}

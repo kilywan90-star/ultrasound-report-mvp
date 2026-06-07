@@ -43,8 +43,8 @@ from api_system_log import router as syslog_router
 from api_data_list import router as datalist_router
 import db
 
-BUILD = "20260607-1452"
-VERSION = f"v3.2.{BUILD}"
+BUILD = "20260607-2103"
+VERSION = f"v3.3.{BUILD}"
 
 from api_exam_parts import router as exam_parts_router
 app = FastAPI(title="超声报告语音结构化", version=VERSION)
