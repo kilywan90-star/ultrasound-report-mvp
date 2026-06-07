@@ -172,18 +172,24 @@ def patient_queue(status: str = None) -> list[dict]:
     """获取患者队列，默认返回所有等待和检查中的患者"""
     c = _conn()
     if status:
+        # 兼容前端 '待检' → 数据库 '已缴费'
+        if status == '待检':
+            status = '已缴费'
         rows = c.execute(
             "SELECT * FROM patients WHERE status=? ORDER BY created_at DESC", (status,)
         ).fetchall()
     else:
         rows = c.execute(
-            "SELECT * FROM patients WHERE status IN ('待检','检查中') ORDER BY created_at DESC"
+            "SELECT * FROM patients WHERE status IN ('已缴费','检查中') ORDER BY created_at DESC"
         ).fetchall()
     return [dict(r) for r in rows]
 
 
 def patient_update_status(patient_id: int, status: str) -> dict | None:
     c = _conn()
+    # 兼容前端 '待检' → 数据库 '已缴费'
+    if status == '待检':
+        status = '已缴费'
     c.execute(
         "UPDATE patients SET status=?, updated_at=datetime('now','localtime') WHERE id=?",
         (status, patient_id),
