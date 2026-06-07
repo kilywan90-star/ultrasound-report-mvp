@@ -331,7 +331,9 @@ def correct_ASR_text(text: str) -> str:
         text = re.sub(r"腹部\s*彩\s*超", "腹部彩超", text)
         text = re.sub(r"腹部B超", "腹部超声", text)
 
-    # 收尾
+    # 收尾: 语气词清洗 + 空格/标点标准化
+    # 语气词: 嗯啊哦呃额呢吧啦噢哟哈哇呵诶
+    text = re.sub(r'[嗯啊哦呃额呢吧啦噢哟哈哇呵诶]{1,3}', '', text)
     text = re.sub(r"[ ]{2,}", " ", text)
     text = re.sub(r"([。，、；：])\s*", r"\1", text)
 
