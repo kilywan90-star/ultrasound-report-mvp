@@ -14,7 +14,10 @@ def get_stats():
     draft = conn.execute("SELECT COUNT(*) as n FROM reports WHERE status='draft'").fetchone()['n']
     today = conn.execute("""SELECT COUNT(*) as n FROM reports
                             WHERE date(created_at)=date('now','localtime')""").fetchone()['n']
-    match_count = conn.execute("SELECT COUNT(*) as n FROM match_log").fetchone()['n']
+    try:
+        match_count = conn.execute("SELECT COUNT(*) as n FROM match_log").fetchone()['n']
+    except Exception:
+        match_count = 0
     doc_count = conn.execute("SELECT COUNT(*) as n FROM doctors").fetchone()['n']
     patient_count = conn.execute("SELECT COUNT(*) as n FROM patients").fetchone()['n']
 
