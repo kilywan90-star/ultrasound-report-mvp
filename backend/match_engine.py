@@ -51,8 +51,8 @@ def _load_csv():
     # 回退: 从CSV加载
     csv_path = _CSV_PATH.parent / "全字段40万-matching_result_clean.csv"
     if not csv_path.exists():
-        # 尝试桌面路径
-        csv_path = Path(r'C:\Users\Administrator\Desktop\40万超声数据挖掘\全字段40万-matching_result_clean.csv')
+        # 尝试项目 knowledge 目录
+        csv_path = _HERE / "knowledge" / "全字段40万-matching_result_clean.csv"
     if not csv_path.exists():
         print(f"[匹配引擎] CSV不存在: {csv_path}")
         _LOADED = True

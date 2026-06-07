@@ -118,8 +118,8 @@ class ASREngine:
         return self._hotwords
 
     def _build_hotwords(self) -> list:
-        rb_path = r"C:\Users\Administrator\Desktop\超声规则库_rulebase.json"
-        if not os.path.exists(rb_path):
+        rb_path = Path(__file__).resolve().parent / "knowledge" / "超声规则库_rulebase.json"
+        if not rb_path.exists():
             return ["肝脏","胆囊","胰腺","脾脏","肾脏","甲状腺","乳腺"]
         import json as _json
         with open(rb_path, 'r', encoding='utf-8') as f:

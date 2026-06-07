@@ -125,7 +125,7 @@ def _score_number_validity(text: str) -> float:
     无数值 → 0.8 (中性，不惩罚)
     """
     try:
-        from validators import _extract_number_unit_pairs, _find_field_for_position
+        from validators.numerical import _extract_number_unit_pairs, _find_field_for_position
         from rule_engine import get_rule
         field_hints = get_rule("extraction.field_asr_hints", {})
     except Exception:

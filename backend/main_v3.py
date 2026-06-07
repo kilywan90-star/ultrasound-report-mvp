@@ -16,7 +16,7 @@ os.environ.setdefault("DASHSCOPE_API_KEY", os.environ.get("DASHSCOPE_API_KEY", "
 
 BASE_DIR = Path(__file__).parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
-RULEBASE_PATH = r"C:\Users\Administrator\Desktop\超声规则库_rulebase.json"
+RULEBASE_PATH = BASE_DIR / "knowledge" / "超声规则库_rulebase.json"
 PORT = 18001
 
 # ===== 数据库初始化 =====

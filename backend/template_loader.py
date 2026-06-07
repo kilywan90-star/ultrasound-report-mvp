@@ -32,7 +32,8 @@ CATEGORY_MODULE_MAP: dict[str, list[str]] = {
     "vascular": ["周围血管"],
     # 脾脏: 专用模块12条
     "spleen": ["脾"],
-    # fetal: 胎儿路径独立处理, 不走template_loader
+    # fetal: 产科模板
+    "fetal": ["产科"],
     # other: 不限分类, 全量搜索
 }
 

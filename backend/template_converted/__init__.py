@@ -57,9 +57,16 @@ def _load_csv():
             }
 
 
+_setup_done = False
+
+
 def setup():
-    """初始化：加载CSV索引 + 所有注册的模板"""
+    """初始化：加载CSV索引 + 所有注册的模板（只执行一次）"""
+    global _setup_done
+    if _setup_done:
+        return
     _load_csv()
+    _setup_done = True
 
 
 def lookup_template(name: str) -> dict | None:

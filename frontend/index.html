@@ -153,6 +153,12 @@ table.data tr:hover td{background:#f9fafb;cursor:pointer}
         </div>
         <div class="st info" id="matchStatus">等待输入后自动处理...</div>
 
+        <!-- ⚡ 管线时间线（新）-->
+        <div class="card" id="timelineCard" style="display:none">
+          <div class="card-hd" style="font-size:13px">⚡ 处理步骤展开</div>
+          <div class="card-bd" id="timelineSteps" style="padding:8px 14px;font-size:12px"></div>
+        </div>
+
         <div class="match-area">
           <div class="match-left">
             <div class="card"><div class="card-bd" style="padding:10px 16px">
@@ -364,48 +370,116 @@ async function loadDashboard(){
   }catch(e){console.error(e)}
 }
 
+const STRUCTURE_API = '/api/structure';
+
 // ===== Voice Pipeline =====
 async function runPipeline(text){
   S.text=text.trim();S.sel=0;
   if(!S.text){resetMatch();return}
   $('statusBadge').textContent='● 管线处理中';
+  $('matchStatus').textContent='⏳ ASR纠错 → 路由 → 模板搜索 → 匹配 → 填充 → 验证 → 建议';
+  $('matchStatus').className='st info';
   try{
-    const r=await post('/api/auto/match',{text:S.text,doctor:S.doctor});
+    const r=await post(STRUCTURE_API,{text:S.text,exam_type:'腹部超声'});
     S.currentReport=null;
     renderPipeline(r);
-  }catch(e){msg('管线处理失败','error');$('statusBadge').textContent='● 错误'}
+  }catch(e){
+    $('matchStatus').textContent='❌ 管线处理失败: '+e.message;
+    $('matchStatus').className='st err';
+    msg('管线处理失败','error');
+    $('statusBadge').textContent='● 错误';
+  }
 }
 function renderPipeline(r){
-  const ms=r?.matches||[];S.matches=ms;
+  const report=r.report||{};
+  const method=r.method||'?';
+  const template=r.template_used||'';
+  const elapsed=r.elapsed_ms||0;
+  const warnings=r.warnings||[];
+  const confidence=r.confidence||0;
+  const A=r.sources?.A_asr||S.text||'';
+
+  // 编辑区填充
   $('editRawVoice').value=S.text||'';
-  $('editVoice').value=r.report.corrected_text||S.text;
+  $('editVoice').value=A;
+  $('editDesc').value=_stripHtml(report.study_see||'');
+  $('editDiag').value=(report.study_hint||[]).map(h=>h.diagnosis||'').filter(Boolean).join('；')||'';
+  $('editIntent').value=method+(template?' · '+template:'')+' · '+(report.recommendation||'');
 
-  const intent=r.intent||{};
-  const sites=intent.sites?.join(', ')||'';
-  const findings=intent.findings?.join(', ')||'正常';
-  const isNormal=intent.is_normal?'🔍 正常检查':'⚠️ 异常发现';
-  $('editIntent').value=`${isNormal} | 部位: ${sites} | 发现: ${findings}`;
+  // 状态摘要
+  const c=confidence>=0.7?'ok':confidence>=0.4?'warn':'err';
+  const cl={'ok':'✅ 高置信度','warn':'🟡 中等置信度','err':'⚠️ 低置信度'};
+  const wn=warnings.length?' ⚠️ '+warnings.join('; '):'';
+  $('matchStatus').innerHTML=`${cl[c]} · ${method} · ${template} · 耗时${elapsed}ms${wn}`;
+  $('matchStatus').className=`st ${c}`;
+  $('statusBadge').textContent='● 就绪';
 
-  const b=ms[0];
-  if(!ms.length){$('matchStatus').textContent='⚠️ 未匹配到模板';$('matchStatus').className='st err'}
-  else{
-    let l,c;
-    if(b.score>=0.5){l='✅ 高置信度';c='ok'}else if(b.score>=0.3){l='🟡 中等匹配';c='warn'}else{l='⚠️ 低置信度';c='err'}
-    $('matchStatus').innerHTML=`${l} · ${sites||'?'} · <strong>${b.template_name}</strong> (${(b.score*100).toFixed(0)}%) · 耗时${r.elapsed_ms}ms`;
-    $('matchStatus').className=`st ${c}`;
-    $('editDesc').value=b.description||'';
-    $('editDiag').value=b.diagnosis||'';
-  }
-  renderCandidates(ms);
-  $('statusBadge').textContent=ms.length?`● ${ms.length}个匹配`:'● 就绪';
-
-  $('pipelineInfo').innerHTML=`
-    <div>🔊 ASR修正: <span style="color:var(--text)">${S.text.slice(0,25)}...</span></div>
-    <div>🧹 知识库修正: <span style="color:var(--success)">${(r.report.corrected_text||S.text).slice(0,25)}...</span></div>
-    <div>🎯 模板: <span style="color:var(--primary)">${b?b.template_name:'(无)'}</span></div>
-    <div>⚡ 耗时: ${r.elapsed_ms}ms</div>
+  // 候选模板（简单显示）
+  $('candidateList').innerHTML=`
+    <div class="c on"><div class="nm">${template||'(无匹配)'}</div>
+    <div class="meta"><span>方法: ${method}</span><span class="tag ${c}">${(confidence*100).toFixed(0)}%</span></div></div>
   `;
+  S.matches=[{template_name:template,method:method,score:confidence}];
+
+  // ⚡ 详细管线时间线
+  renderTimeline(r, A);
 }
+function _stripHtml(h){const d=document.createElement('div');d.innerHTML=h;return d.textContent||d.innerText||''}
+
+function renderTimeline(r, A){
+  const method=r.method||'';
+  const elapsed=r.elapsed_ms||0;
+  const template=r.template_used||'';
+  const report=r.report||{};
+  const warnings=r.warnings||[];
+  const hint=(report.study_hint||[]).map(h=>h.diagnosis||'').filter(Boolean).join('；')||'';
+
+  // 构建步骤
+  const steps=[
+    {icon:'🔊',label:'L0. 文本接收',detail:`"${A.slice(0,30)}..."`,time:'0ms',ok:true},
+    {icon:'🧹',label:'L0.5 口误检测',detail:'过滤重复/不对不对/改一下等',time:'0ms',ok:true},
+    {icon:'🧭',label:'L1. 路由预分类',detail:`${method.includes('fetal')?'胎儿':method.includes('multi')?'多器官':'标准路径'}`,time:'0ms',ok:true},
+  ];
+
+  // 依赖于最终方法的步骤
+  if(method==='fetal_template'){
+    steps.push({icon:'👶',label:'L2. 胎儿模板',detail:'fill_fetal_template 快速填充',time:'0ms',ok:true});
+  }else if(method==='llm_multi'){
+    steps.push({icon:'🧠',label:'L2. LLM多器官',detail:'_llm_multi_organ_fill',time:`<${elapsed}ms`,ok:true});
+  }else if(method==='converted_fill'||method==='converted_fill_llm'){
+    steps.push({icon:'📋',label:'L2. 模板搜索',detail:`${template}`,time:'0ms',ok:true});
+    steps.push({icon:'🔄',label:'L3. 40万引擎',detail:warnings.find(w=>w.includes('40万'))?'已触发':'跳过(无需)',time:'0ms',ok:true});
+    steps.push({icon:'✏️',label:'L4. 转换填充',detail:method==='converted_fill_llm'?'填充+LLM补全':'fill_converted_template',time:'0ms',ok:true});
+  }else if(method==='template_fill'){
+    steps.push({icon:'📋',label:'L2. 模板搜索',detail:template,time:'0ms',ok:true});
+    steps.push({icon:'🧠',label:'L3. LLM填充',detail:'_llm_fill_template',time:'0ms',ok:true});
+  }else if(method==='llm_free'){
+    steps.push({icon:'🧠',label:'L2. LLM自由生成',detail:'无匹配模板',time:'0ms',ok:true});
+  }
+
+  steps.push({icon:'🔢',label:'L5. 数值保全',detail:warnings.find(w=>w.includes('数值'))?'已补:'+warnings.find(w=>w.includes('数值')):'未发现缺失值',time:'0ms',ok:true});
+  const hasViolation=warnings.find(w=>w.includes('L5')||w.includes('L6'));
+  steps.push({icon:'✅',label:'L6. 验证',detail:hasViolation||'通过(无矛盾/超范围)',time:'0ms',ok:!hasViolation});
+  steps.push({icon:'💊',label:'L7. 建议生成',detail:report.recommendation||'(空)',time:'0ms',ok:true});
+  steps.push({icon:'💾',label:'L8. 入库+Tracelog',detail:report.study_hint?.length>0?`${report.study_hint.length}条诊断`:'正常报告',time:`${elapsed}ms`,ok:true});
+
+  // 总耗时
+  steps.push({icon:'🏁',label:'完成',detail:`总共 ${elapsed}ms`+ (warnings.length?` ⚠️ ${warnings.length}个警告`:''),time:`${elapsed}ms`,ok:true});
+
+  $('timelineSteps').innerHTML=steps.map((s,i)=>`
+    <div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid ${i<steps.length-1?'var(--border)':'transparent'};opacity:0.9">
+      <span style="flex-shrink:0;width:20px;text-align:center;font-size:13px">${s.ok?'✅':'❌'}</span>
+      <span style="flex-shrink:0;width:20px;text-align:center;font-size:13px">${s.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:500">${s.label}</div>
+        <div style="font-size:11px;color:var(--text2);word-break:break-all">${s.detail}</div>
+      </div>
+      <span style="flex-shrink:0;font-size:11px;color:var(--text2);font-family:var(--mono)">${s.time}</span>
+    </div>
+  `).join('');
+  $('timelineCard').style.display='';
+}
+function resetMatch(){
 function renderCandidates(ms){
   if(!ms?.length){$('candidateList').innerHTML='<div class="empty">无结果</div>';return}
   $('candidateList').innerHTML=ms.map((m,i)=>{

@@ -510,8 +510,10 @@ def anchored_structure(text: str, exam_type: str = "腹部超声",
     candidates = match_exact_template(text, exam_type)
     if not candidates:
         # Fallback to old path
-        from main import _rule_fallback
-        return _rule_fallback(text, exam_type, patient_id)
+        from routers.structure import _llm_free_generate
+        report = _llm_free_generate(text, exam_type)
+        report["_method"] = "llm_free"
+        return {"success": True, **report}
 
     best = candidates[0]
     template_name = best["tpl_name"]

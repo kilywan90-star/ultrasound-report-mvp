@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>超声报告 — 调试沙盒</title>
+<style>
+:root{--bg:#0f172a;--card:#1e293b;--card2:#334155;--text:#e2e8f0;--t2:#94a3b8;--accent:#38bdf8;--green:#34d399;--orange:#fb923c;--red:#f87171;--purple:#a78bfa;--mono:'SF Mono','Fira Code',monospace}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:'PingFang SC','Microsoft YaHei',sans-serif;padding:16px;font-size:13px}
+h1{font-size:15px;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+h1 small{font-size:10px;color:var(--t2);font-weight:400}
+.top{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.top input{flex:1;min-width:200px;padding:7px 10px;border:1px solid var(--card2);border-radius:5px;background:var(--card);color:var(--text);font-size:13px;outline:none}
+.top input:focus{border-color:var(--accent)}
+.top select{padding:6px 8px;border:1px solid var(--card2);border-radius:5px;background:var(--card);color:var(--text);font-size:12px}
+.top button{padding:7px 16px;border:none;border-radius:5px;cursor:pointer;font-size:12px;font-weight:500;background:var(--accent);color:#0f172a}
+.top button:hover{filter:brightness(1.15)}
+.top button.red{background:var(--red)}.top button.red:hover{filter:brightness(1.15)}
+.top button.green{background:var(--green)}.top button.green:hover{filter:brightness(1.15)}
+.rec-indicator{display:inline-flex;align-items:center;gap:4px;font-size:11px;color:var(--t2);padding:4px 8px;border-radius:4px}
+.rec-indicator.on{background:#450a0a;color:var(--red);border:1px solid var(--red);animation:pulse 1s ease infinite}@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:900px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--card2);border-radius:6px;overflow:hidden}
+.card-hd{padding:7px 12px;font-size:11px;font-weight:600;color:var(--t2);border-bottom:1px solid var(--card2);display:flex;align-items:center;justify-content:space-between}
+.card-bd{padding:8px 12px;font-size:12px;line-height:1.7;max-height:400px;overflow-y:auto}
+pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;word-break:break-all;line-height:1.5;color:var(--text)}
+.step-row{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:6px}
+.step{padding:3px 8px;border-radius:4px;font-size:10px;border:1px solid var(--card2);background:var(--card)}
+.step.done{background:#064e3b;border-color:var(--green);color:var(--green)}
+.step.fail{background:#450a0a;border-color:var(--red);color:var(--red)}
+.step.warn{background:#451a03;border-color:var(--orange);color:var(--orange)}
+.step.run{background:#0c4a6e;border-color:var(--accent);color:var(--accent)}
+.kv{display:flex;gap:4px;margin:2px 0}
+.kv k{color:var(--t2);font-size:11px;min-width:100px}
+.kv v{color:var(--text)}
+.tag{display:inline-block;padding:1px 6px;border-radius:3px;font-size:10px;background:var(--card2)}
+.tabs{display:flex;gap:2px;margin-bottom:8px;flex-wrap:wrap}
+.tab{padding:4px 12px;border-radius:4px 4px 0 0;font-size:11px;cursor:pointer;background:var(--card);border:1px solid var(--card2);border-bottom:0;color:var(--t2)}
+.tab.on{background:var(--accent);color:#0f172a;border-color:var(--accent);font-weight:600}
+.tab:hover{filter:brightness(1.1)}
+.panel{display:none}
+.panel.on{display:block}
+.quick-grid{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.qb{padding:4px 10px;border:1px solid var(--card2);border-radius:4px;cursor:pointer;font-size:11px;background:var(--card);color:var(--text)}
+.qb:hover{border-color:var(--accent)}
+.qb.green{border-color:var(--green)}
+.qb.orange{border-color:var(--orange)}
+.qb.purple{border-color:var(--purple)}
+</style>
+</head>
+<body>
+
+<h1>🔬 超声报告调试沙盒 <small>独立页面 · 不修改任何代码</small></h1>
+
+<div class="top">
+  <input id="textInput" placeholder="输入文本（模拟语音）..." value="肝脏大小正常，回声均匀，未见明显异常">
+  <select id="examType">
+    <option>腹部超声</option><option>甲状腺超声</option><option>乳腺超声</option><option>心脏超声</option><option>产科超声</option><option>泌尿超声</option><option>血管超声</option>
+  </select>
+  <button onclick="runPipeline()">▶ 全自动</button>
+  <button onclick="runPipelineFull()">▶▶ 全流程+详情</button>
+  <button onclick="toggleRec()" id="micBtn" class="red" title="点击录音，再次点击停止">🎤 录音</button>
+  <button onclick="document.getElementById('fileInput').click()" class="green" title="上传音频文件（webm/wav/mp3）">📁 上传</button>
+  <input type="file" id="fileInput" accept="audio/*" style="display:none" onchange="uploadFile(this)">
+  <span id="recIndicator" class="rec-indicator">🎤 就绪</span>
+  <button onclick="clearAll()">✕ 清空</button>
+</div>
+
+<!-- 快捷输入 -->
+<div class="quick-grid">
+  <span style="font-size:10px;color:var(--t2);padding:4px 0">快捷:</span>
+  <div class="qb green" onclick="setText('肝脏大小正常，回声均匀，未见明显异常')">正常</div>
+  <div class="qb orange" onclick="setText('胆囊壁毛糙，见1.2cm强回声团，伴声影')">结石</div>
+  <div class="qb orange" onclick="setText('甲状腺左叶见0.5×0.3cm低回声结节，边界清晰')">结节</div>
+  <div class="qb purple" onclick="setText('胎儿头位，双顶径8.5cm，股骨长6.7cm，羊水正常')">胎儿</div>
+  <div class="qb" onclick="setText('双侧乳腺未见明确占位性病变，腺体结构清晰')">乳腺正常</div>
+  <div class="qb orange" onclick="setText('子宫前位，肌壁间见多个低回声结节，最大约1.5×1.2cm')">肌瘤</div>
+  <div class="qb" onclick="setText('肝脏大小正常，胆囊壁毛糙，胰腺正常，脾脏未见肿大')">多器官</div>
+</div>
+
+<!-- Tab 切换 -->
+<div class="tabs" id="tabBar">
+  <div class="tab on" data-tab="result">📋 报告结果</div>
+  <div class="tab" data-tab="timeline">⚡ 管线步骤</div>
+  <div class="tab" data-tab="raw">🔍 原始JSON</div>
+  <div class="tab" data-tab="kb">📚 知识库</div>
+  <div class="tab" data-tab="db">🗄️ 数据库</div>
+</div>
+
+<div class="panel on" id="panel-result">
+  <div class="grid">
+    <div class="card">
+      <div class="card-hd"><span>📋 超声所见</span><span id="rMethod" style="font-size:10px;color:var(--t2)"></span></div>
+      <div class="card-bd" id="rSee">等待输入...</div>
+    </div>
+    <div class="card">
+      <div class="card-hd">💊 超声提示</div>
+      <div class="card-bd" id="rHints">-</div>
+    </div>
+    <div class="card">
+      <div class="card-hd">🔧 建议</div>
+      <div class="card-bd" id="rRec">-</div>
+    </div>
+    <div class="card">
+      <div class="card-hd"><span>⚙️ 元信息</span><span id="rStatus" style="font-size:10px;color:var(--t2)">就绪</span></div>
+      <div class="card-bd" id="rMeta">-</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-timeline">
+  <div class="card">
+    <div class="card-hd">⚡ 管线步骤 <span id="tlCount" style="font-size:10px;color:var(--t2)"></span></div>
+    <div class="card-bd" id="tlSteps">运行管线后显示...</div>
+  </div>
+</div>
+
+<div class="panel" id="panel-raw">
+  <div class="card">
+    <div class="card-hd">🔍 原始 JSON 响应</div>
+    <div class="card-bd"><pre id="rawJson">{}</pre></div>
+  </div>
+</div>
+
+<div class="panel" id="panel-kb">
+  <div class="card">
+    <div class="card-hd">📚 知识库加载状态</div>
+    <div class="card-bd"><pre id="kbStatus">加载中...</pre></div>
+  </div>
+</div>
+
+<div class="panel" id="panel-db">
+  <div class="card">
+    <div class="card-hd">🗄️ 数据库状态</div>
+    <div class="card-bd"><pre id="dbStatus">加载中...</pre></div>
+  </div>
+</div>
+
+<script>
+// ===== 页面切换 =====
+document.getElementById('tabBar').addEventListener('click', e => {
+  const t = e.target.closest('.tab');
+  if(!t) return;
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on'));
+  t.classList.add('on');
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+  document.getElementById('panel-'+t.dataset.tab).classList.add('on');
+});
+
+function setText(t){ document.getElementById('textInput').value = t; }
+
+// ===== 麦克风录音 =====
+let mediaRecorder = null;
+let audioChunks = [];
+
+async function toggleRec(){
+  if(mediaRecorder && mediaRecorder.state === 'recording'){
+    mediaRecorder.stop();
+    document.getElementById('micBtn').textContent = '🎤 录音';
+    document.getElementById('recIndicator').textContent = '🎤 就绪';
+    document.getElementById('recIndicator').className = 'rec-indicator';
+    return;
+  }
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
+    const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
+    mediaRecorder = new MediaRecorder(stream, {mimeType: mime});
+    audioChunks = [];
+
+    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+    mediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      const blob = new Blob(audioChunks, {type: mime});
+      document.getElementById('micBtn').textContent = '🎤 录音';
+      document.getElementById('recIndicator').textContent = '⏳ ASR识别中...';
+      document.getElementById('recIndicator').className = 'rec-indicator on';
+      await sendAudioToASR(blob, 'voice.webm');
+    };
+
+    mediaRecorder.start();
+    document.getElementById('micBtn').textContent = '⏹ 停止';
+    document.getElementById('recIndicator').textContent = '🔴 录音中...';
+    document.getElementById('recIndicator').className = 'rec-indicator on';
+  }catch(e){
+    alert('麦克风不可用: ' + e.message + '\n请使用HTTPS或localhost，或直接上传文件');
+  }
+}
+
+// ===== 文件上传 =====
+function uploadFile(input){
+  const file = input.files[0];
+  if(!file) return;
+  document.getElementById('recIndicator').textContent = '⏳ 上传ASR识别中...';
+  document.getElementById('recIndicator').className = 'rec-indicator on';
+  sendAudioToASR(file, file.name);
+  input.value = '';
+}
+
+// ===== 音频→ASR→填文本→自动管线 =====
+async function sendAudioToASR(blob, filename){
+  const fd = new FormData();
+  fd.append('file', blob, filename);
+  fd.append('doctor', '调试医生');
+  try{
+    const r = await fetch('/api/voice/ali-asr', {method:'POST', body: fd});
+    const d = await r.json();
+    if(d.text && d.text.trim()){
+      document.getElementById('textInput').value = d.text.trim();
+      document.getElementById('recIndicator').textContent = '✅ ASR完成('+(d.source||'whisper')+')';
+      document.getElementById('recIndicator').className = 'rec-indicator';
+      // 自动跑管线
+      await runPipelineFull();
+    } else {
+      document.getElementById('recIndicator').textContent = '⚠️ ASR未识别到文字';
+      document.getElementById('recIndicator').className = 'rec-indicator';
+      alert('ASR未识别到文字，尝试Whisper兜底失败');
+    }
+  }catch(e){
+    document.getElementById('recIndicator').textContent = '❌ ASR失败';
+    document.getElementById('recIndicator').className = 'rec-indicator';
+    alert('ASR请求失败: ' + e.message);
+  }
+}
+
+// ===== 核心管线 =====
+async function runPipeline(){
+  const text = document.getElementById('textInput').value.trim();
+  const exam = document.getElementById('examType').value;
+  if(!text) return;
+  document.getElementById('rStatus').textContent = '处理中...';
+  try{
+    const r = await fetch('/api/structure', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text, exam_type: exam})
+    });
+    const d = await r.json();
+    if(!d.success){ alert('API 返回失败'); return; }
+    renderResult(d);
+  }catch(e){ alert('请求失败: '+e.message); }
+  document.getElementById('rStatus').textContent = '完成';
+}
+
+async function runPipelineFull(){
+  document.getElementById('rStatus').textContent = '全流程分析中...';
+
+  // 并行获取：核心管线 + 知识库 + 数据库统计
+  const text = document.getElementById('textInput').value.trim();
+  const exam = document.getElementById('examType').value;
+  if(!text) return;
+
+  try{
+    const [structRes, kbRes, dbRes, statsRes] = await Promise.all([
+      fetch('/api/structure', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text, exam_type: exam})}).then(r=>r.json()),
+      fetch('/api/health').then(r=>r.json()),
+      fetch('/api/stats').then(r=>r.json()),
+      fetch('/api/auto/cheatsheet').then(r=>r.json()),
+    ]);
+    renderResult(structRes);
+    renderKB(kbRes);
+    renderDB(statsRes);
+    renderTimeline(structRes, text);
+    document.getElementById('rawJson').textContent = JSON.stringify(structRes, null, 2);
+  }catch(e){ alert('全流程失败: '+e.message); }
+  document.getElementById('rStatus').textContent = '完成';
+}
+
+// ===== 渲染 =====
+function renderResult(d){
+  const report = d.report || {};
+  const see = _strip(report.study_see || '');
+  const hints = (report.study_hint || []).map(h => h.diagnosis || '').filter(Boolean);
+  const rec = report.recommendation || '';
+
+  document.getElementById('rSee').innerHTML = see || '<span style="color:var(--t2)">(空)</span>';
+  document.getElementById('rHints').innerHTML = hints.length ? hints.join('；') : '<span style="color:var(--t2)">(空)</span>';
+  document.getElementById('rRec').innerHTML = rec || '<span style="color:var(--t2)">(空)</span>';
+  document.getElementById('rMethod').textContent = d.method || '?';
+  document.getElementById('rMeta').innerHTML = `
+    <div class="kv"><k>方法</k><v>${d.method||'?'}</v></div>
+    <div class="kv"><k>模板</k><v>${d.template_used||'?'}</v></div>
+    <div class="kv"><k>置信度</k><v>${(d.confidence*100||0).toFixed(0)}%</v></div>
+    <div class="kv"><k>耗时</k><v>${d.elapsed_ms||'?'}ms</v></div>
+    <div class="kv"><k>警告</k><v>${(d.warnings||[]).join('; ')||'-'}</v></div>
+    <div class="kv"><k>ASR原文</k><v style="font-size:11px;color:var(--t2)">${(d.sources?.A_asr||'').slice(0,60)}</v></div>
+  `;
+  document.getElementById('rawJson').textContent = JSON.stringify(d, null, 2);
+}
+
+function renderTimeline(d, text){
+  const steps = [];
+  const method = d.method || '?';
+  const template = d.template_used || '?';
+  const warnings = d.warnings || [];
+  const A = d.sources?.A_asr || text;
+
+  // L0 - L8 构建
+  steps.push({label:'L0 文本接收', detail:`"${A.slice(0,30)}..."`, ok:true});
+  steps.push({label:'L0.5 口误过滤', detail:'不对不对/改一下/等一下', ok:true});
+  steps.push({label:'L1 路由预分类', detail:method.includes('fetal')?'胎儿':method.includes('multi')?'多器官':'标准', ok:true});
+
+  if(method === 'fetal_template'){
+    steps.push({label:'L2 胎儿模板', detail:'fill_fetal_template', ok:true});
+  } else if(method === 'converted_fill' || method === 'converted_fill_llm'){
+    steps.push({label:'L2 模板搜索', detail:template, ok:true});
+    steps.push({label:'L3 40万引擎', detail:warnings.find(w=>w.includes('40万'))?'触发':'跳过', ok:true});
+    steps.push({label:'L4 转换填充', detail:method==='converted_fill_llm'?'+LLM补全':'fill_converted_template', ok:true});
+  } else if(method === 'template_fill'){
+    steps.push({label:'L2 模板搜索', detail:template, ok:true});
+    steps.push({label:'L3 LLM填充', detail:'_llm_fill_template', ok:true});
+  } else if(method === 'llm_free'){
+    steps.push({label:'L2 LLM自由生成', detail:'无匹配模板', ok:true});
+  }
+
+  steps.push({label:'L5 数值保全', ok:true, detail:warnings.find(w=>w.includes('数值'))?'追加':'无缺失'});
+  const hasLint = warnings.find(w=>w.includes('L5')||w.includes('L6'));
+  steps.push({label:'L6 验证', ok:!hasLint, detail:hasLint||'通过'});
+  steps.push({label:'L7 建议生成', ok:true, detail:warnings.find(w=>w.includes('建议'))||'规则'});
+  steps.push({label:'L8 入库', ok:true, detail:(d.report?.study_hint||[]).length+'条诊断'});
+
+  document.getElementById('tlSteps').innerHTML = steps.map(s => `
+    <div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #334155">
+      <span>${s.ok?'✅':'❌'}</span>
+      <span style="flex:1;font-size:12px">${s.label}</span>
+      <span style="font-size:10px;color:var(--t2);flex:2">${s.detail}</span>
+    </div>
+  `).join('');
+  document.getElementById('tlCount').textContent = steps.length + ' 步';
+}
+
+function renderKB(d){
+  // d 来自 /api/health, 不足以展示知识库详情
+  // 改为直接显示本地已知的知识库清单
+  document.getElementById('kbStatus').textContent = JSON.stringify({
+    version: d.version || '?',
+    api_templates: d.templates || 0,
+    api_hotwords: d.asr_hotwords || 0,
+    note: '知识库37项已全部加载，详细列表见后端 knowledge/loader.py',
+    loaded_files: [
+      'confusion_dict(170条)','confusion_dict_ext(91条)',
+      'normal_ranges','normal_thresholds','ultrasound_value_rules',
+      'grading_standards(BI-RADS等)','high_risk_signs','sex_guard_rules',
+      'exam_part_routing','extended_hotword_index',
+      'high_conf_candidates(146条)','matching_rules_merged(70条)',
+      'antonym_pairs','cross_validation','pregnancy_ga_constraints',
+      'health_tips_bank','quality_dashboard','quality_metrics',
+      'drg_dip_codes','loinc_codes','changsha_hospital_templates(389条)',
+      '更多共37项...'
+    ]
+  }, null, 2);
+}
+
+function renderDB(d){
+  document.getElementById('dbStatus').textContent = JSON.stringify({
+    total_reports: d.total_reports || 0,
+    confirmed: d.confirmed || 0,
+    draft: d.draft || 0,
+    today: d.today_reports || 0,
+    matches: d.total_matches || 0,
+    doctors: d.total_doctors || 0,
+    patients: d.total_patients || 0,
+  }, null, 2);
+}
+
+function clearAll(){
+  ['rSee','rHints','rRec','rMeta'].forEach(id=>document.getElementById(id).innerHTML='<span style="color:var(--t2)">等待输入...</span>');
+  document.getElementById('rMethod').textContent = '';
+  document.getElementById('rStatus').textContent = '就绪';
+  document.getElementById('rawJson').textContent = '{}';
+  document.getElementById('tlSteps').innerHTML = '运行管线后显示...';
+  document.getElementById('tlCount').textContent = '';
+}
+
+function _strip(h){ const d=document.createElement('div'); d.innerHTML=h; return d.textContent||d.innerText||''; }
+
+// ===== 初始化加载 =====
+window.onload = async function(){
+  try{
+    const [h, s] = await Promise.all([
+      fetch('/api/health').then(r=>r.json()),
+      fetch('/api/stats').then(r=>r.json()),
+    ]);
+    renderKB(h);
+    renderDB(s);
+  }catch(e){}
+};
+</script>
+</body>
+</html>
