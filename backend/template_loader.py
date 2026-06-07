@@ -163,25 +163,40 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
             scored[name] = max(scored.get(name, 0), 100 + len(keyword) * 5 + extra_bonus)
 
         # P0-2.5: 文本级异常信号检测 — 文本有"结节/回声/占位"等描述时, 对应疾病模板加分
-    _text_abnormal_signals = ["结节","无回声","低回声","混合回声","稍高回声","强回声","回声团","囊性"]
+    _text_abnormal_signals = ["结节","无回声","低回声","混合回声","稍高回声","强回声","回声团","囊性","囊肿","水泡","水囊"]
     _text_has_abnormal = any(sig in text for sig in _text_abnormal_signals)
     if _text_has_abnormal:
         for name, entry in _template_index.items():
             tpl_text = entry.get("name","") + entry.get("info1","")[:200]
             # 如果模板和文本共享"异常信号词"+器官词 → 加分
+            _matched = False
             for sig in _text_abnormal_signals:
                 if sig in text and sig in tpl_text:
                     for organ in _ORGAN_WORDS:
                         if organ in text and organ in tpl_text:
                             scored[name] = max(scored.get(name, 0), 140)
+                            _matched = True
                             break
-                    break
+                    if _matched:
+                        break
         # 同器官的正常模板扣分(文本有异常信号时正常模板不配同分)
         for name, entry in _template_index.items():
             if "正常" in name or "未见异常" in name:
                 for organ in _ORGAN_WORDS:
                     if organ in text and organ in (entry.get("info1","") + entry.get("name","")):
                         scored[name] = max(scored.get(name, 0) - 80, 60)
+                        break
+        # 疾病模板加分: 同器官时疾病模板额外加分(超过正常模板)
+        for name, entry in _template_index.items():
+            if "正常" not in name and "未见异常" not in name:
+                tpl_text = entry.get("name","") + entry.get("info1","")[:200]
+                for organ in _ORGAN_WORDS:
+                    if organ in text and organ in tpl_text:
+                        # 文本和模板都有异常信号词 → +20
+                        for sig in _text_abnormal_signals:
+                            if sig in text or sig in tpl_text:
+                                scored[name] = max(scored.get(name, 0), 120) + 20
+                                break
                         break
 
     # P0-2.6: 文本有异常信号时, 正常模板不再享受P0-3加分
