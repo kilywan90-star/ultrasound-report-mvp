@@ -444,39 +444,24 @@ async def structure(req: StructureRequest):
             report["recommendation"] = _llm_suggestion
         return _make_response(report, req, method, best_name, 0.85, warnings, A)
 
-    # ⚡ 40万数据匹配引擎 — 当模板匹配分<100时, 或category=other时尝试
+    # ⚡ 40万数据匹配引擎 — 低分或category=other 时补充
     _match_hint = None
     if best_score < 100 or _route_result.get("category") == "other":
         try:
             from match_engine import auto_match as _auto_match, search as _match_search
-            # 尝试自动匹配
             _match_result = _auto_match(A)
             if _match_result:
                 _match_hint = _match_result
-                # 用40万数据的info1作为模板
                 if not template_info1 or len(template_info1) < 20:
                     template_info1 = _match_result.get("info1", template_info1)
                 if not best_name:
                     best_name = _match_result.get("discname", "")
-            # 如果还是没模板, 但匹配引擎有候选
             if not template_info1 or len(template_info1) < 20:
                 _top = _match_search(A, 1)
                 if _top:
                     _match_hint = _top[0]
                     template_info1 = _top[0].get("info1", template_info1)
                     best_name = _top[0].get("discname", best_name)
-        except Exception as _me:
-            pass
-        try:
-            from match_engine import auto_match as _auto_match
-            _match_result = _auto_match(A)
-            if _match_result:
-                _match_hint = _match_result
-                if best_score < 50:
-                    # 用40万数据的info1作为模板
-                    template_info1 = _match_result.get("info1", template_info1)
-                    if not best_name:
-                        best_name = _match_result.get("discname", "")
         except Exception as _me:
             pass
 

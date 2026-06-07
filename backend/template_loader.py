@@ -13,6 +13,19 @@ _keyword_index: dict[str, str] = {}
 _category_index: dict[str, list[str]] = defaultdict(list)
 _module_index: dict[str, list[str]] = defaultdict(list)
 
+# 路由分类 → 模板模块 映射表 (用于category过滤)
+# routing/__init__.py 的 category 值 → template_loader 的 module 名
+CATEGORY_MODULE_MAP: dict[str, list[str]] = {
+    "cardiac": ["心脏"],
+    "thyroid": ["甲状腺"],
+    "breast": ["乳腺"],
+    "abdomen": ["UIS", "肝脏", "胆囊", "胰腺", "脾脏", "肾脏"],  # UIS=腹部超声主模块
+    "gynecology": ["子宫"],
+    "urology": ["前列腺", "男生殖系"],
+    "vascular": ["周围血管"],
+    # fetal: 胎儿路径独立处理, 不走template_loader
+    # other: 不限分类, 全量搜索
+}
 
 
 def _infer_module(name, info1, info2):
@@ -138,6 +151,20 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
 
     scored: dict[str, int] = {}
 
+    # ═══ Route 2: 按category限制搜索范围 ═══
+    _valid_names: set[str] | None = None
+    if category and category != "other" and category in CATEGORY_MODULE_MAP:
+        _target_modules = set(CATEGORY_MODULE_MAP[category])
+        _valid_names = {
+            name for name, entry in _template_index.items()
+            if entry.get("module", "") in _target_modules
+        }
+        # 即使限制了category, 也保留至少保留最基础的关键词命中模板
+        # (防止category映射不完整导致丢失模板)
+        if not _valid_names:
+            _valid_names = None  # fallback: 不限
+    # 注: category=None/"other" 时不限, 保留340条全量搜索
+
     # 策略1: DISCNAME关键词精确匹配
     # 器官词列表（用于全搜索函数）
     _ORGAN_WORDS = ["肝脏","胆囊","胰腺","脾脏","肾脏","子宫","卵巢","前列腺","甲状腺","乳腺","心脏","颈动脉","椎动脉","胎儿","膀胱","睾丸","附睾","淋巴结","阑尾","胸腔","腹腔","盆腔","胆总管","门静脉","胎心","胎盘","羊水","脐带"]
@@ -146,6 +173,9 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
     for keyword in sorted(_keyword_index.keys(), key=len, reverse=True):
         if keyword in text and len(keyword) >= 2:
             name = _keyword_index[keyword]
+            # category过滤: 跳过不在有效范围内的模板
+            if _valid_names and name not in _valid_names:
+                continue
             # P0-2: 异常模板需证据——DISCNAME含疾病词时必须有ASR文本证据
             abnormal_kw = ["癌","瘤","结石","囊肿","增生","钙化","硬化","异位","梗塞","血栓","积水","腹水","畸形","占位","肿物","团块","结节"]
             # 超声描述词也可作为疾病证据（如"强回声团"→结石）
@@ -167,6 +197,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
     _text_has_abnormal = any(sig in text for sig in _text_abnormal_signals)
     if _text_has_abnormal:
         for name, entry in _template_index.items():
+            if _valid_names and name not in _valid_names: continue
             tpl_text = entry.get("name","") + entry.get("info1","")[:200]
             # 如果模板和文本共享"异常信号词"+器官词 → 加分
             _matched = False
@@ -181,6 +212,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
                         break
         # 同器官的正常模板扣分(文本有异常信号时正常模板不配同分)
         for name, entry in _template_index.items():
+            if _valid_names and name not in _valid_names: continue
             if "正常" in name or "未见异常" in name:
                 for organ in _ORGAN_WORDS:
                     if organ in text and organ in (entry.get("info1","") + entry.get("name","")):
@@ -188,6 +220,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
                         break
         # 疾病模板加分: 同器官时疾病模板额外加分(超过正常模板)
         for name, entry in _template_index.items():
+            if _valid_names and name not in _valid_names: continue
             if "正常" not in name and "未见异常" not in name:
                 tpl_text = entry.get("name","") + entry.get("info1","")[:200]
                 for organ in _ORGAN_WORDS:
@@ -207,6 +240,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
     has_normal_signal = any(w in text for w in normal_words) and not _suppress_normal
     if has_normal_signal:
         for name, entry in _template_index.items():
+            if _valid_names and name not in _valid_names: continue
             if "正常" in name and any(w in text for w in ["正常","大小正常","光滑"]):
                 scored[name] = max(scored.get(name, 0), 120)
             # 文本含器官词且模板名含"正常"时保底加分
@@ -253,6 +287,8 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
         for tpl_name, keywords in match_kw_dict.items():
             if tpl_name not in _template_index:
                 continue
+            if _valid_names and tpl_name not in _valid_names:
+                continue
             for kw in keywords:
                 if kw in text and len(kw) >= 2:
                     scored[tpl_name] = max(scored.get(tpl_name, 0), 200)
@@ -260,6 +296,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
 
     # 策略2: 器官词匹配INFO1 (复用_ORGAN_WORDS)
     for name, entry in _template_index.items():
+        if _valid_names and name not in _valid_names: continue
         info1 = entry.get("info1", "")
         for organ in _ORGAN_WORDS:
             if organ in text and organ in info1:
@@ -269,6 +306,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
     # 策略3: 疾病词匹配 (硬编码)
     disease_words = ["结石","囊肿","肌瘤","息肉","增生","钙化","血管瘤","脂肪肝","结节","积液","占位","弥漫","斑块","狭窄","血栓","积水","腹水","脾大","肝硬化","畸胎瘤","腺肌症"]
     for name, entry in _template_index.items():
+        if _valid_names and name not in _valid_names: continue
         info1 = entry.get("info1", "") + entry.get("info2", "")
         for disease in disease_words:
             if disease in text and disease in info1:
@@ -309,6 +347,7 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
             text_organ_categories.add(cat)
 
     for name in list(_template_index.keys()):
+        if _valid_names and name not in _valid_names: continue
         entry = _template_index[name]
         mod = entry.get("module", "")
         # 模块匹配加分 (有明确模块名的模板优先)
