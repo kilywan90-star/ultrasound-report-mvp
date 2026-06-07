@@ -38,7 +38,7 @@ app = FastAPI(title="超声语音报告系统", version="3.0")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 # ===== 注册路由 =====
-from routers import doctors, patients, reports, templates, stats, match, voice, auto
+from routers import doctors, patients, reports, templates, stats, match, voice, auto, smart
 
 # 注入依赖
 templates.init(matcher)
@@ -52,6 +52,7 @@ app.include_router(stats.router)
 app.include_router(match.router)
 app.include_router(voice.router)
 app.include_router(auto.router)
+app.include_router(smart.router)
 
 # ===== 初始化默认数据 =====
 @app.on_event("startup")

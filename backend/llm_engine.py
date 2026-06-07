@@ -3,9 +3,8 @@
 使用 DeepSeek API + 输入缓存 做语义理解,文本规范化,匹配和填充
 
 核心优化:
-1. 输入缓存: 相同输入跳过API调用(日常高频短语命中率极高)
+1. 输入缓存: 相同输入跳过API调用
 2. 合并API: analyze_and_match 一次完成规范化+匹配+诊断
-3. fill_template 单独1次API
 """
 import json, os, re, urllib.request, time, hashlib
 
@@ -13,127 +12,36 @@ LLM_API_KEY = "sk-43ffc7dafcec4369a039436377694820"
 LLM_MODEL = "deepseek-v4-flash"
 LLM_URL = "https://api.deepseek.com/chat/completions"
 
-# ===== 缓存 =====
-# 格式: {input_hash: {response_key: value}}
 _cache = {}
-_CACHE_MAX = 200  # 最多缓存200条
-
+_CACHE_MAX = 200
 
 def _cache_key(text, prefix=''):
-    """生成缓存key"""
     return prefix + hashlib.sha256(text.encode('utf-8')).hexdigest()[:24]
-
 
 def _cache_get(key):
     return _cache.get(key)
 
-
 def _cache_set(key, value):
     if len(_cache) > _CACHE_MAX:
-        # 清掉一半
         keys = list(_cache.keys())
         for k in keys[:len(keys)//2]:
             del _cache[k]
     _cache[key] = value
 
+SYSTEM_PROMPT = "你是超声科医生助手。根据语音识别文本,输出结构化JSON。sites:检查部位列表,description:超声描述,diagnosis:诊断,is_normal:是否正常。"
 
-SYSTEM_PROMPT = """你是超声科医生助手.你的任务是根据语音识别文本,输出结构化JSON报告.
+NORMALIZE_SYSTEM_PROMPT = "你是一位超声科医生。将打乱的汉字重新排列成通顺的超声医学描述。只输出整理后的文字。超声描述标准顺序:器官名->形态/大小->表面/包膜->内部回声->其他。只重新排列已有文字不添加不删除。"
 
-规则:
-1. sites: 检查部位列表(如["肝脏","胆囊","脾脏"])
-2. description: 超声描述,用专业医学语言(补全口语缺失部分但不虚构)
-3. diagnosis: 诊断结论(如果有)
-4. is_normal: 是否正常(true/false)
+MATCH_SYSTEM_PROMPT = "你是超声科医生助手。根据语音描述从候选模板选择最匹配的一个。输出JSON:模板名,confidence,理由。"
 
-语音文本特点:
-- 医生只说异常部分(如"肝上有个囊肿"),正常器官不会提
-- 口语化,可能有ASR识别错误
-- 可能混有环境噪声词
+FILL_SYSTEM_PROMPT = "你是超声科医生助手。根据描述内容填充超声报告模板中缺失的部分。将xx,x mm等占位符替换为实际数值。输出填充后完整模板。"
 
-输出要求:
-- 只输出JSON,不要其他文字
-- 描述要专业,简洁
-- 不虚构未提及的内容"""
+DIAGNOSIS_SYSTEM_PROMPT = "你是超声科医生助手。根据超声描述生成规范的诊断结论。简洁专业。输出纯文本。"
 
-NORMALIZE_SYSTEM_PROMPT = """你是一位超声科医生.以下是一段文字顺序被打乱的超声描述.
-你需要做的是:把打乱的汉字重新排列成通顺的超声医学描述.
-保持所有数字和单位不变.
-只输出整理后的文字,不要解释.
-
-关键规则:
-1. 超声描述的标准顺序是:器官名 + 形态/大小 + 表面/包膜 + 内部回声 + 其他发现
-2. 常见的超声短语如"实质回声均匀","大小正常","形态规则","表面光滑"等可能会被打散
-3. 只重新排列已有文字,不添加新内容,不删除内容
-4. 数值如"4.8x1.8mm","12mm"等保持原样
-5. 如果文字太少无法还原,直接原样输出
-
-示例:
-输入: "质回实音均大匀小正常"
-输出: "实质回声均匀,大小正常"
-
-输入: "回声均实质匀大常小正"
-输出: "实质回声均匀,大小正常"
-
-输入: "甲囊肿壮线有"
-输出: "甲状腺有囊肿"
-
-输入: "干脏大小正常回生军匀"
-输出: "肝脏大小正常回声均匀"
-
-输入: "肝内可见无回声区大小约" (正常顺序)
-输出: "肝内可见无回声区大小约"
-
-输入: "内胆可见囊结石"
-输出: "胆囊内可见结石""
-
-MATCH_SYSTEM_PROMPT = """你是超声科医生助手.根据医生的语音描述,从候选模板列表中选择最匹配的一个.
-
-规则:
-- 仔细理解语音描述的医学含义,不要只看关键词
-- 如果描述提到"未见异常","正常",优先选正常模板
-- 甲状腺,乳腺,心脏等专有部位的描述不要跨部位匹配
-- 超声描述的顺序可能被打乱,需要根据医学语义判断
-- 输出JSON格式:{"template_name": "选中的模板名(必须完全匹配候选列表中的名称)", "confidence": 0-1评分, "reason": "选择理由"}"""
-
-FILL_SYSTEM_PROMPT = """你是超声科医生助手.根据医生提供的描述内容,填充超声报告模板中缺失的部分.
-
-规则:
-- 模板中的xx,x mm等占位符需要用输入中的实际数值替换
-- 数值单位保持一致
-- 只填充模板中明确占位的部分
-- 保持模板原有的句子结构和医学用语
-- 输出填充后的完整模板文本"""
-
-DIAGNOSIS_SYSTEM_PROMPT = """你是超声科医生助手.根据超声描述内容,生成规范的诊断结论.
-
-规则:
-- 诊断结论应简洁,专业
-- 只包含超声检查能确定的诊断
-- 不要臆想
-- 如果描述中提及"未见明显异常"或类似表述,诊断应为"未见明显异常"
-- 输出纯文本,不要JSON"""
-
-ANALYZE_SYSTEM_PROMPT = """你是超声科医生助手.根据医生的输入文本,完成以下任务:
-
-1. 文本可能文字顺序被打乱或有同音错字,请还原为通顺的医学描述
-2. 从候选模板中选最匹配的一个
-3. 判断诊断结论
-
-输出JSON格式:
-{
-  "normalized_text": "还原后的通顺描述",
-  "template_name": "选中的模板名",
-  "diagnosis": "诊断结论",
-  "confidence": 0-1评分,
-  "reason": "选择理由"
-}
-
-超声描述的标准顺序: 器官名 -> 形态/大小 -> 表面/包膜 -> 内部回声 -> 其他发现
-保持数值和单位不变.只还原已有文字,不虚构."""
+ANALYZE_SYSTEM_PROMPT = "你是超声科医生助手。根据输入文本完成:1.文字可能乱序或同音错字请还原通顺;2.从候选模板选最匹配的;3.判断诊断。输出JSON:normalized_text,template_name,diagnosis,confidence,reason。"
 
 
 def _call_deepseek(messages, system_prompt, response_format=None, max_tokens=1000, temperature=0.1, retries=2):
-    """通用DeepSeek API调用"""
     payload = {
         "model": LLM_MODEL,
         "messages": [{"role": "system", "content": system_prompt}] + messages,
@@ -142,25 +50,18 @@ def _call_deepseek(messages, system_prompt, response_format=None, max_tokens=100
     }
     if response_format:
         payload["response_format"] = response_format
-
     for attempt in range(retries):
         try:
             req = urllib.request.Request(
-                LLM_URL,
-                data=json.dumps(payload).encode(),
-                headers={
-                    "Authorization": f"Bearer {LLM_API_KEY}",
-                    "Content-Type": "application/json"
-                },
+                LLM_URL, data=json.dumps(payload).encode(),
+                headers={"Authorization": "Bearer " + LLM_API_KEY, "Content-Type": "application/json"},
                 method="POST"
             )
             r = urllib.request.urlopen(req, timeout=60)
             result = json.loads(r.read())
             content = result["choices"][0]["message"]["content"]
             return content, result.get("usage", {}).get("total_tokens", 0)
-        except json.JSONDecodeError:
-            continue
-        except Exception as e:
+        except:
             if attempt < retries - 1:
                 time.sleep(1)
                 continue
@@ -168,38 +69,21 @@ def _call_deepseek(messages, system_prompt, response_format=None, max_tokens=100
     return None, 0
 
 
-def llm_analyze_and_match(scrambled_text: str, candidates: list) -> dict:
-    """合并版:规范化+匹配+诊断,1次API调用(带缓存)"""
+def llm_analyze_and_match(scrambled_text, candidates):
     if not scrambled_text or not candidates:
         return {"normalized_text": scrambled_text or "", "template_name": "", "diagnosis": "", "confidence": 0}
-
-    # 缓存命中检测(基于输入+candidates数量)
     ck = _cache_key(scrambled_text, 'analyze')
     cached = _cache_get(ck)
     if cached:
         return cached
-
-    candidate_info = []
-    for t in candidates[:15]:
-        candidate_info.append({
-            "name": t.get("name") or t.get("template_name", ""),
-            "id": t.get("id") or t.get("template_id", ""),
-            "site": t.get("site", ""),
-            "desc_summary": (t.get("description", "") or "")[:60]
-        })
-
-    prompt = json.dumps({
-        input_text: scrambled_text,
-        candidates: candidate_info,
-        instruction: analyze_and_match
-    }, ensure_ascii=False)
-
+    candidate_info = [{"name": t.get("name") or t.get("template_name", ""), "id": t.get("id") or t.get("template_id", ""), "site": t.get("site", ""), "summary": (t.get("description", "") or "")[:60]} for t in candidates[:15]]
+    prompt = ("输入文本: " + scrambled_text + "\n候选模板: " + json.dumps(candidate_info, ensure_ascii=False) +
+              "\n输出JSON: {\"normalized_text\":\"还原的通顺描述\",\"template_name\":\"完全匹配的模板名\",\"diagnosis\":\"诊断\",\"confidence\":0-1,\"reason\":\"理由\"}")
     content, _ = _call_deepseek(
         messages=[{"role": "user", "content": prompt}],
         system_prompt=ANALYZE_SYSTEM_PROMPT,
         response_format={"type": "json_object"},
-        max_tokens=800,
-        temperature=0.05,
+        max_tokens=800, temperature=0.05,
     )
     if content:
         try:
@@ -213,7 +97,6 @@ def llm_analyze_and_match(scrambled_text: str, candidates: list) -> dict:
                         break
                 else:
                     result["confidence"] = 0
-            # 缓存结果
             _cache_set(ck, result)
             return result
         except:
@@ -223,98 +106,65 @@ def llm_analyze_and_match(scrambled_text: str, candidates: list) -> dict:
     return result
 
 
-def llm_fill_template(template_desc: str, input_text: str, template_name: str = "") -> str:
-    """LLM根据输入内容填充模板中的占位变量(带缓存)"""
+def llm_fill_template(template_desc, input_text, template_name=""):
     if not template_desc or not input_text:
         return template_desc or ""
-
-    # 缓存命中检测
     fill_key = _cache_key(template_desc + '|' + input_text, 'fill')
     cached = _cache_get(fill_key)
     if cached:
         return cached
-
-    prompt = json.dumps({
-        template_name: template_name or 未知,
-        template_content: template_desc,
-        input_description: input_text,
-        instruction: fill_template
-    }, ensure_ascii=False)
-
+    prompt = ("模板: " + (template_name or "未知") + "\n原文: " + template_desc +
+              "\n输入: " + input_text + "\n将模板中xx,x mm等占位符替换为实际数值。输出完整模板。")
     content, _ = _call_deepseek(
         messages=[{"role": "user", "content": prompt}],
         system_prompt=FILL_SYSTEM_PROMPT,
-        max_tokens=1000,
-        temperature=0.1,
+        max_tokens=1000, temperature=0.1,
     )
     result = content.strip() if content else template_desc
     _cache_set(fill_key, result)
     return result
 
 
-def llm_normalize(scrambled_text: str) -> str:
-    """乱序文本规范化(带缓存)"""
+def llm_normalize(scrambled_text):
     if not scrambled_text or len(scrambled_text.strip()) < 3:
         return scrambled_text or ""
-
     ck = _cache_key(scrambled_text, 'norm')
     cached = _cache_get(ck)
     if cached:
         return cached
-
     content, _ = _call_deepseek(
         messages=[{"role": "user", "content": scrambled_text}],
         system_prompt=NORMALIZE_SYSTEM_PROMPT,
-        max_tokens=500,
-        temperature=0.05,
+        max_tokens=500, temperature=0.05,
     )
     result = content.strip() if content else scrambled_text
     _cache_set(ck, result)
     return result
 
 
-def llm_match_template(voice_text: str, candidates: list) -> dict:
-    """LLM选择最匹配的模板(带缓存)"""
+def llm_match_template(voice_text, candidates):
     if not voice_text or not candidates:
-        return {"template_name": "", "confidence": 0, "reason": "无候选"}
-
+        return {"template_name": "", "confidence": 0, "reason": "no candidates"}
     ck = _cache_key(voice_text + str(len(candidates)), 'match')
     cached = _cache_get(ck)
     if cached:
         return cached
-
-    candidate_info = []
-    for t in candidates[:20]:
-        candidate_info.append({
-            "id": t.get("template_id", t.get("id", "")),
-            "name": t.get("template_name", t.get("name", "")),
-            "site": t.get("site", ""),
-            "desc_summary": (t.get("description", "") or "")[:80]
-        })
-
-    prompt = f"""根据输入的超声描述文本,从以下候选模板中选择最匹配的一个.
-
-输入文本: "{voice_text}"
-
-候选模板:
-{json.dumps(candidate_info, ensure_ascii=False)}
-
-输出JSON: {{"template_name": "选中的模板名(必须完全匹配)", "confidence": 0-1评分, "reason": "选择理由"}}"""
-
+    candidate_info = [{"id": t.get("id", t.get("template_id", "")), "name": t.get("name", t.get("template_name", "")), "site": t.get("site", ""), "summary": (t.get("description", "") or "")[:60]} for t in candidates[:20]]
+    prompt = ("输入: " + voice_text + "\n候选: " + json.dumps(candidate_info, ensure_ascii=False) +
+              "\n输出JSON: {\"template_name\":\"选中模板名\",\"confidence\":0-1,\"reason\":\"理由\"}")
     content, _ = _call_deepseek(
         messages=[{"role": "user", "content": prompt}],
         system_prompt=MATCH_SYSTEM_PROMPT,
         response_format={"type": "json_object"},
-        max_tokens=500,
-        temperature=0.1,
+        max_tokens=500, temperature=0.1,
     )
-    result = {"template_name": "", "confidence": 0, "reason": "LLM调用失败"}
+    result = {"template_name": "", "confidence": 0, "reason": "LLM call failed"}
     if content:
         try:
             result = json.loads(content)
             matched_name = result.get("template_name", "")
             if matched_name:
-                valid_names = {t.get("template_name", t.get("name", "")) for t in candidates[:20]}
+                valid_names = {t.get("name", t.get("template_name", "")) for t in candidates[:20]}
                 if matched_name not in valid_names:
                     for vn in valid_names:
                         if matched_name in vn or vn in matched_name:
@@ -328,59 +178,43 @@ def llm_match_template(voice_text: str, candidates: list) -> dict:
     return result
 
 
-def llm_generate_diagnosis(description: str, template_name: str = "") -> str:
-    """LLM生成诊断结论(带缓存)"""
+def llm_generate_diagnosis(description, template_name=""):
     if not description:
         return ""
-
     ck = _cache_key(description + '|' + template_name, 'diag')
     cached = _cache_get(ck)
     if cached:
         return cached
-
-    context = f"模板: {template_name}\n超声描述: {description}" if template_name else f"超声描述: {description}"
-
+    context = ("模板: " + template_name + "\n描述: " + description) if template_name else ("描述: " + description)
     content, _ = _call_deepseek(
         messages=[{"role": "user", "content": context}],
         system_prompt=DIAGNOSIS_SYSTEM_PROMPT,
-        max_tokens=300,
-        temperature=0.1,
+        max_tokens=300, temperature=0.1,
     )
     result = content.strip() if content else ""
     _cache_set(ck, result)
     return result
 
 
-def llm_enhance(voice_text: str, retries=2) -> dict:
-    """(保留原接口) LLM理解语音文本,输出结构化信息(带缓存)"""
+def llm_enhance(voice_text, retries=2):
     if not voice_text or len(voice_text.strip()) < 3:
         return {"sites": [], "description": voice_text or "", "diagnosis": "", "is_normal": False}
-
     ck = _cache_key(voice_text, 'enhance')
     cached = _cache_get(ck)
     if cached:
         return cached
-
     content, _ = _call_deepseek(
         messages=[{"role": "user", "content": voice_text}],
         system_prompt=SYSTEM_PROMPT,
         response_format={"type": "json_object"},
-        max_tokens=800,
-        temperature=0.1,
-        retries=retries,
+        max_tokens=800, temperature=0.1, retries=retries,
     )
     result = {"sites": [], "description": voice_text, "diagnosis": "", "is_normal": False}
     if content:
         try:
             parsed = json.loads(content)
             if isinstance(parsed, dict):
-                result = {
-                    "sites": parsed.get("sites", parsed.get("exam_site", [])),
-                    "description": parsed.get("description", ""),
-                    "diagnosis": parsed.get("diagnosis", ""),
-                    "is_normal": parsed.get("is_normal", False),
-                    "raw_llm_output": parsed,
-                }
+                result = {"sites": parsed.get("sites", parsed.get("exam_site", [])), "description": parsed.get("description", ""), "diagnosis": parsed.get("diagnosis", ""), "is_normal": parsed.get("is_normal", False), "raw_llm_output": parsed}
         except:
             pass
     _cache_set(ck, result)

@@ -406,6 +406,16 @@ async def structure(req: StructureRequest):
         return _make_response(report, req, "llm_multi", "多器官综合报告", 0.85, warnings, A)
 
     # Step1: Pattern match (按分类限制搜索范围)
+    candidates = None
+    _match_result_40k = None
+    if _route_result.get("category") == "other":
+        # ⚡ category=other时先用40万数据匹配引擎
+        try:
+            from match_engine import auto_match as _auto_match
+            _match_result_40k = _auto_match(A)
+        except Exception:
+            pass
+
     candidates = search_candidates(A, req.exam_type, limit=8, category=_route_result.get("category"))
     best_score = candidates[0]["score"] if candidates else 0
     best_name = candidates[0]["name"] if candidates else ""
@@ -413,6 +423,62 @@ async def structure(req: StructureRequest):
     if not template_info1 and best_name:
         tpl = get_template_by_name(best_name)
         if tpl: template_info1 = tpl.get("info1", "")
+
+    # 如果category=other且40万引擎有结果, 用它覆盖模板信息
+    if _match_result_40k and (_route_result.get("category") == "other" or best_score < 50):
+        template_info1 = _match_result_40k.get("info1", template_info1)
+        best_name = _match_result_40k.get("discname", best_name)
+        best_score = max(best_score, 100)
+        # 从40万数据构建report, 不走converted_fill
+        report = {
+            "study_see": f"<div class='rpt-html'>{template_info1[:2000]}</div>",
+            "study_hint": [{"rank": 1, "diagnosis": _match_result_40k.get("discname", ""), "icd10": ""}],
+            "recommendation": "",
+        }
+        method = "converted_fill"
+        # 直接进数值保全步骤
+        report = _wrap_hints_with_toggle(report)
+        report, warnings = _preserve_numbers(A, report, warnings)
+        _llm_suggestion = _generate_recommendation(A, best_name, report, req.exam_type)
+        if _llm_suggestion:
+            report["recommendation"] = _llm_suggestion
+        return _make_response(report, req, method, best_name, 0.85, warnings, A)
+
+    # ⚡ 40万数据匹配引擎 — 当模板匹配分<100时, 或category=other时尝试
+    _match_hint = None
+    if best_score < 100 or _route_result.get("category") == "other":
+        try:
+            from match_engine import auto_match as _auto_match, search as _match_search
+            # 尝试自动匹配
+            _match_result = _auto_match(A)
+            if _match_result:
+                _match_hint = _match_result
+                # 用40万数据的info1作为模板
+                if not template_info1 or len(template_info1) < 20:
+                    template_info1 = _match_result.get("info1", template_info1)
+                if not best_name:
+                    best_name = _match_result.get("discname", "")
+            # 如果还是没模板, 但匹配引擎有候选
+            if not template_info1 or len(template_info1) < 20:
+                _top = _match_search(A, 1)
+                if _top:
+                    _match_hint = _top[0]
+                    template_info1 = _top[0].get("info1", template_info1)
+                    best_name = _top[0].get("discname", best_name)
+        except Exception as _me:
+            pass
+        try:
+            from match_engine import auto_match as _auto_match
+            _match_result = _auto_match(A)
+            if _match_result:
+                _match_hint = _match_result
+                if best_score < 50:
+                    # 用40万数据的info1作为模板
+                    template_info1 = _match_result.get("info1", template_info1)
+                    if not best_name:
+                        best_name = _match_result.get("discname", "")
+        except Exception as _me:
+            pass
 
     # Step2: 路径分派
     from template_converted import lookup_template, setup as _tc_setup
