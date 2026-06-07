@@ -477,6 +477,26 @@ document.addEventListener('DOMContentLoaded',function(){
         </div>
       </div>
       
+      <!-- 信息来源说明 -->
+      <div style="margin-top:4px;padding:4px 6px;background:#f8fafc;border-radius:4px;font-size:9px;color:#64748b;line-height:1.6">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;align-items:center">
+          <span style="display:inline-flex;align-items:center;gap:2px;background:#e0e7ff;padding:1px 6px;border-radius:3px;color:#3730a3;font-weight:500">🎤 ASR识别</span>
+          <span style="color:#94a3b8">→</span>
+          <span style="display:inline-flex;align-items:center;gap:2px;background:#d1fae5;padding:1px 6px;border-radius:3px;color:#065f46;font-weight:500">🔧 纠错(混淆+方言)</span>
+          <span style="color:#94a3b8">→</span>
+          <span style="display:inline-flex;align-items:center;gap:2px;background:#dbeafe;padding:1px 6px;border-radius:3px;color:#1e40af;font-weight:500">📋 路由(12类)</span>
+          <span style="color:#94a3b8">→</span>
+          <span style="display:inline-flex;align-items:center;gap:2px;background:#fef3c7;padding:1px 6px;border-radius:3px;color:#92400e;font-weight:500">📄 模板(464条)</span>
+          <span style="color:#94a3b8">→</span>
+          <span style="display:inline-flex;align-items:center;gap:2px;background:#ede9fe;padding:1px 6px;border-radius:3px;color:#5b21b6;font-weight:500">✅ 报告(3色HTML)</span>
+        </div>
+        <div style="margin-top:2px;color:#94a3b8">
+          橙色=<span style="color:var(--success);font-weight:600">voice</span> AI填入值 |
+          蓝色=<span style="color:#92400e;font-weight:600">unfill</span> 需手动补充 |
+          <span id="method_info" style="color:var(--primary)">方法: <span id="method_badge_info">-</span></span>
+        </div>
+      </div>
+
       <!-- 方法徽章 + 测试按钮 -->
       <div style="margin-top:8px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
         <span id="method_badge" style="display:none;font-size:10px;padding:2px 8px;border-radius:8px;color:white"></span>
@@ -740,6 +760,8 @@ fetch('/api/structure',{method:'POST',headers:{'Content-Type':'application/json'
 
 function showMethodBadge(d){
   var method=d.method||'';var badge=document.getElementById('method_badge');
+  var infoEl=document.getElementById('method_badge_info');
+  if(infoEl)infoEl.textContent=method;
   if(!badge)return;
   var labels={'section_match':'段落匹配','abcdef_v3':'ABCDEF v3','rule_fallback':'规则引擎兜底','fetal_template':'胎儿模板','converted_fill':'模板填充','rule_fill':'规则填充','template_fill':'LLM填充','llm_free':'自由生成','llm_multi':'多器官LLM','regex_fill':'规则引擎','anchored_llm':'模板锚定LLM','anchored_regex':'模板锚定Regex'};
   var colors={'section_match':'#16a34a','abcdef_v3':'#7c3aed','rule_fallback':'#f59e0b','fetal_template':'#16a34a','converted_fill':'#059669','rule_fill':'#2563eb','template_fill':'#0891b2','llm_free':'#64748b','llm_multi':'#7c3aed','regex_fill':'#2563eb','anchored_llm':'#0891b2','anchored_regex':'#6366f1'};
