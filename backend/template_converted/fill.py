@@ -80,6 +80,22 @@ def fill_converted_template(
                         vals[fkey] = m.group(1)
                         break
 
+            # 尝试4: 宽松上下文 — 取最后一段汉字的尾部字, ASR中不直接匹配时做纯数字兜底
+            if fkey not in vals:
+                ctx_chars = re.findall(r'[一-鿿]+', clean_ctx)
+                if ctx_chars:
+                    last_seg = ctx_chars[-1]
+                    # 如果最后一段>=2字且在ASR中没有直接出现
+                    if len(last_seg) >= 2 and last_seg not in text:
+                        # 尝试只取最后1-2个字符作为弱上下文
+                        for weak_len in [2, 1]:
+                            if weak_len > len(last_seg): continue
+                            weak = last_seg[-weak_len:]
+                            m = re.search(rf'(?:{re.escape(weak)})\s*(?:约|为|是|大)?\s*(\d+(?:\.\d+)?)', text)
+                            if m:
+                                vals[fkey] = m.group(1)
+                                break
+
     # 提取选项
     opts = {}
     for pat, key in options:
