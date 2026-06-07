@@ -68,12 +68,14 @@ class Pipeline:
     def process(self, voice_text: str, doctor: str = '') -> dict:
         """
         完整管线 v2: ASR修正 → 意图识别 → 模板匹配(LLM+关键词) → 变量提取 → LLM填充
+        LLM调用已从4次合并为1次（analyze_and_match输出含规范化+匹配+诊断）
+        只有模板填充需要额外1次API（可选）
         """
         start = time.time()
         corrected = knowledge.correct_asr_text(voice_text)
         intent = self.detect_intent(corrected)
 
-        # 模板匹配（引擎内: 关键词→knowledge→LLM→路由）
+        # 模板匹配（引擎内: 关键词→LLM(1次API)→knowledge→路由）
         matches = self.matcher.match(corrected)
         best = matches[0] if matches else None
 
@@ -81,9 +83,13 @@ class Pipeline:
         variables = self.extract_vars(voice_text)
         variables.update(self.extract_vars(corrected))
 
-        # LLM模板填充增强
+        # 从LLM匹配结果中读取预生成的诊断和规范化文本
+        llm_diagnosis = getattr(self.matcher, '_llm_diagnosis', '')
+        llm_normalized = getattr(self.matcher, '_llm_normalized_text', '')
+
+        # LLM模板填充占位符（仅1次API，诊断已由analyze_and_match生成）
         filled_description = ''
-        if best and best.get('description'):
+        if best and best.get('description') and not filled_description:
             try:
                 from llm_engine import llm_fill_template
                 filled = llm_fill_template(best['description'], corrected, best.get('template_name', ''))
@@ -94,7 +100,7 @@ class Pipeline:
 
         report = {
             'description': filled_description or (best['description'] if best else corrected),
-            'diagnosis': best['diagnosis'] if best else '',
+            'diagnosis': llm_diagnosis or (best['diagnosis'] if best else ''),
             'template_name': best['template_name'] if best else '',
             'template_id': best['template_id'] if best else '',
             'match_score': best['score'] if best else 0,

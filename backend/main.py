@@ -420,17 +420,38 @@ async def structure(req: StructureRequest):
     converted = lookup_template(best_name) if best_name else None
 
     if converted and best_score >= 100:
+        # ⚡ 方案B: 多候选模板智能选择
+        # 检查是否有比best_name更匹配的候选模板
+        _better_name = best_name
+        _better_converted = converted
+        if len(candidates) >= 2:
+            import re as _re_sel
+            _asr_meas = len(_re_sel.findall(r'\d+(?:\.\d+)?\s*[×xX\*]', A))
+            for _cand in candidates[1:4]:  # 检查第2-4名
+                _cand_name = _cand["name"]
+                if _cand["score"] >= best_score - 30:  # 分差30以内
+                    _cand_conv = lookup_template(_cand_name)
+                    if _cand_conv:
+                        _cand_fields = _cand_conv.get("fields", {})
+                        _cand_meas = len(_cand_fields)
+                        # 如果ASR有多个测量值但当前模板只有1个槽位 → 换模板
+                        if _cand_meas > len(converted.get("fields", {})) and _asr_meas >= _cand_meas:
+                            _better_name = _cand_name
+                            _better_converted = _cand_conv
+                            break
+
         from template_converted.fill import fill_converted_template
         cat = _route_result.get("category", "abdomen")
         report = fill_converted_template(
             A,
-            converted.get("html", template_info1),
-            converted.get("fields", {}),
-            converted.get("measurements", []),
-            converted.get("options", []),
-            converted.get("opt_reset", {}),
-            set(converted.get("option_keys", [])),
+            _better_converted.get("html", template_info1),
+            _better_converted.get("fields", {}),
+            _better_converted.get("measurements", []),
+            _better_converted.get("options", []),
+            _better_converted.get("opt_reset", {}),
+            set(_better_converted.get("option_keys", [])),
         )
+        best_name = _better_name
         method = "converted_fill"
 
         # 智能补全: 只有unfill超过阈值时才调用LLM

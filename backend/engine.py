@@ -48,6 +48,8 @@ class Matcher:
         self.rb = rb
         self.templates = rb['templates']
         self.use_llm = use_llm
+        self._llm_normalized_text = ''
+        self._llm_diagnosis = ''
         # 合并规则库 + 增强keywords
         self.site_kw = {}
         all_sites = set(rb['site_keywords'].keys()) | set(ENHANCED_SITE_KW.keys())
@@ -129,13 +131,13 @@ class Matcher:
             exact_matches.sort(key=lambda x: -x['score'])
             return exact_matches[:n]
 
-        # 策略B: LLM语义匹配（对乱序/混淆文本有效）
+        # 策略B: LLM语义匹配（对乱序/混淆文本有效，也对描述有异常但关键词匹配到正常模板的情况有效）
         if self.use_llm:
             llm_result = self._llm_match(text)
             if llm_result and llm_result.get('template_name'):
                 tpl_name = llm_result['template_name']
                 confidence = llm_result.get('confidence', 0.5)
-                if confidence >= 0.4:
+                if confidence >= 0.3:
                     for tpl in self.templates:
                         if tpl.get('name') == tpl_name:
                             return [{
@@ -285,40 +287,35 @@ class Matcher:
         return unique[:n]
 
     def _llm_match(self, text):
-        """LLM语义匹配：对乱序文本理解语义后匹配模板"""
+        """LLM语义匹配+诊断：1次API调用完成规范化+匹配+诊断"""
         try:
-            from llm_engine import llm_match_template, llm_normalize
-            # 先用LLM规范化文本
-            normalized = llm_normalize(text)
-            if normalized == text:
-                normalized = None
-            match_text = normalized or text
+            from llm_engine import llm_analyze_and_match
 
-            # 快速关键词评分构建候选
-            ts = self.sites(match_text)
-            text_kws = set(re.findall(r'[一-鿿]{2,}', match_text))
+            # 快速关键词评分构建候选（不需要额外API）
+            ts = self.sites(text)
+            text_kws = set(re.findall(r'[一-鿿]{2,}', text))
             scored = []
             for tpl in self.templates:
                 nm = tpl.get('name', '')
                 nm_kws = set(re.findall(r'[一-鿿]{2,}', nm.replace('（', '').replace('）', '')))
                 nm_score = len(nm_kws & text_kws) / max(len(nm_kws), 1) if nm_kws else 0
-
                 tss = set(tpl.get('sites', []))
                 site_score = 0
                 if ts and tss:
                     inter = ts & tss
                     site_score = len(inter) / max(len(ts | tss), 1)
-
                 total = nm_score + site_score
                 if total > 0.1:
                     scored.append((total, tpl))
-
             scored.sort(key=lambda x: -x[0])
             candidates = [t[1] for t in scored[:30]]
 
             if candidates:
-                result = llm_match_template(match_text, candidates)
+                result = llm_analyze_and_match(text, candidates)
                 if result and result.get('confidence', 0) >= 0.4:
+                    # 保存规范化文本和诊断给pipeline用
+                    self._llm_normalized_text = result.get('normalized_text', '')
+                    self._llm_diagnosis = result.get('diagnosis', '')
                     return result
         except Exception as e:
             pass

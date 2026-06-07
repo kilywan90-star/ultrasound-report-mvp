@@ -68,6 +68,7 @@ MATCH_SYSTEM_PROMPT = """你是超声科医生助手。根据医生的语音描�
 - 仔细理解语音描述的医学含义，不要只看关键词
 - 如果描述提到"未见异常"、"正常"，优先选正常模板
 - 甲状腺、乳腺、心脏等专有部位的描述不要跨部位匹配
+- 超声描述的顺序可能被打乱，需要根据医学语义判断
 - 输出JSON格式：{"template_name": "选中的模板名（必须完全匹配候选列表中的名称）", "confidence": 0-1评分, "reason": "选择理由"}"""
 
 FILL_SYSTEM_PROMPT = """你是超声科医生助手。根据医生提供的描述内容，填充超声报告模板中缺失的部分。
@@ -78,6 +79,34 @@ FILL_SYSTEM_PROMPT = """你是超声科医生助手。根据医生提供的描�
 - 只填充模板中明确占位的部分
 - 保持模板原有的句子结构和医学用语
 - 输出填充后的完整模板文本"""
+
+DIAGNOSIS_SYSTEM_PROMPT = """你是超声科医生助手。根据超声描述内容，生成规范的诊断结论。
+
+规则：
+- 诊断结论应简洁、专业
+- 只包含超声检查能确定的诊断
+- 不要臆想
+- 如果描述中提及"未见明显异常"或类似表述，诊断应为"未见明显异常"
+- 输出纯文本，不要JSON"""
+
+# 合并系统提示词：规范化+匹配，一次API调用搞定
+ANALYZE_SYSTEM_PROMPT = """你是超声科医生助手。根据医生的输入文本，完成以下任务:
+
+1. 文本可能文字顺序被打乱或有同音错字，请还原为通顺的医学描述
+2. 从候选模板中选最匹配的一个
+3. 判断诊断结论
+
+输出JSON格式:
+{
+  "normalized_text": "还原后的通顺描述",
+  "template_name": "选中的模板名",
+  "diagnosis": "诊断结论",
+  "confidence": 0-1评分,
+  "reason": "选择理由"
+}
+
+超声描述的标准顺序: 器官名 -> 形态/大小 -> 表面/包膜 -> 内部回声 -> 其他发现
+保持数值和单位不变。只还原已有文字，不虚构。"""
 
 
 def _call_deepseek(messages, system_prompt, response_format=None, max_tokens=1000, temperature=0.1, retries=2):
@@ -115,6 +144,64 @@ def _call_deepseek(messages, system_prompt, response_format=None, max_tokens=100
                 continue
             return None, 0
     return None, 0
+
+
+def llm_analyze_and_match(scrambled_text: str, candidates: list) -> dict:
+    """合并版：规范化+匹配+诊断，1次API调用
+
+    Returns:
+        {"normalized_text": "...", "template_name": "...", "diagnosis": "...", "confidence": 0-1}
+    """
+    if not scrambled_text or not candidates:
+        return {"normalized_text": scrambled_text or "", "template_name": "", "diagnosis": "", "confidence": 0}
+
+    candidate_info = []
+    for t in candidates[:15]:
+        candidate_info.append({
+            "name": t.get("name") or t.get("template_name", ""),
+            "id": t.get("id") or t.get("template_id", ""),
+            "site": t.get("site", ""),
+            "desc_summary": (t.get("description", "") or "")[:60]
+        })
+
+    prompt = f"""输入文本: "{scrambled_text}"
+
+候选模板:
+{json.dumps(candidate_info, ensure_ascii=False)}
+
+请输出JSON:
+{{
+  "normalized_text": "还原后的通顺描述(与输入文本同内容但顺序正确)",
+  "template_name": "完全匹配候选列表中的模板名",
+  "diagnosis": "诊断结论",
+  "confidence": 0-1评分,
+  "reason": "选择理由"
+}}"""
+
+    content, _ = _call_deepseek(
+        messages=[{"role": "user", "content": prompt}],
+        system_prompt=ANALYZE_SYSTEM_PROMPT,
+        response_format={"type": "json_object"},
+        max_tokens=800,
+        temperature=0.05,
+    )
+    if content:
+        try:
+            result = json.loads(content)
+            # 验证模板名
+            matched_name = result.get("template_name", "")
+            valid_names = {t.get("name") or t.get("template_name", "") for t in candidates}
+            if matched_name and matched_name not in valid_names:
+                for vn in valid_names:
+                    if matched_name in vn or vn in matched_name:
+                        result["template_name"] = vn
+                        break
+                else:
+                    result["confidence"] = 0
+            return result
+        except:
+            pass
+    return {"normalized_text": scrambled_text, "template_name": "", "diagnosis": "", "confidence": 0}
 
 
 def llm_normalize(scrambled_text: str) -> str:
@@ -204,14 +291,6 @@ def llm_match_template(voice_text: str, candidates: list) -> dict:
 def llm_fill_template(template_desc: str, input_text: str, template_name: str = "") -> str:
     """
     LLM根据输入内容填充模板中的占位变量
-
-    Args:
-        template_desc: 模板原文（含xx、x mm等占位符）
-        input_text: 输入文本（含实际数值）
-        template_name: 模板名（上下文参考）
-
-    Returns:
-        填充后的文本
     """
     if not template_desc or not input_text:
         return template_desc or ""
@@ -234,6 +313,26 @@ def llm_fill_template(template_desc: str, input_text: str, template_name: str = 
     if content:
         return content.strip()
     return template_desc
+
+
+def llm_generate_diagnosis(description: str, template_name: str = "") -> str:
+    """
+    LLM根据超声描述和模板名，生成诊断结论
+    """
+    if not description:
+        return ""
+
+    context = f"模板: {template_name}\n超声描述: {description}" if template_name else f"超声描述: {description}"
+
+    content, _ = _call_deepseek(
+        messages=[{"role": "user", "content": context}],
+        system_prompt=DIAGNOSIS_SYSTEM_PROMPT,
+        max_tokens=300,
+        temperature=0.1,
+    )
+    if content:
+        return content.strip()
+    return ""
 
 
 def llm_enhance(voice_text: str, retries=2) -> dict:
