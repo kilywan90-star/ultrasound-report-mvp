@@ -69,7 +69,7 @@ ROUTES = [
     },
     {
         "name": "abdomen",
-        "keywords": ["腹部","肝肾","肝胆","肝","脾","胰","腹腔"],
+        "keywords": ["腹部","肝肾","肝胆","肝","脾","胰","腹腔","胆囊","胆","膀胱","肾"],
         "exam_types": ["腹部超声"],
         "category": "abdomen",
         "priority": 30,
@@ -103,9 +103,13 @@ def classify(text: str, exam_type: str = "") -> dict:
                 # 检查关键词是否命中
                 kw_hits = sum(1 for kw in r["keywords"] if kw in text)
                 if kw_hits > 0 or not r["keywords"]:
-                    if r["priority"] > best.get("priority", 0):
+                    # 同等priority条件下, 选命中多的路由
+                    if r["priority"] > best.get("priority", 0) or (r["priority"] == best.get("priority", 0) and kw_hits > best.get("_kw_hits", 0)):
                         best = r
-                    break
+                        best["_kw_hits"] = kw_hits
+                    elif r["priority"] > best.get("priority", 0):
+                        best = r
+                        best["_kw_hits"] = kw_hits
 
     # 2. 按关键词匹配（如果exam_type没命中）
     for r in sorted(ROUTES, key=lambda x: -x["priority"]):

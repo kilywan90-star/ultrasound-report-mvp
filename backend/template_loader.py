@@ -141,8 +141,8 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
     # 策略1: DISCNAME关键词精确匹配
     # 器官词列表（用于全搜索函数）
     _ORGAN_WORDS = ["肝脏","胆囊","胰腺","脾脏","肾脏","子宫","卵巢","前列腺","甲状腺","乳腺","心脏","颈动脉","椎动脉","胎儿","膀胱","睾丸","附睾","淋巴结","阑尾","胸腔","腹腔","盆腔","胆总管","门静脉","胎心","胎盘","羊水","脐带"]
-    # 否定词: 如果ASR含有这些词 → 降低对应异常模板的得分
-    _NEGATION_WORDS = {"已切除":"切除","未探及":"无正常","未扪及":"无","未见":"无"}
+    # 否定信号检测: "已切除""未探及"等 → 降低正常模板得分
+    _has_negation = any(kw in text for kw in ["已切除","切除","未探及","未扪及","术后"])
     for keyword in sorted(_keyword_index.keys(), key=len, reverse=True):
         if keyword in text and len(keyword) >= 2:
             name = _keyword_index[keyword]
@@ -163,8 +163,11 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
             scored[name] = max(scored.get(name, 0), 100 + len(keyword) * 5 + extra_bonus)
 
         # P0-3: "正常"关键词匹配——文本含"正常"时给正常模板加成
+        # 但如果文本有"已切除/未探及/术后"等否定词 → 抑制正常信号
+    _SUPPRESS_NORMAL_WORDS = ["已切除","切除","未探及","未扪及","术后","切除术后","全切"]
+    _suppress_normal = any(kw in text for kw in _SUPPRESS_NORMAL_WORDS)
     normal_words = ["正常", "大小正常", "光滑", "光整", "规则", "均匀", "清晰", "通畅"]
-    has_normal_signal = any(w in text for w in normal_words)
+    has_normal_signal = any(w in text for w in normal_words) and not _suppress_normal
     if has_normal_signal:
         for name, entry in _template_index.items():
             entry_text = (entry.get("name", "") + entry.get("info1", ""))[:100]
@@ -260,6 +263,9 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
         "TCD": ["大脑","基底动脉","椎动脉","经颅","MCA","ACA","PCA","BA"],
         "胎儿": ["胎儿","孕囊","胎盘","羊水","脐带","胎心","BPD"],
     }
+    # P0-4: 否定信号守卫——ASR有"已切除/术后"时, 正常模板强扣分
+    _SUPPRESS_WORDS = ["切除","已切除","术后","全切","未探及"]
+    _has_suppression = any(w in text for w in _SUPPRESS_WORDS)
     # 确定文本属于哪个器官类别
     text_organ_categories = set()
     for cat, organs in organ_module_map.items():
@@ -282,6 +288,9 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
             for cat, organs in organ_module_map.items():
                 if any(o in tpl_text for o in organs):
                     tpl_categories.add(cat)
+            # P0-4: 否定词守卫——文本有"已切除"但模板是"正常" → 强扣分
+            if _has_suppression and "正常" in name:
+                scored[name] = max(scored.get(name, 0) - 120, 0)
             # 更严格的守卫: 如果模板INFO1中没有任何文本中的器官词 → 强扣分
             # 注意: text中有"双肾"但organ_words是"肾脏", 需额外检查"肾"
             tpl_has_text_organ = any(o in tpl_text for o in _ORGAN_WORDS)
