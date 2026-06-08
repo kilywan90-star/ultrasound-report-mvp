@@ -206,21 +206,22 @@ def _run_fast_validation(filled_html: str, exam_type: str) -> list[str]:
 
 
 def _preserve_numbers(A, report, warnings):
-    _asr_meas = re.findall(r'(?:约|大?小约?|长(?:约)?)?\s*\d+(?:\.\d+)?\s*[×xX\*乘]\s*\d+(?:\.\d+)?\s*(?:mm|毫米|cm|厘米)?', A)
-    _asr_single = re.findall(r'(?:约|大?小约?|厚约?|长约?|深约?|宽约?|内径约?)\s*\d+(?:\.\d+)?\s*(?:mm|毫米|cm|厘米)', A)
+    """数值保全：捕获ASR中所有数值，确保出现在报告或补充到末尾"""
+    _asr_meas = re.findall(r'\d+(?:\.\d+)?\s*[×xX\*乘]\s*\d+(?:\.\d+)?(?:\s*[×xX\*乘]\s*\d+(?:\.\d+)?)?\s*(?:mm|毫米|cm|厘米)?', A)
+    _asr_single = re.findall(r'(?:约|大小约|厚约|长约|宽约|深约|内径约|分离约)?\s*\d+(?:\.\d+)?\s*(?:mm|毫米|cm|厘米)', A)
+    _asr_nums = re.findall(r'(?<![×\d])\d+(?:\.\d+)?(?=\s*(?:×|mm|毫米|cm|厘米|[，。\s]))', A)
     _all_vals = list(dict.fromkeys(_asr_meas + _asr_single))
     _plain = re.sub(r'<[^>]+>', '', report.get("study_see", ""))
     _missing = []
     for val in _all_vals:
-        _clean = re.sub(r'[约大小长厚深宽内径]', '', val).strip()
-        _nums = re.findall(r'\d+(?:\.\d+)?', _clean)
+        _nums = re.findall(r'\d+(?:\.\d+)?', str(val))
         if _nums and not any(n in _plain for n in _nums):
             _missing.append(val)
     if _missing:
-        report["study_see"] = report.get("study_see", "") + "<br><b class='voice'>补充测量: " + "，".join(_missing) + "</b>"
+        appendix = "，".join(str(v) for v in _missing)
+        report["study_see"] = report.get("study_see", "") + f"<br><b class='voice'>补充测量: {appendix}</b>"
         warnings.append(f"数值保全: {len(_missing)}个测量值追加到报告末尾")
     return report, warnings
-
 
 def _save_trace_simple(req, pid, A, report, template_name, method, elapsed_ms, warnings):
     try:
