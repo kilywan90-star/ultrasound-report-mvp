@@ -167,7 +167,7 @@ class ASREngine:
 
         return "。".join(prompts)
 
-    def load_model(self, model_name='small'):
+    def load_model(self, model_name='tiny'):
         if self._model is None:
             import whisper
             start = time.time()

@@ -3,11 +3,12 @@ import asyncio
 超声语音报告系统 - 结构化管线路由 (核心)
 (从 main.py 拆出的内联路由)
 """
-import re, json, time as _time, logging
+import re, json, time as _time, logging, hashlib
 from datetime import datetime
 from pathlib import Path
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
+from collections import OrderedDict
 
 import db
 from asr_correction import correct_ASR_text
@@ -16,7 +17,54 @@ from template_loader import search_candidates, get_template_by_name, load_templa
 from template_filler import match_and_fill as _rule_fill
 from template_fetal import fill_fetal_template
 
+# ─── 本地微调模型 (替换火山方舟LLM) ───
+_USE_LOCAL_LLM = True   # True=用本地merged model(免费), False=火山方舟(付费)
+try:
+    from llm_local import generate_structured, generate as _local_gen
+    _LOCAL_LLM_AVAILABLE = True
+except ImportError:
+    _LOCAL_LLM_AVAILABLE = False
+    _USE_LOCAL_LLM = False
+
 router = APIRouter(tags=["结构化"])
+
+
+# ==================== LLM 调用缓存 ====================
+
+class LLMCache:
+    """内存缓存 LLM 调用结果（LRU，最多 500 条）"""
+    def __init__(self, maxsize: int = 500):
+        self._cache: OrderedDict[str, str] = OrderedDict()
+        self._maxsize = maxsize
+
+    def _key(self, text: str, exam_type: str, tpl_name: str = "") -> str:
+        return hashlib.md5(f"{text}|{exam_type}|{tpl_name}".encode()).hexdigest()
+
+    def get(self, text: str, exam_type: str, tpl_name: str = "") -> str | None:
+        k = self._key(text, exam_type, tpl_name)
+        if k in self._cache:
+            self._cache.move_to_end(k)
+            return self._cache[k]
+        return None
+
+    def set(self, text: str, exam_type: str, result: str, tpl_name: str = "") -> None:
+        k = self._key(text, exam_type, tpl_name)
+        self._cache[k] = result
+        if len(self._cache) > self._maxsize:
+            self._cache.popitem(last=False)
+
+    def clear(self) -> None:
+        self._cache.clear()
+
+
+_llm_cache = LLMCache(500)
+_llm_cache_hits = 0
+_llm_cache_miss = 0
+
+
+def cache_hit_rate() -> str:
+    total = _llm_cache_hits + _llm_cache_miss
+    return f"{_llm_cache_hits}/{total} ({(_llm_cache_hits/total*100 if total else 0):.0f}%)"
 
 
 # ==================== 模型 ====================
@@ -398,21 +446,41 @@ _SYSTEM_RECOMMEND_PROMPT = """超声科主任医师。基于超声所见内容, 
 
 def _call_llm_recommendation(asr_text: str, template_name: str, report: dict, exam_type: str) -> str:
     """同步LLM调用（在异步线程中执行）"""
-    from llm_client import _get_client, _parse_json
+    global _llm_cache_hits, _llm_cache_miss
     _study_see_plain = re.sub(r'<[^>]+>', '', report.get("study_see", ""))[:500]
+
+    # 缓存检查
+    cached = _llm_cache.get(asr_text, exam_type, template_name)
+    if cached:
+        _llm_cache_hits += 1
+        return cached
+    _llm_cache_miss += 1
+
+    prompt = f"模板: {template_name}\n超声所见: {_study_see_plain}"
+
     try:
-        client = _get_client(provider="volc")
-        resp = client.chat.completions.create(
-            model="doubao-seed-1-6-flash-250615",
-            temperature=0.1, max_tokens=128, timeout=8,
-            messages=[
-                {"role": "system", "content": _SYSTEM_RECOMMEND_PROMPT},
-                {"role": "user", "content": f"模板: {template_name}\n超声所见: {_study_see_plain}"},
-            ],
-        )
-        content = resp.choices[0].message.content
-        if content:
-            return content.strip().strip('"').strip("'")[:60]
+        if _USE_LOCAL_LLM and _LOCAL_LLM_AVAILABLE:
+            result = _local_gen(prompt, system_prompt=_SYSTEM_RECOMMEND_PROMPT, max_tokens=128)
+            if result:
+                result = result.strip().strip('"').strip("'")[:60]
+                _llm_cache.set(asr_text, exam_type, result, template_name)
+                return result
+        else:
+            from llm_client import _get_client, _parse_json
+            client = _get_client(provider="volc")
+            resp = client.chat.completions.create(
+                model="doubao-seed-1-6-flash-250615",
+                temperature=0.1, max_tokens=128, timeout=8,
+                messages=[
+                    {"role": "system", "content": _SYSTEM_RECOMMEND_PROMPT},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+            content = resp.choices[0].message.content
+            if content:
+                result = content.strip().strip('"').strip("'")[:60]
+                _llm_cache.set(asr_text, exam_type, result, template_name)
+                return result
     except Exception:
         pass
     return ""
@@ -447,9 +515,6 @@ async def _generate_recommendation(asr_text: str, template_name: str, report: di
 
 def _llm_fill_template(asr_text, exam_type, tpl_name, info1):
     """1 LLM call: 将短文本片段展开为完整超声报告"""
-    from llm_client import _get_client, _parse_json
-    client = _get_client(provider="volc")
-    model = "doubao-seed-1-6-flash-250615"
 
     system = f"""超声科主任医师。基于口述片段生成完整规范的超声报告。
 
@@ -469,23 +534,30 @@ def _llm_fill_template(asr_text, exam_type, tpl_name, info1):
 6. 只输出JSON: {{"study_see":"完整HTML...", "study_hint":[{{"rank":1,"diagnosis":"..."}}], "recommendation":"..."}}"""
 
     try:
-        resp = client.chat.completions.create(
-            model=model, temperature=0.1, max_tokens=4096, timeout=40,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": f"ASR口述:\n{asr_text[:800]}"},
-            ],
-        )
-        content = resp.choices[0].message.content
-        if content:
-            parsed = _parse_json(content)
-            if parsed and parsed.get("study_see"):
-                return parsed
-            if "<div" in content or "study_see" in content[:100]:
-                html_match = re.search(r'<div[^>]*class=.rpt-html.*?>.*?</div>', content, re.DOTALL)
-                if html_match:
-                    return {"study_see": html_match.group(0), "study_hint": [], "recommendation": ""}
-                return {"study_see": f"<div class='rpt-html'>{re.sub(r'[\"{}\n\r]', ' ', content[:2000])}</div>", "study_hint": [], "recommendation": ""}
+        if _USE_LOCAL_LLM and _LOCAL_LLM_AVAILABLE:
+            result = generate_structured(system, f"ASR口述:\n{asr_text[:800]}")
+            if result.get("study_see"):
+                return result
+        else:
+            from llm_client import _get_client, _parse_json
+            client = _get_client(provider="volc")
+            resp = client.chat.completions.create(
+                model="doubao-seed-1-6-flash-250615", temperature=0.1, max_tokens=4096, timeout=40,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": f"ASR口述:\n{asr_text[:800]}"},
+                ],
+            )
+            content = resp.choices[0].message.content
+            if content:
+                parsed = _parse_json(content)
+                if parsed and parsed.get("study_see"):
+                    return parsed
+                if "<div" in content or "study_see" in content[:100]:
+                    html_match = re.search(r'<div[^>]*class=.rpt-html.*?>.*?</div>', content, re.DOTALL)
+                    if html_match:
+                        return {"study_see": html_match.group(0), "study_hint": [], "recommendation": ""}
+                    return {"study_see": f"<div class='rpt-html'>{re.sub(r'[\"{}\n\r]', ' ', content[:2000])}</div>", "study_hint": [], "recommendation": ""}
     except Exception as e:
         logging.warning(f"LLM fill failed: {e}")
 
@@ -496,9 +568,6 @@ def _llm_complete_report(asr_text, tpl_name, template, report):
     """LLM智能补全: 推理医生没说但可推导的正常值(unfill→voice)"""
     if not report.get("study_see"):
         return report
-    from llm_client import _get_client, _parse_json
-    client = _get_client(provider="volc")
-    model = "doubao-seed-1-6-flash-250615"
 
     _current_see = report["study_see"]
     _plain = re.sub(r'<[^>]+>', '', _current_see)
@@ -521,23 +590,40 @@ ASR原文: {asr_text[:600]}
 3. 置信度: 能确定的填值, 不确定的保留___
 4. 只输出修改后的完整study_see HTML! 不要包裹在JSON中!"""
 
+    prompt = f"当前报告:\n{_current_see}"
+
     try:
-        resp = client.chat.completions.create(
-            model=model, temperature=0.1, max_tokens=4096, timeout=15,
-            messages=[
-                {"role": "system", "content": system},
-                {"role": "user", "content": f"当前报告:\n{_current_see}"},
-            ],
-        )
-        content = resp.choices[0].message.content.strip()
-        if content and "unfill" in _current_see:
-            if "<div" in content:
-                report["study_see"] = content
-            elif content.startswith("{"):
-                parsed = _parse_json(content)
-                if parsed and "study_see" in parsed:
-                    report["study_see"] = parsed["study_see"]
-        return report
+        if _USE_LOCAL_LLM and _LOCAL_LLM_AVAILABLE:
+            content = _local_gen(prompt, system_prompt=system, max_tokens=4096)
+            if content and "unfill" in _current_see:
+                if "<div" in content:
+                    report["study_see"] = content
+                try:
+                    import json as _js
+                    parsed = _js.loads(content)
+                    if parsed and "study_see" in parsed:
+                        report["study_see"] = parsed["study_see"]
+                except: pass
+            return report
+        else:
+            from llm_client import _get_client, _parse_json
+            client = _get_client(provider="volc")
+            resp = client.chat.completions.create(
+                model="doubao-seed-1-6-flash-250615", temperature=0.1, max_tokens=4096, timeout=15,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+            content = resp.choices[0].message.content.strip()
+            if content and "unfill" in _current_see:
+                if "<div" in content:
+                    report["study_see"] = content
+                elif content.startswith("{"):
+                    parsed = _parse_json(content)
+                    if parsed and "study_see" in parsed:
+                        report["study_see"] = parsed["study_see"]
+            return report
     except Exception as e:
         logging.warning(f"LLM智能补全失败: {e}")
         return report
@@ -545,9 +631,6 @@ ASR原文: {asr_text[:600]}
 
 def _llm_multi_organ_fill(asr_text, exam_type):
     """多器官综合描述 — 用LLM生成完整的逐器官报告"""
-    from llm_client import _get_client, _parse_json
-    client = _get_client(provider="volc")
-    model = "doubao-seed-1-6-flash-250615"
 
     all_organs = ["乳腺", "甲状腺", "胆囊", "肝脏", "胰腺", "脾脏", "双肾", "子宫", "卵巢", "附件", "前列腺", "膀胱", "心脏", "颈动脉"]
     found_organs = [o for o in all_organs if o in asr_text]

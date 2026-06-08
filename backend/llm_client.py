@@ -338,8 +338,20 @@ def _get_client(provider: str = "deepseek"):
             base_url="https://ark.cn-beijing.volces.com/api/v3",
         )
     if provider == "dashscope":
+        # 优先环境变量，其次本地 .env
+        _key = os.getenv("DASHSCOPE_API_KEY")
+        if not _key:
+            try:
+                from dotenv import load_dotenv
+                from pathlib import Path
+                _p = Path(__file__).resolve().parent.parent.parent / ".env"
+                if _p.exists():
+                    load_dotenv(_p)
+                    _key = os.getenv("DASHSCOPE_API_KEY")
+            except Exception:
+                pass
         return OpenAI(
-            api_key=os.getenv("DASHSCOPE_API_KEY"),
+            api_key=_key or "",
             base_url="https://dashscope.aliyuncs.com/compatible-mode/v1",
         )
     return OpenAI(

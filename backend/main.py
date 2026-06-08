@@ -50,6 +50,10 @@ from routers.patients import router as mvp_patients_router
 from routers.reports import router as mvp_reports_router
 from routers.voice import router as mvp_voice_router
 
+# main_v3 兼容路由需要 database.py 的表，确保初始化
+from database import init_db as mvp_init_db
+mvp_init_db()
+
 import db
 
 BUILD = "20260607-2103"

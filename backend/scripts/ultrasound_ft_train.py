@@ -26,8 +26,8 @@ EPOCHS = 2
 LORA_R = 16
 LORA_ALPHA = 32
 LORA_DROPOUT = 0.05
-SAVE_STEPS = 400
-EVAL_STEPS = 200
+SAVE_STEPS = 50   # demo (2000条): 114步, 约每10min存一次; full (50000条): ~2850步
+EVAL_STEPS = 50
 assert SAVE_STEPS % EVAL_STEPS == 0, f"SAVE_STEPS({SAVE_STEPS})不是EVAL_STEPS({EVAL_STEPS})的整数倍"
 
 # ─── Data Preparation ──────────────────────────────────────────
@@ -255,6 +255,7 @@ def train():
         tokenizer, pad_to_multiple_of=8, return_tensors="pt"
     )
 
+    # ── 训练 ──
     trainer = Trainer(
         model=model,
         args=training_args,
@@ -263,27 +264,28 @@ def train():
         eval_dataset=val_ds,
     )
 
-    # ── 启动训练 ──
     print("\n" + "="*60)
     print("  开始训练 Qwen2.5-3B + Q-LoRA")
     print(f"  训练: {len(train_ds)} 条, 验证: {len(val_ds)} 条")
     print(f"  Epochs: {EPOCHS}, Batch: {BATCH_SIZE}, Accum: {GRAD_ACCUM}")
     print(f"  Max Length: {MAX_LENGTH}, LoRA r: {LORA_R}")
     print(f"  GPU: RTX 4070 Super (12GB VRAM)")
-    print(f"  预计时间: ~4-6小时\n")
+    print(f"  Save every: {SAVE_STEPS} steps")
 
     trainer.train()
 
-    # ── 保存 ──
+    # ── 保存最终模型 ──
     final_path = OUTPUT_DIR / "final"
+    final_path.mkdir(exist_ok=True)
     trainer.save_model(str(final_path))
     tokenizer.save_pretrained(str(final_path))
-    print(f"[完成] 模型保存到: {final_path}")
+    print(f"[完成] 完整模型保存到: {final_path}")
 
-    # 也保存LoRA adapter本身
+    # LoRA adapter only
     adapter_path = OUTPUT_DIR / "adapter"
+    adapter_path.mkdir(exist_ok=True)
     model.save_pretrained(str(adapter_path))
-    print(f"[完成] Adapter保存到: {adapter_path}")
+    print(f"[完成] LoRA adapter保存到: {adapter_path}")
 
     return model, tokenizer
 

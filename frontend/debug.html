@@ -87,6 +87,7 @@ pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;word-break:break
   <div class="tab" data-tab="raw">🔍 原始JSON</div>
   <div class="tab" data-tab="kb">📚 知识库</div>
   <div class="tab" data-tab="db">🗄️ 数据库</div>
+  <div class="tab" data-tab="history">📊 历史记录</div>
 </div>
 
 <div class="panel on" id="panel-result">
@@ -135,6 +136,15 @@ pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;word-break:break
   <div class="card">
     <div class="card-hd">🗄️ 数据库状态</div>
     <div class="card-bd"><pre id="dbStatus">加载中...</pre></div>
+  </div>
+</div>
+
+<div class="panel" id="panel-history">
+  <div class="card">
+    <div class="card-hd">📊 历史报告 <span id="historyCount" style="font-size:10px;color:var(--t2)"></span></div>
+    <div class="card-bd" id="historyList" style="padding:0;max-height:500px;overflow-y:auto;font-size:12px">
+      <div style="padding:20px;text-align:center;color:var(--t2)">加载中...</div>
+    </div>
   </div>
 </div>
 
@@ -220,7 +230,7 @@ async function sendAudioToASR(blob, filename){
   }catch(e){
     document.getElementById('recIndicator').textContent = '❌ ASR失败';
     document.getElementById('recIndicator').className = 'rec-indicator';
-    alert('ASR请求失败: ' + e.message);
+    alert('语音识别失败，请检查阿里云百炼语音服务是否开通。\n可以先在输入框手动输入文字测试管线。\n\n错误: ' + e.message);
   }
 }
 
@@ -378,14 +388,43 @@ function _strip(h){ const d=document.createElement('div'); d.innerHTML=h; return
 // ===== 初始化加载 =====
 window.onload = async function(){
   try{
-    const [h, s] = await Promise.all([
+    const [h, s, r] = await Promise.all([
       fetch('/api/health').then(r=>r.json()),
       fetch('/api/stats').then(r=>r.json()),
+      fetch('/api/external/reports').then(r=>r.json()),
     ]);
     renderKB(h);
     renderDB(s);
+    renderHistory(r);
   }catch(e){}
 };
+
+// ===== 历史记录 =====
+function renderHistory(d){
+  const reports = d.reports || [];
+  document.getElementById('historyCount').textContent = reports.length + '条';
+  if(!reports.length){
+    document.getElementById('historyList').innerHTML = '<div style="padding:20px;text-align:center;color:var(--t2)">暂无记录</div>';
+    return;
+  }
+  let html = '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+  html += '<tr style="background:var(--card2);color:var(--t2);position:sticky;top:0">' +
+    '<th style="padding:6px 8px;text-align:left">时间</th>' +
+    '<th style="padding:6px 8px;text-align:left">检查</th>' +
+    '<th style="padding:6px 8px;text-align:left">诊断</th>' +
+    '<th style="padding:6px 8px;text-align:left">所见摘要</th></tr>';
+  reports.forEach(r => {
+    const time = (r.created_at || '').slice(0, 16) || (r.examdate||'')+' '+(r.examtime||'');
+    html += `<tr style="border-bottom:1px solid var(--card2)">` +
+      `<td style="padding:5px 8px;font-family:var(--mono);font-size:10px">${time}</td>` +
+      `<td style="padding:5px 8px">${r.VISCERAS||r.ModuleName||'-'}</td>` +
+      `<td style="padding:5px 8px">${(r.DIAGNOSIS||'').slice(0,20)}</td>` +
+      `<td style="padding:5px 8px;color:var(--t2);font-size:10px">${(r.DESCRIBES||'').slice(0,40)}...</td>` +
+      `</tr>`;
+  });
+  html += '</table>';
+  document.getElementById('historyList').innerHTML = html;
+}
 </script>
 </body>
 </html>
