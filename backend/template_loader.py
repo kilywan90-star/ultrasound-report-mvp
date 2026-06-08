@@ -121,15 +121,19 @@ def load_templates() -> OrderedDict[str, dict]:
 
             # 从info1提取额外关键词 (如"双肾"、"集合系统")
             if info1:
-                info_keywords = re.findall(r'[双两][侧肾]|[双两]侧[输卵子肾]|实质回声|大小形态|回声均匀|未见[异常占位]', info1)
+                info_keywords = re.findall(r'[双两][侧肾]|[双两]侧[输卵子肾]|实质回声|大小形态|回声均匀(?![^，。；]*大小)|未见[异常占位]', info1)
                 for kw in info_keywords:
-                    if kw not in _keyword_index:
+                    if kw not in _keyword_index and len(kw) >= 4:  # 少于4字的关键词太通用
                         _keyword_index[kw] = name
             # 额外: 如果模板名含"正常"且info1含"双肾"+"集合系统"，增加专属关键词
             # 注意: 不覆盖"双肾"本身，让疾病模板也能匹配
             if '正常' in name and info1 and ('双肾' in info1 or '集合系统' in info1):
                 _keyword_index['肾正常'] = name
                 _keyword_index['双肾正常'] = name
+
+        # 为异常模板添加人工关键词（模板名中没体现的）
+        # 副脾 → 只需保留"副脾"关键词, 但"回声均匀"不应指向副脾
+        # 解决方案: 对所有含"回声"的关键词, 只保留作为二级索引
 
             # 类别索引
             if group:
@@ -358,10 +362,14 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
         "颈动脉": ["颈动脉","椎动脉","IMT","颈总","颈内","颈外","内膜中层"],
         "TCD": ["大脑","基底动脉","椎动脉","经颅","MCA","ACA","PCA","BA"],
         "胎儿": ["胎儿","孕囊","胎盘","羊水","脐带","胎心","BPD"],
+        "胰腺": ["胰腺","胰头","胰体","胰尾","主胰管"],
+        "脾脏": ["脾脏","脾门","脾实"],
     }
-    # P0-4: 否定信号守卫——ASR有"已切除/术后"时, 正常模板强扣分
-    _SUPPRESS_WORDS = ["切除","已切除","术后","全切","未探及"]
+    # P0-4: 否定信号守卫——ASR有"已切除/术后/未探及/未扪及/未见"时, 疾病模板扣分
+    _SUPPRESS_WORDS = ["切除","已切除","术后","全切","未探及","未扪及","未见积水","未见结石","未见占位","未见结节","未见异常"]
     _has_suppression = any(w in text for w in _SUPPRESS_WORDS)
+    # 补充: "未见XX"否定检测
+    _has_negation_signal = bool(re.search(r'未见[^。，；]{1,12}', text))
     # 确定文本属于哪个器官类别
     text_organ_categories = set()
     for cat, organs in organ_module_map.items():
