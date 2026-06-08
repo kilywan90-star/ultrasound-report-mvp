@@ -210,13 +210,14 @@ def search_candidates(text: str, exam_type: str = "", limit: int = 10, category:
             scored[name] = max(scored.get(name, 0), 100 + len(keyword) * 5 + extra_bonus)
 
         # P0-2.5: 文本级异常信号检测 — 文本有"结节/回声/占位"等描述时, 对应疾病模板加分
+    # 注意: "强回声"在"胆囊"文本中出现时不应加分给"肝内钙化灶"
     _text_abnormal_signals = ["结节","无回声","低回声","混合回声","稍高回声","强回声","回声团","囊性","囊肿","水泡","水囊"]
     _text_has_abnormal = any(sig in text for sig in _text_abnormal_signals)
     if _text_has_abnormal:
         for name, entry in _template_index.items():
             if _valid_names and name not in _valid_names: continue
             tpl_text = entry.get("name","") + entry.get("info1","")[:200]
-            # 如果模板和文本共享"异常信号词"+器官词 → 加分
+            # 限制: 异常信号加分必须同时有共享受益的器官词
             _matched = False
             for sig in _text_abnormal_signals:
                 if sig in text and sig in tpl_text:
