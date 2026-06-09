@@ -2,770 +2,193 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>超声语音报告系统 v3.0</title>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>超声语音报告系统 - 专业医疗报告结构化平台</title>
+<link rel="stylesheet" href="/style.css?v=20260609">
 <style>
-:root{--primary:#1677ff;--primary-hover:#4096ff;--primary-bg:#e6f4ff;--success:#52c41a;--warning:#faad14;--danger:#ff4d4f;--bg:#f5f6fa;--card:#fff;--text:#1f1f1f;--text2:#6b7280;--border:#e5e7eb;--shadow:0 1px 3px rgba(0,0,0,.08);--radius:8px;--sidebar-w:220px;--font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Noto Sans SC","Microsoft YaHei",sans-serif;--mono:"SF Mono","Fira Code",monospace}
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;font-family:var(--font);font-size:14px;color:var(--text);background:var(--bg)}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#d1d5db;border-radius:3px}
-.app{display:flex;height:100vh}
-.sidebar{width:var(--sidebar-w);background:linear-gradient(180deg,#001529,#002140);color:#fff;display:flex;flex-direction:column;flex-shrink:0}
-.sidebar .logo{padding:18px 20px;font-size:16px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:8px}
-.sidebar .logo .v{font-size:10px;background:var(--primary);padding:2px 8px;border-radius:10px}
-.sidebar .nav{flex:1;padding:8px 0;overflow-y:auto}
-.sidebar .nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;color:rgba(255,255,255,.7);cursor:pointer;border-left:3px solid transparent;font-size:14px;transition:.15s}
-.sidebar .nav-item:hover{color:#fff;background:rgba(255,255,255,.05)}
-.sidebar .nav-item.on{color:#fff;background:var(--primary);border-left-color:#fff}
-.sidebar .nav-item .icon{font-size:16px;width:20px;text-align:center}
-.sidebar .ver{border-top:1px solid rgba(255,255,255,.1);padding:12px 20px;font-size:11px;color:rgba(255,255,255,.4)}
-.main{flex:1;display:flex;flex-direction:column;min-width:0;overflow:hidden}
-.topbar{display:flex;align-items:center;justify-content:space-between;padding:0 24px;height:54px;background:var(--card);border-bottom:1px solid var(--border);flex-shrink:0}
-.topbar .title{font-size:16px;font-weight:600}
-.topbar .right{display:flex;align-items:center;gap:14px}
-.topbar .right select{padding:5px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:var(--card);cursor:pointer;font-family:var(--font)}
-.topbar .right .badge{font-size:12px;padding:3px 14px;border-radius:12px;font-weight:500}
-.topbar .right .badge.online{background:#f0fdf4;color:#15803d}
-.content{flex:1;padding:16px 24px;overflow-y:auto}
-.page{display:none}.page.on{display:block}
-.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px}
-.card-hd{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:600}
-.card-bd{padding:14px 20px}
-.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px}
-.stat-card{padding:16px 20px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow)}
-.stat-card .num{font-size:26px;font-weight:700;color:var(--primary)}
-.stat-card .label{font-size:13px;color:var(--text2);margin-top:2px}
-.stat-card.green .num{color:var(--success)}.stat-card.orange .num{color:var(--warning)}.stat-card.purple .num{color:#8b5cf6}
-.voice-row{display:flex;align-items:center;gap:10px;padding:12px 20px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:14px}
-.voice-row .mic-btn{width:42px;height:42px;border-radius:50%;border:2px solid var(--primary);background:var(--card);color:var(--primary);font-size:18px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center}
-.voice-row .mic-btn:hover{background:var(--primary-bg)}
-.voice-row .mic-btn.recording{border-color:var(--danger);color:#fff;background:var(--danger);animation:pulse 1s ease infinite}
-@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(255,77,79,.4)}70%{box-shadow:0 0 0 14px rgba(255,77,79,0)}100%{box-shadow:0 0 0 0 rgba(255,77,79,0)}}
-.voice-row input{flex:1;padding:9px 14px;border:1px solid var(--border);border-radius:6px;font-size:14px;outline:none;background:#f9fafb}
-.voice-row input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(22,119,255,.12);background:var(--card)}
-.voice-row .btn{padding:8px 20px;border:none;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;background:var(--primary);color:#fff}
-.voice-row .btn:hover{background:var(--primary-hover)}
-.voice-row .btn.green{background:var(--success)}.voice-row .btn.green:hover{filter:brightness(1.1)}
-.voice-row .btn.gray{background:#f3f4f6;color:var(--text2)}.voice-row .btn.gray:hover{background:#e5e7eb}
-.match-area{display:flex;gap:14px;min-height:400px}
-.match-left{flex:1;min-width:0}.match-right{width:300px;flex-shrink:0}
-@media(max-width:900px){.match-right{display:none}}
-.st{padding:10px 14px;border-radius:6px;font-size:13px;margin-bottom:10px}
-.st.ok{background:#f0fdf4;color:#15803d;border-left:3px solid var(--success)}
-.st.warn{background:#fffbeb;color:#b45309;border-left:3px solid var(--warning)}
-.st.err{background:#fef2f2;color:#b91c1c;border-left:3px solid var(--danger)}
-.st.info{background:var(--primary-bg);color:var(--primary);border-left:3px solid var(--primary)}
-.edit-area label{font-size:11px;font-weight:600;color:var(--text2);margin-top:10px;display:block}
-.edit-area label:first-child{margin-top:0}
-.edit-area textarea{width:100%;min-height:44px;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;font-family:var(--font);resize:vertical;outline:none;background:#f9fafb;line-height:1.5;margin-top:4px}
-.edit-area textarea:focus{border-color:var(--primary);background:var(--card)}
-.edit-area textarea.desc{min-height:70px}
-.edit-area textarea.diag{min-height:34px}
-.patient-bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:8px 0}
-.patient-bar input{padding:6px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;flex:1}
-.patient-bar input:focus{border-color:var(--primary)}
-.cl{display:flex;flex-direction:column;gap:4px;max-height:520px;overflow-y:auto}
-.c{padding:10px 14px;background:var(--card);border-radius:6px;box-shadow:var(--shadow);cursor:pointer;border:2px solid transparent}
-.c:hover{border-color:var(--primary)}.c.on{border-color:var(--primary);background:var(--primary-bg)}
-.c .nm{font-size:13px;font-weight:500}
-.c .meta{font-size:11px;color:var(--text2);margin-top:2px;display:flex;gap:8px;align-items:center}
-.c .meta .tag{padding:1px 8px;border-radius:10px;font-size:11px;font-weight:500}
-.c .meta .tag.high{background:#f0fdf4;color:#15803d}
-.c .meta .tag.med{background:#fffbeb;color:#b45309}
-.c .meta .tag.low{background:#fef2f2;color:#b91c1c}
-table.data{width:100%;border-collapse:collapse;font-size:13px}
-table.data th{padding:9px 12px;text-align:left;font-weight:600;color:var(--text2);border-bottom:2px solid var(--border);background:#fafafa;position:sticky;top:0;font-size:12px}
-table.data td{padding:8px 12px;border-bottom:1px solid #f3f4f6}
-table.data tr:hover td{background:#f9fafb;cursor:pointer}
-.badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:12px;font-weight:500}
-.badge.confirmed{background:#f0fdf4;color:#15803d}
-.badge.draft{background:#fffbeb;color:#b45309}
-.form-row{display:flex;gap:10px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
-.form-row label{min-width:60px;font-size:13px;color:var(--text2);font-weight:500}
-.form-row input,.form-row select{padding:6px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;flex:1}
-.form-row input:focus{border-color:var(--primary)}
-.btn-sm{padding:5px 14px;border:none;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer}
-.btn-sm.primary{background:var(--primary);color:#fff}
-.btn-sm.primary:hover{background:var(--primary-hover)}
-.btn-sm.danger{background:var(--danger);color:#fff}
-.btn-sm.gray{background:#f3f4f6;color:var(--text2)}
-.btn-sm.gray:hover{background:#e5e7eb}
-.btn-sm.green{background:var(--success);color:#fff}
-.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9999;opacity:0;transition:.3s}
-.toast.on{opacity:1}
-.toast-inner{padding:10px 24px;border-radius:6px;font-size:13px;box-shadow:0 4px 12px rgba(0,0,0,.15)}
-.toast-inner.success{background:#f0fdf4;color:#15803d;border:1px solid #bbf7d0}
-.toast-inner.error{background:#fef2f2;color:#b91c1c;border:1px solid #fecaca}
-.toast-inner.info{background:var(--primary-bg);color:var(--primary);border:1px solid #b2d9ff}
-.modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:999;align-items:center;justify-content:center}
-.modal.on{display:flex}
-.modal-box{background:var(--card);border-radius:var(--radius);padding:24px;width:440px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.modal-box h3{margin-bottom:16px;font-size:16px}
-@media print{body{background:#fff}.sidebar,.topbar,.voice-row,.match-right,.search-row,.btn{display:none!important}.content{padding:0}.page{display:block!important}.card{box-shadow:none;border:1px solid #ddd}}
-.empty{padding:30px;text-align:center;color:var(--text2);font-size:13px}
-.flex{display:flex;gap:8px;align-items:center}
-.text-sm{font-size:12px;color:var(--text2)}
-.w-full{width:100%}
+/* ── 增强医疗专业风格 ── */
+:root{--sidebar-bg:linear-gradient(180deg,#0b1628,#172238)}
+.sidebar{background:var(--sidebar-bg)}
+.topbar{background:linear-gradient(135deg,#f8fafc,#fff);border-bottom:1px solid var(--border);height:60px;padding:0 24px;box-shadow:0 1px 4px rgba(0,0,0,.04)}
+.brand-bar{display:flex;align-items:center;gap:8px}.brand-logo{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#1a73e8,#0f4ea8);display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px}.brand-text{font-weight:700;font-size:16px;color:var(--text)}.brand-sub{font-size:11px;color:var(--text-muted);margin-left:10px}.page-title{font-size:18px;font-weight:700;color:var(--text)}.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:18px}.stat-card-modern{background:var(--card);border-radius:14px;padding:18px 20px;box-shadow:0 2px 12px rgba(0,0,0,.05);border:1px solid var(--border);transition:.15s}.stat-card-modern:hover{box-shadow:0 4px 20px rgba(0,0,0,.08);transform:translateY(-1px)}.stat-card-modern .val{font-size:32px;font-weight:800;line-height:1.2}.stat-card-modern .lbl{font-size:12px;color:var(--text-muted);margin-top:2px}.stat-card-modern .icon{font-size:22px;margin-bottom:6px}.section-title{font-size:14px;font-weight:700;color:var(--text-secondary);margin-bottom:10px;text-transform:uppercase;letter-spacing:.4px}.med-table{table-layout:auto;width:100%;font-size:13px}.med-table th{background:var(--bg);padding:10px 14px;font-weight:600;color:var(--text-secondary);border-bottom:2px solid var(--border)}.med-table td{padding:9px 14px;border-bottom:1px solid var(--border)}.med-table tr:last-child td{border-bottom:none}.med-table tr:hover td{background:#fafcff}.badge-sm{padding:2px 8px;border-radius:8px;font-size:11px;font-weight:500}
+.btn-ghost-light{background:transparent;border:1px solid var(--border);color:var(--text-secondary);padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;transition:.15s;font-family:var(--font)}.btn-ghost-light:hover{background:var(--bg);border-color:var(--primary);color:var(--primary)}.quick-example{margin-bottom:14px}.qlabel{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px}.flex{display:flex;gap:8px;flex-wrap:wrap}.gap{margin-top:16px}
+.wrap{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px}.wrap-title{font-size:13px;font-weight:700;color:var(--text-secondary);border-bottom:1px solid var(--border);padding-bottom:8px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.voice-area{padding:10px 0}.voice-area textarea{margin-top:8px;min-height:80px}.exam-select{max-width:180px}.page-header{margin-bottom:12px;font-size:14px;color:var(--text-muted)}.table-wrap-scroll{overflow-x:auto;border-radius:10px}
+@media(max-width:768px){.stat-row{grid-template-columns:repeat(2,1fr)}}
 </style>
 </head>
 <body>
 <div class="app">
-  <div class="sidebar">
-    <div class="logo">🏥 超声报告 <span class="v">v3</span></div>
-    <div class="nav">
-      <div class="nav-item on" data-page="dashboard"><span class="icon">📊</span>工作台</div>
-      <div class="nav-item" data-page="voice"><span class="icon">🎤</span>语音报告</div>
-      <div class="nav-item" data-page="patients"><span class="icon">👤</span>患者管理</div>
-      <div class="nav-item" data-page="reports"><span class="icon">📋</span>报告列表</div>
-      <div class="nav-item" data-page="stats"><span class="icon">📈</span>统计</div>
-      <div class="nav-item" data-page="templates"><span class="icon">📁</span>模板库</div>
-      <div class="nav-item" data-page="cheatsheet"><span class="icon">📖</span>语音提示卡</div>
+  <aside class="sidebar">
+    <div class="logo"><span class="icon">🔬</span><span>超声报告</span><span class="badge">v4.3</span></div>
+    <nav class="nav">
+      <div class="nav-item on" data-page="workstation">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 16h16"/><path d="M3 3h18v18H3z"/><circle cx="12" cy="12" r="2"/></svg>
+        <span>医生工作站</span>
+      </div>
+      <div class="nav-item" data-page="dashboard">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="4" rx="1"/><rect x="14" y="10" width="7" height="11" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span>工作台</span>
+      </div>
+      <div class="nav-item" data-page="voice">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        <span>语音报告</span>
+      </div>
+      <div class="nav-item" data-page="audio">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><circle cx="12" cy="16" r="5"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        <span>语音档案</span>
+      </div>
+      <div class="nav-item" data-page="patients">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>患者管理</span>
+      </div>
+      <div class="nav-item" data-page="reports">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="13" y2="17"/></svg>
+        <span>报告列表</span>
+      </div>
+      <div class="nav-item" data-page="templates">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/><line x1="9" y1="10" x2="15" y2="10"/><line x1="12" y1="7" x2="12" y2="13"/></svg>
+        <span>模板库</span>
+      </div>
+      <div class="nav-item" data-page="knowledge">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span>知识库</span>
+      </div>
+      <div class="nav-item" data-page="settings">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>系统配置</span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sf-brand">Ultrasound AI</div>
+      <div class="sf-ver">专业医疗报告结构化平台</div>
     </div>
-    <div class="ver">v3.0 · 全自动管线</div>
-  </div>
+  </aside>
 
-  <div class="main">
-    <div class="topbar">
-      <div class="title" id="pageTitle">工作台</div>
-      <div class="right">
-        <select id="doctorSelect"><option>加载...</option></select>
-        <span class="badge online" id="statusBadge">● 就绪</span>
+  <main class="main">
+    <header class="topbar" style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex;align-items:center;gap:14px">
+        <span class="page-title" id="pageTitle">医生工作站</span>
+        <span class="brand-sub">专业医疗报告结构化平台</span>
       </div>
-    </div>
-
-    <div class="content">
-      <div class="page on" id="page-dashboard">
-        <div class="stats-row" id="dashStats"></div>
-        <div style="display:flex;gap:14px;flex-wrap:wrap">
-          <div class="card" style="flex:1"><div class="card-hd">今日报告 Top5</div><div class="card-bd" id="dashToday"><div class="empty">加载中...</div></div></div>
-          <div class="card" style="flex:1"><div class="card-hd">状态分布</div><div class="card-bd" id="dashStatus"><div class="empty">加载中...</div></div></div>
-        </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <select id="doctorSelect" style="padding:5px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;background:var(--card);cursor:pointer;font-family:var(--font);color:var(--text)"></select>
+        <span id="sysStatus" class="badge-sm" style="background:#f0fdf4;color:#15803d">系统在线</span>
+        <button class="btn-ghost-light" onclick="refreshAll()">刷新</button>
       </div>
+    </header>
 
-      <div class="page" id="page-voice">
-        <div class="voice-row">
-          <button class="mic-btn" id="micBtn" title="录音">🎤</button>
-          <input id="textInput" placeholder="输入超声描述（语音说或手动输入）..." autofocus>
-          <button class="btn" id="matchBtn">全自动处理</button>
-          <button class="btn green" id="saveBtn">确认报告</button>
-          <button class="btn gray" id="resetBtn">重置</button>
+    <section class="content">
+
+      <!-- ── 医生工作站 ── -->
+      <section class="page on" id="page-workstation">
+        <div class="grid-2">
+          <div class="card"><div class="card-hd"><span>待检患者队列</span><span><button class="btn-ghost-light" onclick="seedMockPatients()">模拟患者</button><button class="btn-ghost-light" onclick="loadWorkstationQueue()" style="margin-left:6px">刷新</button></span></div><div class="card-bd table-wrap-scroll" id="wsPatientQueue">加载中...</div></div>
+          <div class="card"><div class="card-hd">当前检查会话</div><div class="card-bd" id="wsSessionPanel" style="font-size:13px;color:var(--text-muted)">请选择左侧患者。</div></div>
         </div>
-        <div class="st info" id="matchStatus">等待输入后自动处理...</div>
-
-        <!-- ⚡ 管线时间线（新）-->
-        <div class="card" id="timelineCard" style="display:none">
-          <div class="card-hd" style="font-size:13px">⚡ 处理步骤展开</div>
-          <div class="card-bd" id="timelineSteps" style="padding:8px 14px;font-size:12px"></div>
-        </div>
-
-        <div class="match-area">
-          <div class="match-left">
-            <div class="card"><div class="card-bd" style="padding:10px 16px">
-              <div class="patient-bar">
-                <span style="font-size:12px;color:var(--text2);font-weight:500">患者:</span>
-                <input id="patientQuickName" placeholder="姓名" style="max-width:70px">
-                <select id="patientQuickSex" style="max-width:50px;padding:2px 4px;border:1px solid var(--border);border-radius:4px;font-size:11px">
-                  <option value="">性</option><option value="男">男</option><option value="女">女</option>
-                </select>
-                <input id="patientQuickAge" placeholder="年龄" type="number" min="0" max="200" style="max-width:55px">
-                <input id="patientQuickExam" placeholder="检查类型(腹部超声)" style="max-width:130px">
-                <button class="btn-sm primary" onclick="quickAddPatient()">入队</button>
-                <input id="patientSearch" placeholder="搜索..." style="max-width:100px">
-                <button class="btn-sm gray" onclick="searchPatient()">查找</button>
-                <span id="patientDisplay" style="font-size:12px;color:var(--text2)">未选择</span>
-                <input type="hidden" id="patientId" value="0">
-              </div>
-            </div></div>
-            <div class="card">
-              <div class="card-hd">
-                <span>📋 报告编辑</span>
-                <div class="flex">
-                  <span id="reportIdDisplay" class="text-sm"></span>
-                  <span id="reportStatusDisplay"></span>
-                </div>
-              </div>
-              <div class="card-bd">
-                <div class="edit-area">
-                  <label>🥇 原始语音（ASR直出）</label>
-                  <textarea id="editRawVoice" placeholder="Whisper识别原始文本..." readonly style="background:#fef7e0;min-height:30px;font-size:12px"></textarea>
-                  <label>🔧 本地规则修正后</label>
-                  <textarea id="editVoice" placeholder="知识库混淆词典+数值标准化+幻觉清洗后的文本..." readonly style="background:#e6f4ea;min-height:30px;font-size:12px"></textarea>
-                  <label>🎯 意图识别</label>
-                  <textarea id="editIntent" placeholder="检测到的部位、异常发现..." readonly style="min-height:28px"></textarea>
-                  <label>📋 超声描述（模板+可编辑）</label>
-                  <textarea id="editDesc" class="desc" placeholder="模板填充后自动生成..."></textarea>
-                  <label>💊 诊断结论</label>
-                  <textarea id="editDiag" class="diag" placeholder="诊断结论..."></textarea>
-                </div>
-              </div>
-            </div>
+        <div class="card" style="margin-top:12px"><div class="card-hd"><span>分段录音 / 上传</span><span id="wsRecordStatus" class="badge-sm" style="background:var(--primary-light);color:var(--primary)">未选择患者</span></div><div class="card-bd">
+          <div class="flex" style="margin-bottom:10px">
+            <button class="btn btn-danger btn-sm" id="wsRecordBtn" onclick="toggleWsRecording()">🎤 开始录音</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('wsUploadInput').click()">📁 上传一段</button>
+            <button class="btn btn-primary btn-sm" onclick="mergeCurrentSession()">合并文本</button>
+            <button class="btn btn-success btn-sm" onclick="generateCurrentReport()">生成报告</button>
+            <input type="file" id="wsUploadInput" accept="audio/*" style="display:none" onchange="uploadWsSegment(this)">
           </div>
-          <div class="match-right">
-            <div class="card"><div class="card-hd">📌 备选模板</div>
-              <div class="card-bd" style="padding:8px">
-                <div class="cl" id="candidateList"><div class="empty">输入后自动匹配</div></div>
-              </div>
-            </div>
-            <div class="card"><div class="card-hd" style="font-size:12px;font-weight:500">⚡ 管线状态</div>
-              <div class="card-bd" style="padding:8px 14px;font-size:12px;color:var(--text2)" id="pipelineInfo">
-                ASR修正 → 意图识别 → 模板匹配 → 变量提取 → 入库
-              </div>
-            </div>
-          </div>
+          <div id="wsSegments" style="font-size:13px;color:var(--text-muted)">暂无录音段。</div>
+        </div></div>
+        <div class="grid-2" style="margin-top:12px">
+          <div class="card"><div class="card-hd">合并后文本</div><div class="card-bd"><textarea class="input" id="wsMergedText" style="min-height:100px" placeholder="合并文本..."></textarea></div></div>
+          <div class="card"><div class="card-hd">自动报告结果</div><div class="card-bd" id="wsReportResult"><span style="color:var(--text-muted)">生成报告后显示。</span></div></div>
         </div>
-      </div>
+      </section>
 
-      <div class="page" id="page-patients">
-        <div class="card">
-          <div class="card-hd"><span>👤 患者管理</span><div class="flex"><button class="btn-sm primary" onclick="showPatientForm()">+ 新建</button></div></div>
-          <div class="card-bd" style="padding:0">
-            <div style="padding:10px 14px">
-              <div class="flex">
-                <input id="patSearch" placeholder="姓名/门诊号..." style="max-width:250px;padding:6px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none">
-                <button class="btn-sm primary" onclick="loadPatients()">搜索</button>
-              </div>
-            </div>
-            <table class="data"><thead><tr><th>姓名</th><th>性别</th><th>年龄</th><th>门诊号</th><th>科室</th><th>操作</th></tr></thead><tbody id="patientTable"><tr><td colspan="6" class="empty">暂无</td></tr></tbody></table>
-          </div>
+      <!-- ── 工作台 ── -->
+      <section class="page" id="page-dashboard">
+        <div class="stat-row" id="dashboardStats">
+          <div class="stat-card-modern"><div class="lbl">加载中</div><div class="val">--</div></div>
         </div>
-      </div>
-
-      <div class="page" id="page-reports">
-        <div class="card">
-          <div class="card-hd"><span>📋 报告列表</span><div class="flex">
-            <select id="reportFilter" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px"><option value="">全部</option><option value="draft">草稿</option><option value="confirmed">已确认</option></select>
-            <button class="btn-sm primary" onclick="loadReports()">刷新</button>
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">快速结构化</div><div class="card-bd">
+            <textarea class="input" id="dashboardText" style="min-height:80px" placeholder="输入或粘贴超声描述...">肝脏大小正常，包膜光整，实质回声均匀</textarea>
+            <div class="flex" style="margin-top:10px">
+              <button class="btn btn-primary btn-sm" onclick="document.getElementById('voiceText').value=document.getElementById('dashboardText').value;switchPage('voice');runFullPipeline();">开始分析</button>
+              <button class="btn btn-outline btn-sm" onclick="switchPage('voice')">进入语音报告</button>
+            </div>
           </div></div>
-          <div class="card-bd" style="padding:0">
-            <table class="data"><thead><tr><th>报告ID</th><th>患者</th><th>医生</th><th>模板</th><th>状态</th><th>匹配度</th><th>时间</th><th>操作</th></tr></thead><tbody id="reportTable"><tr><td colspan="8" class="empty">暂无</td></tr></tbody></table>
+          <div class="card"><div class="card-hd">常用语音示例</div><div class="card-bd">
+            <div class="quick-grid">
+              <button class="qb green" data-quick="肝脏大小正常，回声均匀，未见明显异常">正常肝脏</button>
+              <button class="qb orange" data-quick="胆囊壁毛糙，见1.2cm强回声团，伴声影">胆囊结石</button>
+              <button class="qb orange" data-quick="甲状腺左叶见0.5×0.3cm低回声结节，边界清晰">甲状腺结节</button>
+              <button class="qb" data-quick="双侧乳腺未见明确占位性病变，腺体结构清晰">乳腺正常</button>
+              <button class="qb" data-quick="肝脏大小正常，胆囊壁毛糙，胰腺正常，脾脏未见肿大">多器官</button>
+            </div>
+          </div></div>
+        </div>
+        <div class="card" style="margin-top:12px"><div class="card-hd">最近报告</div><div class="card-bd table-wrap-scroll" id="recentReports">加载中...</div></div>
+      </section>
+
+      <!-- ── 语音报告 ── -->
+      <section class="page" id="page-voice">
+        <div class="card"><div class="card-hd"><span>语音/文本输入</span><span id="recIndicator" class="badge-sm" style="background:var(--primary-light);color:var(--primary)">就绪</span></div><div class="card-bd">
+          <div class="flex" style="margin-bottom:8px">
+            <select class="input exam-select" id="examType"><option>腹部超声</option><option>甲状腺超声</option><option>乳腺超声</option><option>心脏超声</option><option>产科超声</option><option>泌尿超声</option><option>血管超声</option></select>
+            <button class="btn btn-primary btn-sm" id="runBtn">▶ 全自动</button>
+            <button class="btn btn-success btn-sm" id="runFullBtn">▶▶ 全流程+详情</button>
+            <button class="btn btn-danger btn-sm" id="recBtn">🎤 录音</button>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('uploadInput').click()">📁 上传</button>
+            <button class="btn btn-ghost btn-sm" id="clearBtn">✕ 清空</button>
+            <input type="file" id="uploadInput" accept="audio/*" style="display:none">
           </div>
+          <textarea class="input" id="voiceText" style="min-height:80px" placeholder="输入语音识别文本...">肝脏大小正常，回声均匀，未见明显异常</textarea>
+        </div></div>
+        <div class="quick-grid" style="margin-bottom:10px">
+          <span style="font-size:12px;color:var(--text-muted);padding:5px 0">快捷：</span>
+          <button class="qb green" data-quick="肝脏大小正常，回声均匀，未见明显异常">正常</button>
+          <button class="qb orange" data-quick="胆囊壁毛糙，见1.2cm强回声团，伴声影">结石</button>
+          <button class="qb orange" data-quick="甲状腺左叶见0.5×0.3cm低回声结节，边界清晰">结节</button>
+          <button class="qb" data-quick="双侧乳腺未见明确占位性病变，腺体结构清晰">乳腺正常</button>
         </div>
-      </div>
-
-      <div class="page" id="page-stats">
-        <div class="stats-row" id="statsCards"></div>
-        <div style="display:flex;gap:14px;flex-wrap:wrap">
-          <div class="card" style="flex:1"><div class="card-hd">👨‍⚕️ 医生 Top10</div><div class="card-bd" id="statsDoctors"><div class="empty">加载...</div></div></div>
-          <div class="card" style="flex:1"><div class="card-hd">📋 模板 Top10</div><div class="card-bd" id="statsTemplates"><div class="empty">加载...</div></div></div>
-          <div class="card" style="flex:1"><div class="card-hd">📊 状态</div><div class="card-bd" id="statsStatus"><div class="empty">加载...</div></div></div>
+        <div class="tabs" style="margin-bottom:10px">
+          <span class="tab on" onclick="document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');document.getElementById('tab-result').style.display='block';document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">报告结果</span>
+          <span class="tab" onclick="document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');document.getElementById('tab-timeline').style.display='block';document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">管线步骤</span>
+          <span class="tab" onclick="document.querySelectorAll('.tab-panel').forEach(p=>p.style.display='none');document.getElementById('tab-raw').style.display='block';document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));this.classList.add('on')">原始JSON</span>
         </div>
-      </div>
+        <div id="tab-result" class="tab-panel"><div class="grid-2">
+          <div class="card"><div class="card-hd"><span>超声所见</span><span id="rMethod" class="badge-sm" style="background:var(--primary-light);color:var(--primary)"></span></div><div class="card-bd" id="rSee"><span style="color:var(--text-muted)">等待输入...</span></div></div>
+          <div class="card"><div class="card-hd">超声提示</div><div class="card-bd" id="rHints"><span style="color:var(--text-muted)">-</span></div></div>
+          <div class="card"><div class="card-hd">建议</div><div class="card-bd" id="rRec"><span style="color:var(--text-muted)">-</span></div></div>
+          <div class="card"><div class="card-hd"><span>元信息</span><span id="rStatus" class="badge-sm" style="background:var(--primary-light);color:var(--primary)">就绪</span></div><div class="card-bd" id="rMeta"><span style="color:var(--text-muted)">-</span></div></div>
+        </div></div>
+        <div id="tab-timeline" class="tab-panel" style="display:none"><div class="card"><div class="card-hd">管线步骤 <span id="tlCount"></span></div><div class="card-bd" id="tlSteps">运行管线后显示...</div></div></div>
+        <div id="tab-raw" class="tab-panel" style="display:none"><div class="card"><div class="card-hd">原始 JSON</div><div class="card-bd"><pre id="rawJson">{}</pre></div></div></div>
+      </section>
 
-      <div class="page" id="page-templates">
-        <div class="card"><div class="card-hd"><span>📁 模板库 <span style="font-weight:400;font-size:12px;color:var(--text2)" id="tplTotal"></span></span></div>
-          <div class="card-bd" style="padding:0">
-            <div style="padding:10px 14px"><div class="flex">
-              <select id="siteFilter" style="padding:5px 10px;border:1px solid var(--border);border-radius:6px;font-size:13px"><option value="">全部部位</option></select>
-              <input id="tplSearch" placeholder="搜索..." style="max-width:200px;padding:5px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none">
-              <button class="btn-sm primary" onclick="loadTemplates()">搜索</button>
-            </div></div>
-            <div id="tplList"><div class="empty">输入后搜索</div></div>
-          </div>
+      <!-- ── 语音档案 ── -->
+      <section class="page" id="page-audio">
+        <div class="grid-2">
+          <div class="card"><div class="card-hd">录音保存目录</div><div class="card-bd" id="audioStorage"><span style="color:var(--text-muted)">加载中...</span></div></div>
+          <div class="card"><div class="card-hd">录音说明</div><div class="card-bd" style="font-size:13px;line-height:1.7;color:var(--text-secondary)">
+            <div class="kv"><k>浏览器录音</k><v>需要 HTTPS 或 localhost，HTTP IP 地址会被浏览器拦截麦克风权限。</v></div>
+            <div class="kv"><k>上传文件</k><v>支持 WebM/WAV/MP3，服务器会转为 16kHz mono WAV 后识别。</v></div>
+          </div></div>
         </div>
-      </div>
+        <div class="card" style="margin-top:12px"><div class="card-hd"><span>语音档案 / 全链路追踪</span><span><button class="btn-ghost-light" onclick="loadAudioArchive()">刷新</button></span></div><div class="card-bd table-wrap-scroll" id="audioArchive"><span style="color:var(--text-muted)">加载中...</span></div></div>
+        <div class="card" style="margin-top:12px"><div class="card-hd">明细</div><div class="card-bd" id="audioDetail"><span style="color:var(--text-muted)">点击列表中的"明细"查看 ASR、结构化、回听信息。</span></div></div>
+      </section>
 
-      <!-- Cheatsheet Page -->
-      <div class="page" id="page-cheatsheet" style="flex-direction:column;height:100%;overflow:hidden">
-  <div style="display:flex;gap:10px;align-items:center;padding:12px 16px;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:10px;flex-shrink:0">
-    <span style="font-size:13px;font-weight:500;color:var(--text2);white-space:nowrap">🔍 筛选</span>
-    <select id="csSiteFilter" style="padding:6px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;background:#fff;cursor:pointer;max-width:160px" onchange="filterCheatsheet()">
-      <option value="">全部部位</option>
-      <option value="肝脏">肝脏</option><option value="胆囊">胆囊</option><option value="心脏">心脏</option>
-      <option value="甲状腺">甲状腺</option><option value="乳腺">乳腺</option><option value="前列腺">前列腺</option>
-      <option value="双肾">双肾</option><option value="子宫附件">子宫附件</option><option value="颈动脉">颈动脉</option>
-      <option value="脾">脾</option><option value="睾丸">睾丸</option>
-    </select>
-    <input id="csSearch" placeholder="搜索提示词..." style="flex:1;padding:6px 12px;border:1px solid var(--border);border-radius:6px;font-size:13px;outline:none;min-width:120px" onkeyup="filterCheatsheet()">
-    <span id="csCount" style="font-size:12px;color:var(--text2);white-space:nowrap;background:#f3f4f6;padding:4px 12px;border-radius:10px"></span>
-  </div>
-
-  <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;flex-shrink:0" id="csNavTabs">
-    <span class="cs-tab on" data-site="" onclick="filterBySite('')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:500;background:var(--primary);color:#fff;transition:.15s">📋 全部</span>
-    <span class="cs-tab" data-site="肝脏" onclick="filterBySite('肝脏')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">肝脏</span>
-    <span class="cs-tab" data-site="胆囊" onclick="filterBySite('胆囊')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">胆囊</span>
-    <span class="cs-tab" data-site="心脏" onclick="filterBySite('心脏')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">心脏</span>
-    <span class="cs-tab" data-site="甲状腺" onclick="filterBySite('甲状腺')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">甲状腺</span>
-    <span class="cs-tab" data-site="乳腺" onclick="filterBySite('乳腺')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">乳腺</span>
-    <span class="cs-tab" data-site="前列腺" onclick="filterBySite('前列腺')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">前列腺</span>
-    <span class="cs-tab" data-site="双肾" onclick="filterBySite('双肾')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">双肾</span>
-    <span class="cs-tab" data-site="子宫附件" onclick="filterBySite('子宫附件')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">子宫附件</span>
-    <span class="cs-tab" data-site="颈动脉" onclick="filterBySite('颈动脉')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">颈动脉</span>
-    <span class="cs-tab" data-site="脾" onclick="filterBySite('脾')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">脾</span>
-    <span class="cs-tab" data-site="睾丸" onclick="filterBySite('睾丸')" style="padding:6px 14px;border-radius:20px;cursor:pointer;font-size:12px;background:#f3f4f6;color:var(--text2);transition:.15s">睾丸</span>
-  </div>
-
-  <div style="flex:1;overflow-y:auto;background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px" id="csList">
-    <div class="empty">加载中...</div>
-  </div>
+      <!-- ── 患者管理 ── -->
+      <section class="page" id="page-patients"><div class="card"><div class="card-hd">患者列表</div><div class="card-bd table-wrap-scroll" id="patientList"><span style="color:var(--text-muted)">加载中...</span></div></div></section>
+      <section class="page" id="page-reports"><div class="card"><div class="card-hd">报告列表</div><div class="card-bd table-wrap-scroll" id="reportList"><span style="color:var(--text-muted)">加载中...</span></div></div></section>
+      <section class="page" id="page-templates"><div class="card"><div class="card-hd">模板库</div><div class="card-bd table-wrap-scroll" id="templateList"><span style="color:var(--text-muted)">加载中...</span></div></div></section>
+      <section class="page" id="page-knowledge"><div class="grid-2"><div class="card"><div class="card-hd">知识库加载状态</div><div class="card-bd"><pre id="kbStatus" style="font-size:11px">加载中...</pre></div></div><div class="card"><div class="card-hd">数据库状态</div><div class="card-bd"><pre id="dbStatus" style="font-size:11px">加载中...</pre></div></div></div></section>
+      <section class="page" id="page-settings"><div class="card"><div class="card-hd">系统配置</div><div class="card-bd"><div class="grid-2"><div><label>默认检查类型</label><select class="input"><option>腹部超声</option><option>甲状腺超声</option></select></div><div><label>API地址</label><input class="input" value="同域 /api" readonly></div></div><p style="margin-top:12px;font-size:12px;color:var(--text-muted)">系统采用专业医疗蓝白主题，适配医生日常录入、报告预览和PACS对接流程。</p></div></div></section>
+    </section>
+  </main>
 </div>
-
-<div class="modal" id="patientModal">
-  <div class="modal-box">
-    <h3 id="modalTitle">新建患者</h3>
-    <div class="form-row"><label>姓名</label><input id="pName"></div>
-    <div class="form-row"><label>性别</label><select id="pSex"><option>男</option><option>女</option></select></div>
-    <div class="form-row"><label>年龄</label><input id="pAge" type="number"></div>
-    <div class="form-row"><label>门诊号</label><input id="pOutNo"></div>
-    <div class="form-row"><label>科室</label><input id="pDept" value="超声科"></div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
-      <button class="btn-sm gray" onclick="closeModal('patientModal')">取消</button>
-      <button class="btn-sm primary" onclick="savePatient()">保存</button>
-    </div>
-    <input type="hidden" id="pEditId" value="0">
-  </div>
-</div>
-
-<script>
-// ===== State =====
-const S = {text:'',matches:[],sel:0,currentReport:null,doctor:'',currentPatient:null};
-const $ = id=>document.getElementById(id);
-let tt = null;
-function msg(s,type='success',d=2500){const el=$('toast'),inner=$('toastInner');inner.textContent=s;inner.className='toast-inner '+type;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),d)}
-
-// ===== API =====
-async function api(m,p,d){const o={method:m,headers:{'Content-Type':'application/json'}};if(d)o.body=JSON.stringify(d);const r=await fetch(p,o);if(!r.ok){const e=await r.text();throw new Error(e)}return r.json()}
-const get=p=>api('GET',p);const post=(p,d)=>api('POST',p,d);const put=(p,d)=>api('PUT',p,d);const del=p=>api('DELETE',p);
-
-// ===== Navigation =====
-function switchPage(name){
-  document.querySelectorAll('.page,.nav-item').forEach(el=>el.classList.remove('on'));
-  document.querySelector(`[data-page="${name}"]`).classList.add('on');
-  const page=$(name==='voice'?'page-voice':'page-'+name);
-  if(page)page.classList.add('on');
-  const titles={dashboard:'📊 工作台',voice:'🎤 语音报告',patients:'👤 患者管理',reports:'📋 报告列表',stats:'📈 统计',templates:'📁 模板库',cheatsheet:'📖 语音提示卡'};
-  $('pageTitle').textContent=titles[name]||name;
-  if(name==='dashboard')loadDashboard();
-  if(name==='patients')loadPatients();
-  if(name==='reports')loadReports();
-  if(name==='stats')loadStats();
-  if(name==='templates')loadTemplates();
-  if(name==='cheatsheet')loadCheatsheet();
-}
-document.querySelectorAll('.nav-item').forEach(el=>el.addEventListener('click',()=>switchPage(el.dataset.page)));
-
-// ===== Doctors =====
-async function loadDoctors(){
-  try{
-    const {doctors}=await get('/api/doctors');
-    const sel=$('doctorSelect');
-    if(!doctors||!doctors.length){for(const n of['陈慧','曾宁花','毛媛媛','刘丹','陈莺语','尹定国','任欢','唐娟']){try{await post('/api/doctors',{name:n,department:'超声科'})}catch(e){}}return loadDoctors()}
-    sel.innerHTML=doctors.map(d=>`<option value="${d.name}">${d.name}</option>`).join('');
-    sel.value=doctors[0].name;S.doctor=doctors[0].name;
-  }catch(e){console.error(e)}
-}
-$('doctorSelect').addEventListener('change',()=>{S.doctor=$('doctorSelect').value;loadReports()});
-
-// ===== Dashboard =====
-async function loadDashboard(){
-  try{
-    const s=await get('/api/stats');
-    $('dashStats').innerHTML=`
-      <div class="stat-card"><div class="num">${s.total_reports}</div><div class="label">总报告</div></div>
-      <div class="stat-card green"><div class="num">${s.confirmed}</div><div class="label">已确认</div></div>
-      <div class="stat-card orange"><div class="num">${s.today_reports}</div><div class="label">今日新增</div></div>
-      <div class="stat-card purple"><div class="num">${s.total_patients}</div><div class="label">患者数</div></div>`;
-    if(s.today_doctors?.length) $('dashToday').innerHTML='<table class="data"><tr><th>医生</th><th>今日份数</th></tr>'+s.today_doctors.map(d=>`<tr><td>${d.doctor}</td><td>${d.cnt}</td></tr>`).join('')+'</table>';
-    if(s.status_dist?.length) $('dashStatus').innerHTML=s.status_dist.map(d=>`<div class="flex" style="justify-content:space-between;padding:6px 0;border-bottom:1px solid #f3f4f6"><span>${d.status==='confirmed'?'✅ 已确认':'📝 草稿'}</span><span style="font-weight:600">${d.cnt}</span></div>`).join('');
-  }catch(e){console.error(e)}
-}
-
-const STRUCTURE_API = '/api/structure';
-
-// ===== Voice Pipeline =====
-async function runPipeline(text){
-  S.text=text.trim();S.sel=0;
-  if(!S.text){resetMatch();return}
-  $('statusBadge').textContent='● 管线处理中';
-  $('matchStatus').textContent='⏳ ASR纠错 → 路由 → 模板搜索 → 匹配 → 填充 → 验证 → 建议';
-  $('matchStatus').className='st info';
-  try{
-    const r=await post(STRUCTURE_API,{text:S.text,exam_type:'腹部超声'});
-    S.currentReport=null;
-    renderPipeline(r);
-  }catch(e){
-    $('matchStatus').textContent='❌ 管线处理失败: '+e.message;
-    $('matchStatus').className='st err';
-    msg('管线处理失败','error');
-    $('statusBadge').textContent='● 错误';
-  }
-}
-function renderPipeline(r){
-  const report=r.report||{};
-  const method=r.method||'?';
-  const template=r.template_used||'';
-  const elapsed=r.elapsed_ms||0;
-  const warnings=r.warnings||[];
-  const confidence=r.confidence||0;
-  const A=r.sources?.A_asr||S.text||'';
-
-  // 编辑区填充
-  $('editRawVoice').value=S.text||'';
-  $('editVoice').value=A;
-  $('editDesc').value=_stripHtml(report.study_see||'');
-  $('editDiag').value=(report.study_hint||[]).map(h=>h.diagnosis||'').filter(Boolean).join('；')||'';
-  $('editIntent').value=method+(template?' · '+template:'')+' · '+(report.recommendation||'');
-
-  // 状态摘要
-  const c=confidence>=0.7?'ok':confidence>=0.4?'warn':'err';
-  const cl={'ok':'✅ 高置信度','warn':'🟡 中等置信度','err':'⚠️ 低置信度'};
-  const wn=warnings.length?' ⚠️ '+warnings.join('; '):'';
-  $('matchStatus').innerHTML=`${cl[c]} · ${method} · ${template} · 耗时${elapsed}ms${wn}`;
-  $('matchStatus').className=`st ${c}`;
-  $('statusBadge').textContent='● 就绪';
-
-  // 候选模板（简单显示）
-  $('candidateList').innerHTML=`
-    <div class="c on"><div class="nm">${template||'(无匹配)'}</div>
-    <div class="meta"><span>方法: ${method}</span><span class="tag ${c}">${(confidence*100).toFixed(0)}%</span></div></div>
-  `;
-  S.matches=[{template_name:template,method:method,score:confidence}];
-
-  // ⚡ 详细管线时间线
-  renderTimeline(r, A);
-}
-function _stripHtml(h){const d=document.createElement('div');d.innerHTML=h;return d.textContent||d.innerText||''}
-
-function renderTimeline(r, A){
-  const method=r.method||'';
-  const elapsed=r.elapsed_ms||0;
-  const template=r.template_used||'';
-  const report=r.report||{};
-  const warnings=r.warnings||[];
-  const hint=(report.study_hint||[]).map(h=>h.diagnosis||'').filter(Boolean).join('；')||'';
-
-  // 构建步骤
-  const steps=[
-    {icon:'🔊',label:'L0. 文本接收',detail:`"${A.slice(0,30)}..."`,time:'0ms',ok:true},
-    {icon:'🧹',label:'L0.5 口误检测',detail:'过滤重复/不对不对/改一下等',time:'0ms',ok:true},
-    {icon:'🧭',label:'L1. 路由预分类',detail:`${method.includes('fetal')?'胎儿':method.includes('multi')?'多器官':'标准路径'}`,time:'0ms',ok:true},
-  ];
-
-  // 依赖于最终方法的步骤
-  if(method==='fetal_template'){
-    steps.push({icon:'👶',label:'L2. 胎儿模板',detail:'fill_fetal_template 快速填充',time:'0ms',ok:true});
-  }else if(method==='llm_multi'){
-    steps.push({icon:'🧠',label:'L2. LLM多器官',detail:'_llm_multi_organ_fill',time:`<${elapsed}ms`,ok:true});
-  }else if(method==='converted_fill'||method==='converted_fill_llm'){
-    steps.push({icon:'📋',label:'L2. 模板搜索',detail:`${template}`,time:'0ms',ok:true});
-    steps.push({icon:'🔄',label:'L3. 40万引擎',detail:warnings.find(w=>w.includes('40万'))?'已触发':'跳过(无需)',time:'0ms',ok:true});
-    steps.push({icon:'✏️',label:'L4. 转换填充',detail:method==='converted_fill_llm'?'填充+LLM补全':'fill_converted_template',time:'0ms',ok:true});
-  }else if(method==='template_fill'){
-    steps.push({icon:'📋',label:'L2. 模板搜索',detail:template,time:'0ms',ok:true});
-    steps.push({icon:'🧠',label:'L3. LLM填充',detail:'_llm_fill_template',time:'0ms',ok:true});
-  }else if(method==='llm_free'){
-    steps.push({icon:'🧠',label:'L2. LLM自由生成',detail:'无匹配模板',time:'0ms',ok:true});
-  }
-
-  steps.push({icon:'🔢',label:'L5. 数值保全',detail:warnings.find(w=>w.includes('数值'))?'已补:'+warnings.find(w=>w.includes('数值')):'未发现缺失值',time:'0ms',ok:true});
-  const hasViolation=warnings.find(w=>w.includes('L5')||w.includes('L6'));
-  steps.push({icon:'✅',label:'L6. 验证',detail:hasViolation||'通过(无矛盾/超范围)',time:'0ms',ok:!hasViolation});
-  steps.push({icon:'💊',label:'L7. 建议生成',detail:report.recommendation||'(空)',time:'0ms',ok:true});
-  steps.push({icon:'💾',label:'L8. 入库+Tracelog',detail:report.study_hint?.length>0?`${report.study_hint.length}条诊断`:'正常报告',time:`${elapsed}ms`,ok:true});
-
-  // 总耗时
-  steps.push({icon:'🏁',label:'完成',detail:`总共 ${elapsed}ms`+ (warnings.length?` ⚠️ ${warnings.length}个警告`:''),time:`${elapsed}ms`,ok:true});
-
-  $('timelineSteps').innerHTML=steps.map((s,i)=>`
-    <div style="display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid ${i<steps.length-1?'var(--border)':'transparent'};opacity:0.9">
-      <span style="flex-shrink:0;width:20px;text-align:center;font-size:13px">${s.ok?'✅':'❌'}</span>
-      <span style="flex-shrink:0;width:20px;text-align:center;font-size:13px">${s.icon}</span>
-      <div style="flex:1;min-width:0">
-        <div style="font-size:12px;font-weight:500">${s.label}</div>
-        <div style="font-size:11px;color:var(--text2);word-break:break-all">${s.detail}</div>
-      </div>
-      <span style="flex-shrink:0;font-size:11px;color:var(--text2);font-family:var(--mono)">${s.time}</span>
-    </div>
-  `).join('');
-  $('timelineCard').style.display='';
-}
-function resetMatch(){
-function renderCandidates(ms){
-  if(!ms?.length){$('candidateList').innerHTML='<div class="empty">无结果</div>';return}
-  $('candidateList').innerHTML=ms.map((m,i)=>{
-    const a=i===S.sel?'on':'';
-    const t=m.score>=0.5?'high':m.score>=0.3?'med':'low';
-    const tl=m.score>=0.5?'高':m.score>=0.3?'中':'低';
-    return `<div class="c ${a}" data-i="${i}"><div class="nm">${m.template_name}</div><div class="meta"><span>${m.site||''}</span><span class="tag ${t}">${tl} ${(m.score*100).toFixed(0)}%</span></div></div>`;
-  }).join('');
-  $('candidateList').querySelectorAll('.c').forEach(el=>el.addEventListener('click',()=>{const i=parseInt(el.dataset.i);selectCandidate(i)}));
-}
-function selectCandidate(i){
-  S.sel=i;const m=S.matches[i];if(!m)return;
-  $('editDesc').value=m.description||'';$('editDiag').value=m.diagnosis||'';
-  $('candidateList').querySelectorAll('.c').forEach(el=>el.classList.toggle('on',parseInt(el.dataset.i)===i));
-}
-function resetMatch(){
-  S.text='';S.matches=[];S.sel=0;S.currentReport=null;
-  $('editRawVoice').value='';$('editVoice').value='';$('editIntent').value='';$('editDesc').value='';$('editDiag').value='';
-  $('reportIdDisplay').textContent='';$('reportStatusDisplay').innerHTML='';
-  $('matchStatus').textContent='等待输入后自动处理...';$('matchStatus').className='st info';
-  $('candidateList').innerHTML='<div class="empty">输入后自动匹配</div>';
-  $('pipelineInfo').innerHTML='ASR修正 → 意图识别 → 模板匹配 → 变量提取 → 入库';
-  $('statusBadge').textContent='● 就绪';
-}
-
-// ===== Patient =====
-async function searchPatient(){
-  const q=$('patientSearch').value.trim();if(!q){msg('输入搜索词','info');return}
-  try{
-    const {patients}=await get(`/api/patients?search=${encodeURI(q)}&limit=10`);
-    if(!patients?.length){msg('未找到','info');return}
-    if(patients.length===1){
-      S.currentPatient={id:patients[0].id,name:patients[0].name};
-      $('patientId').value=patients[0].id;
-      $('patientDisplay').textContent=`${patients[0].name} (${patients[0].sex||''}${patients[0].age||''})`;
-    }else{
-      msg(`找到多个, 请在患者页面选择`,'info',3000);
-    }
-  }catch(e){msg('查询失败','error')}
-}
-async function loadPatients(){
-  try{
-    const s=$('patSearch').value;
-    const {patients}=await get(`/api/patients?search=${encodeURIComponent(s)}&limit=100`);
-    const tb=$('patientTable');
-    if(!patients?.length){tb.innerHTML='<tr><td colspan="6" class="empty">暂无</td></tr>';return}
-    tb.innerHTML=patients.map(p=>`<tr onclick="S.currentPatient={id:${p.id},name:'${p.name}'};$('patientId').value=${p.id};$('patientDisplay').textContent='${p.name}';msg('已选:${p.name}')">
-      <td><strong>${p.name}</strong></td><td>${p.sex||'-'}</td><td>${p.age||'-'}</td>
-      <td style="font-family:var(--mono);font-size:12px">${p.outpatient_no||'-'}</td><td>${p.dept_name||'-'}</td>
-      <td><button class="btn-sm danger" onclick="event.stopPropagation();delPatient(${p.id})">删除</button></td>
-    </tr>`).join('');
-  }catch(e){console.error(e)}
-}
-async function delPatient(id){if(!confirm('确认删除?'))return;await del(`/api/patients/${id}`);msg('已删除');loadPatients()}
-function showPatientForm(data){$('patientModal').classList.add('on');$('pEditId').value=data?.id||0;$('pName').value=data?.name||'';$('pSex').value=data?.sex||'男';$('pAge').value=data?.age||'';$('pOutNo').value=data?.outpatient_no||'';$('pDept').value=data?.dept_name||'超声科';$('modalTitle').textContent=data?.id?'编辑患者':'新建患者'}
-function closeModal(id){$(id).classList.remove('on')}
-async function quickAddPatient(){
-  const n=$('patientQuickName').value.trim(),g=$('patientQuickSex').value,a=parseInt($('patientQuickAge').value)||0,e=$('patientQuickExam').value.trim();
-  if(!n||!g||!a||!e){msg('填写完整姓名/性别/年龄/检查类型','error');return}
-  try{
-    const r=await post('/api/patients/quick-add',{name:n,gender:g,age:a,exam_type:e});
-    if(r.success){
-      $('patientId').value=r.patient.id;
-      S.currentPatient={id:r.patient.id,name:r.patient.name};
-      $('patientDisplay').textContent=`${r.patient.name}(${g}${a})`;
-      msg(`✅ 已入队: ${r.patient.name}`,'success',3000);
-      $('patientQuickName').value='';$('patientQuickSex').value='';$('patientQuickAge').value='';$('patientQuickExam').value='';
-    }
-  }catch(e){msg('入队失败','error')}
-}
-async function savePatient(){
-  const d={name:$('pName').value,sex:$('pSex').value,age:parseInt($('pAge').value)||0,outpatient_no:$('pOutNo').value,dept_name:$('pDept').value};
-  const id=$('pEditId').value;
-  try{if(id&&id!=='0'){await put(`/api/patients/${id}`,d);msg('已更新')}else{const r=await post('/api/patients',d);msg(`已创建: ${r.patient.name}`)}closeModal('patientModal');loadPatients()}catch(e){msg('失败','error')}
-}
-
-// ===== Save Report =====
-async function saveReport(status='draft'){
-  if(!S.doctor){msg('选择医生','info');return}
-  const desc=$('editDesc').value.trim();
-  if(!desc){msg('输入超声描述','info');return}
-  const sites=S.matches.length?[...new Set(S.matches.map(m=>m.site))].join(','):'';
-  const payload={doctor:S.doctor,patient_id:parseInt($('patientId').value)||0,patient_name:S.currentPatient?.name||'',voice_text:$('editVoice').value,template_id:S.matches[S.sel]?.template_id||'',template_name:S.matches[S.sel]?.template_name||'',description:desc,diagnosis:$('editDiag').value,match_score:S.matches[S.sel]?.score||0,matched_sites:sites};
-  try{
-    if(S.currentReport){await put(`/api/reports/${S.currentReport}`,{status,description:desc,diagnosis:$('editDiag').value})}
-    else{const r=await post('/api/reports',payload);S.currentReport=r.report.id}
-    $('reportIdDisplay').textContent=S.currentReport?'#'+S.currentReport:'';
-    $('reportStatusDisplay').innerHTML=status==='confirmed'?'<span class="badge confirmed">✅ 已确认</span>':'<span class="badge draft">📝 草稿</span>';
-    msg(status==='confirmed'?`✅ 已确认 #${S.currentReport}`:`📝 已保存 #${S.currentReport}`);
-    loadDashboard();
-  }catch(e){msg('保存失败','error')}
-}
-$('matchBtn').addEventListener('click',()=>runPipeline($('textInput').value));
-$('textInput').addEventListener('keydown',e=>{if(e.key==='Enter')runPipeline($('textInput').value)});
-$('saveBtn').addEventListener('click',()=>saveReport('confirmed'));
-$('resetBtn').addEventListener('click',resetMatch);
-
-// ===== Microphone =====
-let mediaRecorder=null;
-$('micBtn').addEventListener('click',async()=>{
-  if(mediaRecorder&&mediaRecorder.state==='recording'){mediaRecorder.stop();$('micBtn').classList.remove('recording');$('micBtn').textContent='🎤';return}
-  try{
-    const s=await navigator.mediaDevices.getUserMedia({audio:true});
-    const mt=MediaRecorder.isTypeSupported('audio/webm;codecs=opus')?'audio/webm;codecs=opus':'audio/webm';
-    mediaRecorder=new MediaRecorder(s,{mimeType:mt});const chunks=[];
-    mediaRecorder.ondataavailable=e=>chunks.push(e.data);
-    mediaRecorder.onstop=async()=>{
-      const blob=new Blob(chunks,{type:mt});s.getTracks().forEach(t=>t.stop());
-      const fd=new FormData();fd.append('file',blob,'voice.webm');fd.append('doctor',S.doctor);
-      msg('ASR识别中...','info',10000);
-      try{
-        const resp=await fetch('/api/voice/ali-asr',{method:'POST',body:fd});
-        const r=await resp.json();
-        if(r.text&&r.text.trim()){$('textInput').value=r.text.trim();msg('✅ 识别成功','success',2000);runPipeline(r.text.trim())}
-        else msg('未识别到文字','error');
-      }catch(e){msg('ASR失败','error')}
-      $('micBtn').textContent='🎤';
-    };
-    mediaRecorder.start();$('micBtn').classList.add('recording');$('micBtn').textContent='⏹';msg('录音中...点击停止','info');
-  }catch(e){msg('麦克风不可用','error')}
-});
-
-// ===== Reports =====
-async function loadReports(){
-  try{
-    const st=$('reportFilter').value;
-    const {reports}=await get(`/api/reports?status=${st}&doctor=&limit=200`);
-    const tb=$('reportTable');
-    if(!reports?.length){tb.innerHTML='<tr><td colspan="8" class="empty">暂无</td></tr>';return}
-    tb.innerHTML=reports.map(r=>{
-      const sts=r.status==='confirmed'?'<span class="badge confirmed">✅ 已确认</span>':'<span class="badge draft">📝 草稿</span>';
-      const sc=r.match_score?`${(r.match_score*100).toFixed(0)}%`:'-';
-      return `<tr onclick="openReport('${r.id}')">
-        <td style="font-family:var(--mono);font-size:12px">${r.id}</td>
-        <td>${r.patient_name||'-'}</td><td>${r.doctor}</td>
-        <td>${(r.template_name||'').slice(0,22)}</td>
-        <td>${sts}</td><td>${sc}</td>
-        <td style="font-size:12px;color:var(--text2)">${(r.created_at||'').slice(0,16)}</td>
-        <td><button class="btn-sm danger" onclick="event.stopPropagation();delReport('${r.id}')">删除</button></td>
-      </tr>`;
-    }).join('');
-  }catch(e){console.error(e)}
-}
-$('reportFilter').addEventListener('change',loadReports);
-async function openReport(rid){
-  try{
-    const{report}=await get(`/api/reports/${rid}`);
-    S.currentReport=rid;
-    $('editRawVoice').value=report.voice_text||'';
-    $('editVoice').value=report.voice_text||'';
-    $('editDesc').value=report.description||'';
-    $('editDiag').value=report.diagnosis||'';
-    $('editIntent').value='';
-    if(report.patient_id){$('patientId').value=report.patient_id;$('patientDisplay').textContent=report.patient_name||'';S.currentPatient={id:report.patient_id,name:report.patient_name}}
-    $('reportIdDisplay').textContent='#'+rid;
-    $('reportStatusDisplay').innerHTML=report.status==='confirmed'?'<span class="badge confirmed">✅ 已确认</span>':'<span class="badge draft">📝 草稿</span>';
-    switchPage('voice');msg('已加载报告');
-  }catch(e){msg('加载失败','error')}
-}
-async function delReport(rid){if(!confirm(`确认删除 ${rid}?`))return;await del(`/api/reports/${rid}`);msg('已删除');loadReports()}
-
-// ===== Stats =====
-async function loadStats(){
-  try{
-    const s=await get('/api/stats');
-    $('statsCards').innerHTML=`
-      <div class="stat-card"><div class="num">${s.total_reports}</div><div class="label">总报告</div></div>
-      <div class="stat-card green"><div class="num">${s.confirmed}</div><div class="label">已确认</div></div>
-      <div class="stat-card orange"><div class="num">${s.today_reports}</div><div class="label">今日</div></div>
-      <div class="stat-card purple"><div class="num">${s.total_matches}</div><div class="label">匹配次数</div></div>
-      <div class="stat-card"><div class="num">${s.total_doctors}</div><div class="label">医生</div></div>
-      <div class="stat-card green"><div class="num">${s.total_patients}</div><div class="label">患者</div></div>`;
-    if(s.top_doctors?.length) $('statsDoctors').innerHTML='<table class="data"><tr><th>医生</th><th>报告数</th></tr>'+s.top_doctors.map(d=>`<tr><td>${d.doctor}</td><td>${d.cnt}</td></tr>`).join('')+'</table>';
-    if(s.top_templates?.length) $('statsTemplates').innerHTML='<table class="data"><tr><th>模板</th><th>次数</th></tr>'+s.top_templates.map(t=>`<tr><td>${t.template_name.slice(0,28)}</td><td>${t.cnt}</td></tr>`).join('')+'</table>';
-    if(s.status_dist?.length) $('statsStatus').innerHTML='<table class="data"><tr><th>状态</th><th>数量</th></tr>'+s.status_dist.map(d=>`<tr><td>${d.status==='confirmed'?'✅ 已确认':d.status==='draft'?'📝 草稿':'🔍 '+d.status}</td><td>${d.cnt}</td></tr>`).join('')+'</table>';
-  }catch(e){console.error(e)}
-}
-
-// ===== Templates =====
-async function loadTemplates(){
-  try{
-    const site=$('siteFilter').value;const search=$('tplSearch').value;
-    const{templates,total,sites}=await get(`/api/templates?site=${encodeURIComponent(site)}&search=${encodeURIComponent(search)}&size=200`);
-    if(sites){const cur=$('siteFilter').value;$('siteFilter').innerHTML='<option value="">全部部位</option>'+sites.map(s=>`<option value="${s}" ${s===cur?'selected':''}>${s}</option>`).join('')}
-    $('tplTotal').textContent=`共 ${total} 个`;
-    const list=$('tplList');
-    if(!templates?.length){list.innerHTML='<div class="empty">无匹配</div>';return}
-    list.innerHTML=templates.map(t=>`<div style="padding:8px 14px;border-bottom:1px solid #f3f4f6">
-      <div class="flex" style="gap:6px"><strong>${t.name}</strong><span class="badge" style="background:var(--primary-bg);color:var(--primary);font-size:11px;padding:1px 8px">${t.site||'其他'}</span><span style="font-size:12px;color:var(--text2)">${t.discgroup||''}</span></div>
-      <div style="font-size:12px;color:var(--text2);margin-top:3px;line-height:1.4">${(t.description||'').slice(0,150)}${(t.description||'').length>150?'...':''}</div>
-      ${t.diagnosis?`<div style="font-size:12px;color:var(--primary);margin-top:2px">诊断: ${t.diagnosis.slice(0,80)}</div>`:''}
-    </div>`).join('');
-  }catch(e){console.error(e)}
-}
-$('siteFilter').addEventListener('change',loadTemplates);
-
-// ===== Cheatsheet (数据已迁移到后端API) =====
-function loadCheatsheet() {
-  fetch('/api/auto/cheatsheet')
-    .then(r => r.json())
-    .then(data => {
-      window.CS_DATA = data;
-      filterCheatsheet();
-    })
-    .catch(() => {
-      window.CS_DATA = [];
-      filterCheatsheet();
-    });
-}
-
-function filterCheatsheet() {
-  const site = $('csSiteFilter').value;
-  const search = $('csSearch').value.trim();
-  let filtered = window.CS_DATA || [];
-  if (site) filtered = filtered.filter(d => d.site === site);
-  if (search) filtered = filtered.filter(d => d.say.includes(search) || d.tpl.includes(search) || d.site.includes(search));
-
-  $('csCount').textContent = `${filtered.length} 条`;
-
-  const list = $('csList');
-  if (!filtered.length) { list.innerHTML = '<div class="empty">无匹配结果，换个关键词试试</div>'; return; }
-
-  let html = '';
-  let currentSite = '';
-  filtered.forEach((d, i) => {
-    if (d.site !== currentSite) {
-      if (currentSite) html += '</div></div>';
-      currentSite = d.site;
-      html += `<div style="margin-bottom:16px">
-        <h4 style="font-size:14px;font-weight:600;color:var(--primary);margin-bottom:8px;padding:0 4px">🏥 ${d.site}</h4>
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:6px">`;
-    }
-    html += `<div style="border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;display:flex;align-items:center;gap:8px;transition:.15s" onmouseover="this.style.borderColor='var(--primary)'" onmouseout="this.style.borderColor='var(--border)'">
-      <span style="flex:1;font-size:13px;font-family:var(--font)">${d.say}</span>
-      <span style="color:var(--text2);font-size:11px">→</span>
-      <span style="font-size:12px;color:var(--primary);font-weight:500;text-align:right;max-width:140px">${d.tpl}</span>
-    </div>`;
-  });
-  if (currentSite) html += '</div></div>';
-
-  html += `<div style="margin-top:16px;padding:12px 16px;background:linear-gradient(135deg,#f0fdf4,#e6f4ea);border-radius:var(--radius-sm);font-size:12px;color:#15803d">
-    <strong>💡 提示：</strong>医生只需说出异常部分的描述，正常器官不用提。
-    系统自动匹配最合适的模板并补全正常描述。共 <strong>${filtered.length}</strong> 条提示词
-  </div>`;
-  list.innerHTML = html;
-}
-
-function filterBySite(site) {
-  $('csSiteFilter').value = site;
-  document.querySelectorAll('.cs-tab').forEach(el => {
-    el.style.background = '#f3f4f6';
-    el.style.color = 'var(--text2)';
-    el.style.fontWeight = '400';
-  });
-  const target = document.querySelector(`.cs-tab[data-site="${site}"]`);
-  if (target && site) {
-    target.style.background = 'var(--primary)';
-    target.style.color = '#fff';
-    target.style.fontWeight = '500';
-  } else if (!site) {
-    document.querySelector('.cs-tab.on').style.background = 'var(--primary)';
-    document.querySelector('.cs-tab.on').style.color = '#fff';
-    document.querySelector('.cs-tab.on').style.fontWeight = '500';
-  }
-  filterCheatsheet();
-}
-
-// ===== Keyboard =====
-document.addEventListener('keydown',e=>{
-  if(e.key==='Escape')resetMatch();
-  if(e.key==='ArrowDown'&&S.matches.length){e.preventDefault();selectCandidate(Math.min(S.sel+1,S.matches.length-1))}
-  if(e.key==='ArrowUp'&&S.matches.length){e.preventDefault();selectCandidate(Math.max(S.sel-1,0))}
-  if((e.ctrlKey||e.metaKey)&&e.key==='Enter'){e.preventDefault();saveReport('confirmed')}
-});
-
-// ===== Init =====
-loadDoctors();
-loadDashboard();
-
-const samples=['肝脏大小正常表面光滑实质回声分布均匀门静脉内径正常','肝内可见无回声区大小约3mm壁薄后壁回声增强','甲状腺双侧叶形态规则大小正常表面光滑实质回声均匀','双乳组织增厚增粗回声分布不均呈豹纹征','前列腺大小约45x32x28mm形态饱满实质回声欠均匀'];
-let si=0;
-$('textInput').placeholder=samples[0];
-$('textInput').addEventListener('focus',()=>$('textInput').placeholder='输入超声描述...');
-$('textInput').addEventListener('blur',()=>{if(!$('textInput').value){$('textInput').placeholder=samples[si%samples.length];si++}});
-
-console.log('🚀 超声报告系统 v3 已加载');
-</script>
+<script src="/api.js?v=20260609"></script>
+<script src="/ui.js?v=20260609"></script>
+<script src="/app.js?v=20260609"></script>
 </body>
 </html>

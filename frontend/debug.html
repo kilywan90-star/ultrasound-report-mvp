@@ -88,6 +88,8 @@ pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;word-break:break
   <div class="tab" data-tab="kb">📚 知识库</div>
   <div class="tab" data-tab="db">🗄️ 数据库</div>
   <div class="tab" data-tab="history">📊 历史记录</div>
+  <div class="tab" data-tab="export">📤 导出</div>
+  <div class="tab" data-tab="settings">⚙️ 配置</div>
 </div>
 
 <div class="panel on" id="panel-result">
@@ -142,8 +144,64 @@ pre{font-family:var(--mono);font-size:11px;white-space:pre-wrap;word-break:break
 <div class="panel" id="panel-history">
   <div class="card">
     <div class="card-hd">📊 历史报告 <span id="historyCount" style="font-size:10px;color:var(--t2)"></span></div>
+    <div class="card-bd" style="padding:4px 12px;display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--card2)">
+      <input id="historySearch" placeholder="搜索..." style="flex:1;min-width:100px;padding:4px 8px;border:1px solid var(--card2);border-radius:4px;background:var(--bg);color:var(--text);font-size:11px;outline:none">
+      <select id="historyFilter" style="padding:4px 6px;border:1px solid var(--card2);border-radius:4px;background:var(--bg);color:var(--text);font-size:11px">
+        <option value="all">全部</option><option value="today">今天</option><option value="week">本周</option>
+      </select>
+      <button class="qb" style="padding:3px 10px;font-size:10px" onclick="exportCSV()">📥 导出CSV</button>
+    </div>
     <div class="card-bd" id="historyList" style="padding:0;max-height:500px;overflow-y:auto;font-size:12px">
       <div style="padding:20px;text-align:center;color:var(--t2)">加载中...</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-export">
+  <div class="card">
+    <div class="card-hd">📤 导出报告</div>
+    <div class="card-bd">
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">日期范围:</label>
+        <input type="date" id="exportDateFrom" style="padding:4px 8px;border:1px solid var(--card2);border-radius:4px;background:var(--bg);color:var(--text);font-size:12px">
+        <span style="color:var(--t2);margin:0 6px">至</span>
+        <input type="date" id="exportDateTo" style="padding:4px 8px;border:1px solid var(--card2);border-radius:4px;background:var(--bg);color:var(--text);font-size:12px">
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="qb" onclick="exportCSV()" style="padding:6px 16px">📥 导出 CSV</button>
+        <button class="qb" onclick="exportJSON()" style="padding:6px 16px">📥 导出 JSON</button>
+      </div>
+      <div style="margin-top:10px;font-size:11px;color:var(--t2)" id="exportPreview">共 0 条记录</div>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="panel-settings">
+  <div class="card">
+    <div class="card-hd">⚙️ 配置</div>
+    <div class="card-bd">
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">默认检查类型:</label>
+        <select id="settingsExamType" style="padding:4px 8px;border:1px solid var(--card2);border-radius:4px;background:var(--bg);color:var(--text);font-size:12px" onchange="saveSettings()">
+          <option>腹部超声</option><option>甲状腺超声</option><option>乳腺超声</option><option>心脏超声</option><option>产科超声</option><option>泌尿超声</option><option>血管超声</option>
+        </select>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">管线模式:</label>
+        <select id="settingsPipelineMode" style="padding:4px 8px;border:1px solid var(--card2);border-radius:4px;background:var(--bg);color:var(--text);font-size:12px" onchange="saveSettings()">
+          <option value="full">全流程+详情(默认)</option>
+          <option value="quick">快速(仅报告)</option>
+        </select>
+      </div>
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--t2);display:block;margin-bottom:4px">状态:</label>
+        <div style="font-size:12px" id="settingsStatus">
+          <div>LLM引擎: <span id="settingsLLM">检测中...</span></div>
+          <div>GPU: <span id="settingsGPU">检测中...</span></div>
+          <div>API地址: <span id="settingsAPI">/api</span></div>
+        </div>
+      </div>
+      <button class="qb" onclick="saveSettings()" style="padding:6px 16px;background:var(--accent);color:#0f172a">💾 保存</button>
     </div>
   </div>
 </div>
@@ -161,77 +219,122 @@ document.getElementById('tabBar').addEventListener('click', e => {
 
 function setText(t){ document.getElementById('textInput').value = t; }
 
-// ===== 麦克风录音 =====
-let mediaRecorder = null;
-let audioChunks = [];
+// ===== 麦克风录音 (浏览器Web Speech API) =====
+let recognition = null;
+let isRecording = false;
 
 async function toggleRec(){
-  if(mediaRecorder && mediaRecorder.state === 'recording'){
-    mediaRecorder.stop();
+  if(isRecording){
+    stopRec();
+    return;
+  }
+  startRec();
+}
+
+function startRec(){
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SpeechRecognition){
+    alert('浏览器不支持语音识别，请使用 Chrome');
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = 'zh-CN';
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  let finalText = '';
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
+      const t = e.results[i][0].transcript;
+      if(e.results[i].isFinal) finalText += t;
+      else interim += t;
+    }
+    document.getElementById('textInput').value = finalText + (interim ? ' ['+interim+']' : '');
+  };
+
+  recognition.onerror = (e) => {
+    console.error('语音识别错误:', e.error);
+    if(e.error !== 'no-speech'){
+      stopRec();
+      alert('语音识别错误: ' + e.error);
+    }
+  };
+
+  recognition.onend = () => {
+    if(isRecording){
+      // 如果是手动停止就不重启, 意外结束就重启
+      try{ recognition.start(); }catch(e){}
+      return;
+    }
     document.getElementById('micBtn').textContent = '🎤 录音';
     document.getElementById('recIndicator').textContent = '🎤 就绪';
     document.getElementById('recIndicator').className = 'rec-indicator';
-    return;
-  }
-  try{
-    const stream = await navigator.mediaDevices.getUserMedia({audio: true});
-    const mime = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') ? 'audio/webm;codecs=opus' : 'audio/webm';
-    mediaRecorder = new MediaRecorder(stream, {mimeType: mime});
-    audioChunks = [];
 
-    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
-    mediaRecorder.onstop = async () => {
-      stream.getTracks().forEach(t => t.stop());
-      const blob = new Blob(audioChunks, {type: mime});
-      document.getElementById('micBtn').textContent = '🎤 录音';
-      document.getElementById('recIndicator').textContent = '⏳ ASR识别中...';
-      document.getElementById('recIndicator').className = 'rec-indicator on';
-      await sendAudioToASR(blob, 'voice.webm');
-    };
+    // 自动跑管线
+    const text = document.getElementById('textInput').value.trim();
+    if(text && !text.includes('[')){
+      // 过滤掉中间结果(有[xxx]的)
+      runPipelineFull();
+    }
+  };
 
-    mediaRecorder.start();
-    document.getElementById('micBtn').textContent = '⏹ 停止';
-    document.getElementById('recIndicator').textContent = '🔴 录音中...';
-    document.getElementById('recIndicator').className = 'rec-indicator on';
-  }catch(e){
-    alert('麦克风不可用: ' + e.message + '\n请使用HTTPS或localhost，或直接上传文件');
-  }
+  recognition.start();
+  isRecording = true;
+  document.getElementById('micBtn').textContent = '⏹ 停止';
+  document.getElementById('recIndicator').textContent = '🔴 录音中...(浏览器识别)';
+  document.getElementById('recIndicator').className = 'rec-indicator on';
 }
 
-// ===== 文件上传 =====
+function stopRec(){
+  isRecording = false;
+  if(recognition){
+    recognition.stop();
+    recognition = null;
+  }
+  document.getElementById('micBtn').textContent = '🎤 录音';
+  document.getElementById('recIndicator').textContent = '🎤 就绪';
+  document.getElementById('recIndicator').className = 'rec-indicator';
+}
+
+// ===== 文件上传 (阿里云ASR) =====
 function uploadFile(input){
   const file = input.files[0];
   if(!file) return;
   document.getElementById('recIndicator').textContent = '⏳ 上传ASR识别中...';
   document.getElementById('recIndicator').className = 'rec-indicator on';
-  sendAudioToASR(file, file.name);
-  input.value = '';
-}
 
-// ===== 音频→ASR→填文本→自动管线 =====
-async function sendAudioToASR(blob, filename){
-  const fd = new FormData();
-  fd.append('file', blob, filename);
-  fd.append('doctor', '调试医生');
-  try{
-    const r = await fetch('/api/voice/ali-asr', {method:'POST', body: fd});
-    const d = await r.json();
-    if(d.text && d.text.trim()){
-      document.getElementById('textInput').value = d.text.trim();
-      document.getElementById('recIndicator').textContent = '✅ ASR完成('+(d.source||'whisper')+')';
+  // 读取文件为base64
+  const reader = new FileReader();
+  reader.onload = async function(e){
+    const base64Audio = e.target.result.split(',')[1];
+    try{
+      const r = await fetch('/api/asr/upload', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({audio: base64Audio, format: file.name.split('.').pop()})
+      });
+      const d = await r.json();
+      if(d.text && d.text.trim()){
+        document.getElementById('textInput').value = d.text.trim();
+        document.getElementById('recIndicator').textContent = '✅ ASR完成';
+        document.getElementById('recIndicator').className = 'rec-indicator';
+        await runPipelineFull();
+      } else {
+        document.getElementById('recIndicator').textContent = '⚠️ ASR未识别到文字';
+        document.getElementById('recIndicator').className = 'rec-indicator';
+      }
+    }catch(e){
+      document.getElementById('recIndicator').textContent = '❌ ASR失败';
       document.getElementById('recIndicator').className = 'rec-indicator';
-      // 自动跑管线
-      await runPipelineFull();
-    } else {
-      document.getElementById('recIndicator').textContent = '⚠️ ASR未识别到文字';
-      document.getElementById('recIndicator').className = 'rec-indicator';
-      alert('ASR未识别到文字，尝试Whisper兜底失败');
+      alert('语音识别失败: ' + e.message + '\\n可尝试直接输入文字');
     }
-  }catch(e){
-    document.getElementById('recIndicator').textContent = '❌ ASR失败';
-    document.getElementById('recIndicator').className = 'rec-indicator';
-    alert('语音识别失败，请检查阿里云百炼语音服务是否开通。\n可以先在输入框手动输入文字测试管线。\n\n错误: ' + e.message);
-  }
+  };
+  reader.readAsDataURL(file);
+  input.value = '';
 }
 
 // ===== 核心管线 =====
@@ -385,8 +488,102 @@ function clearAll(){
 
 function _strip(h){ const d=document.createElement('div'); d.innerHTML=h; return d.textContent||d.innerText||''; }
 
-// ===== 初始化加载 =====
+// ===== 历史记录 =====
+function renderHistory(d){
+  const reports = d.reports || [];
+  const filter = document.getElementById('historyFilter')?.value || 'all';
+  const search = (document.getElementById('historySearch')?.value || '').toLowerCase();
+  document.getElementById('historyCount').textContent = reports.length + '条';
+
+  let filtered = reports;
+  if(filter === 'today'){
+    const today = new Date().toISOString().slice(0,10);
+    filtered = reports.filter(r => (r.created_at||'').startsWith(today));
+  } else if(filter === 'week'){
+    const weekAgo = new Date(Date.now()-7*86400000).toISOString().slice(0,10);
+    filtered = reports.filter(r => (r.created_at||'') >= weekAgo);
+  }
+  if(search){
+    filtered = filtered.filter(r =>
+      (r.DIAGNOSIS||'').toLowerCase().includes(search) ||
+      (r.VISCERAS||'').toLowerCase().includes(search) ||
+      (r.DESCRIBES||'').toLowerCase().includes(search)
+    );
+  }
+
+  if(!filtered.length){
+    document.getElementById('historyList').innerHTML = '<div style="padding:20px;text-align:center;color:var(--t2)">无匹配记录</div>';
+    return;
+  }
+  let html = '<table style="width:100%;border-collapse:collapse;font-size:11px">';
+  html += '<tr style="background:var(--card2);color:var(--t2);position:sticky;top:0">' +
+    '<th style="padding:6px 8px;text-align:left">时间</th>' +
+    '<th style="padding:6px 8px;text-align:left">检查</th>' +
+    '<th style="padding:6px 8px;text-align:left">诊断</th>' +
+    '<th style="padding:6px 8px;text-align:left">所见摘要</th>' +
+    '<th style="padding:6px 8px;text-align:center">详情</th></tr>';
+  filtered.forEach(r => {
+    const time = (r.created_at || '').slice(0, 16) || (r.examdate||'')+' '+(r.examtime||'');
+    html += `<tr style="border-bottom:1px solid var(--card2)">` +
+      `<td style="padding:5px 8px;font-family:var(--mono);font-size:10px">${time}</td>` +
+      `<td style="padding:5px 8px">${r.VISCERAS||r.ModuleName||'-'}</td>` +
+      `<td style="padding:5px 8px">${(r.DIAGNOSIS||'').slice(0,20)}</td>` +
+      `<td style="padding:5px 8px;color:var(--t2);font-size:10px">${(r.DESCRIBES||'').slice(0,40)}...</td>` +
+      `<td style="padding:5px 8px;text-align:center"><button class="qb" style="padding:2px 8px;font-size:10px" onclick="alert('${(r.DESCRIBES||'').replace(/'/g,"\\'").slice(0,200)}')">👁️</button></td>` +
+      `</tr>`;
+  });
+  html += `</table><div style="padding:6px 8px;font-size:10px;color:var(--t2)">显示 ${filtered.length}/${reports.length} 条</div>`;
+  document.getElementById('historyList').innerHTML = html;
+}
+
+// 导出 CSV
+function exportCSV(){
+  fetch('/api/external/reports').then(r=>r.json()).then(d=>{
+    const reports = d.reports || [];
+    if(!reports.length){alert('无数据');return}
+    let csv = '时间,检查类型,诊断,所见\n';
+    reports.forEach(r => {
+      const time = (r.created_at||'').slice(0,16);
+      const exam = r.VISCERAS||r.ModuleName||'';
+      const diag = (r.DIAGNOSIS||'').replace(/,/g,'；');
+      const see = (r.DESCRIBES||'').replace(/,/g,'；').replace(/\n/g,' ');
+      csv += `${time},${exam},${diag},${see}\n`;
+    });
+    const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8;'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'ultrasound_reports_'+new Date().toISOString().slice(0,10)+'.csv';
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+}
+
+// 导出 JSON
+function exportJSON(){
+  fetch('/api/external/reports').then(r=>r.json()).then(d=>{
+    const blob = new Blob([JSON.stringify(d.reports||[], null, 2)], {type:'application/json'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = 'ultrasound_reports_'+new Date().toISOString().slice(0,10)+'.json';
+    a.click(); URL.revokeObjectURL(a.href);
+  });
+}
+
+// 配置
+function saveSettings(){
+  const exam = document.getElementById('settingsExamType').value;
+  const mode = document.getElementById('settingsPipelineMode').value;
+  localStorage.setItem('debug_examType', exam);
+  localStorage.setItem('debug_mode', mode);
+  document.getElementById('textInput').focus();
+}
+
+// 初始化加载
 window.onload = async function(){
+  // 加载配置
+  const savedExam = localStorage.getItem('debug_examType');
+  const savedMode = localStorage.getItem('debug_mode');
+  if(savedExam) document.getElementById('examType').value = savedExam;
+  if(savedExam && document.getElementById('settingsExamType')) document.getElementById('settingsExamType').value = savedExam;
+  if(savedMode && document.getElementById('settingsPipelineMode')) document.getElementById('settingsPipelineMode').value = savedMode;
+
   try{
     const [h, s, r] = await Promise.all([
       fetch('/api/health').then(r=>r.json()),
@@ -396,34 +593,27 @@ window.onload = async function(){
     renderKB(h);
     renderDB(s);
     renderHistory(r);
+
+    // 配置状态
+    if(document.getElementById('settingsLLM')){
+      document.getElementById('settingsLLM').textContent = h.version ? '在线' : '未知';
+    }
+    if(document.getElementById('settingsGPU')){
+      document.getElementById('settingsGPU').textContent = h.asr_hotwords ? 'ASR就绪' : '待检测';
+    }
   }catch(e){}
 };
 
-// ===== 历史记录 =====
-function renderHistory(d){
-  const reports = d.reports || [];
-  document.getElementById('historyCount').textContent = reports.length + '条';
-  if(!reports.length){
-    document.getElementById('historyList').innerHTML = '<div style="padding:20px;text-align:center;color:var(--t2)">暂无记录</div>';
-    return;
-  }
-  let html = '<table style="width:100%;border-collapse:collapse;font-size:11px">';
-  html += '<tr style="background:var(--card2);color:var(--t2);position:sticky;top:0">' +
-    '<th style="padding:6px 8px;text-align:left">时间</th>' +
-    '<th style="padding:6px 8px;text-align:left">检查</th>' +
-    '<th style="padding:6px 8px;text-align:left">诊断</th>' +
-    '<th style="padding:6px 8px;text-align:left">所见摘要</th></tr>';
-  reports.forEach(r => {
-    const time = (r.created_at || '').slice(0, 16) || (r.examdate||'')+' '+(r.examtime||'');
-    html += `<tr style="border-bottom:1px solid var(--card2)">` +
-      `<td style="padding:5px 8px;font-family:var(--mono);font-size:10px">${time}</td>` +
-      `<td style="padding:5px 8px">${r.VISCERAS||r.ModuleName||'-'}</td>` +
-      `<td style="padding:5px 8px">${(r.DIAGNOSIS||'').slice(0,20)}</td>` +
-      `<td style="padding:5px 8px;color:var(--t2);font-size:10px">${(r.DESCRIBES||'').slice(0,40)}...</td>` +
-      `</tr>`;
+// 历史搜索/过滤
+if(document.getElementById('historySearch')){
+  document.getElementById('historySearch').addEventListener('input', function(){
+    fetch('/api/external/reports').then(r=>r.json()).then(d=>renderHistory(d));
   });
-  html += '</table>';
-  document.getElementById('historyList').innerHTML = html;
+}
+if(document.getElementById('historyFilter')){
+  document.getElementById('historyFilter').addEventListener('change', function(){
+    fetch('/api/external/reports').then(r=>r.json()).then(d=>renderHistory(d));
+  });
 }
 </script>
 </body>

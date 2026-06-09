@@ -1,430 +1,383 @@
 #!/usr/bin/env python3
 """
-超声报告系统 A/B 对比基准测试
-—— 用随机抽取的500条真实HIS超声报告，对比旧版 vs 新版优化的模板匹配准确率和性能
+LoRA 本地模型 vs 火山方舟 Doubao — AB 对比测试
 
-测试维度:
-  1. 模板匹配准确率 (匹配到的模板DISCNAME是否与HIS报告的RIS_XMMC匹配)
-  2. 响应时间 (旧版 vs 新版)
-  3. 误匹配率 (匹配到错误模板的次数)
-  4. 降级率 (未能匹配降级到类别的比例)
-  5. 数值提取覆盖率 (mm/cm值提取了多少个)
+用法:
+  python backend/scripts/benchmark_ab.py              # 默认跑50条
+  python backend/scripts/benchmark_ab.py --count 100   # 跑100条
+  python backend/scripts/benchmark_ab.py --mode lora   # 只跑LoRA
+  python backend/scripts/benchmark_ab.py --mode volc   # 只跑火山
 """
-import csv, re, sys, json, time, statistics
+import sys, os, time, json, re
 from pathlib import Path
-from collections import defaultdict, Counter, OrderedDict
-from functools import lru_cache
 
-sys.path.insert(0, str(Path(__file__).resolve().parent))
-from template_filler import _search as old_search, _load as old_load, _templates as old_templates, _names, _categories, _fulltext, MANUAL
-from cn_num import cn_to_arabic
-from templates import match_template
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+os.chdir(str(Path(__file__).resolve().parent.parent))
 
-# 确保旧模板引擎已加载
-old_load()
-
-# ============================================================
-# 新版优化引擎 (精简实现, 核心差异: Trie + LRU + 跳级)
-# ============================================================
-class TrieNode:
-    __slots__ = ('children', 'diseases')
-    def __init__(self):
-        self.children = {}
-        self.diseases = {}  # {keyword: disease_name}
-
-SITE_DISEASE = {
-    "胆": {"囊肿": "肝囊肿","结石": "胆囊结石","息肉": "胆囊息肉","增厚": "胆囊壁增厚","毛糙": "胆囊壁毛糙","炎": "胆囊炎"},
-    "肝": {"囊肿": "肝囊肿","结石": "肝内胆管结石","血管瘤": "肝血管瘤","脂肪": "脂肪肝","增大": "肝大","弥漫": "弥漫性肝病","硬化": "肝硬化"},
-    "肾": {"囊肿": "肾囊肿","结石": "肾结石","积水": "肾积水"},
-    "子宫": {"肌瘤": "子宫肌瘤","腺肌": "子宫腺肌症","息肉": "子宫内膜息肉"},
-    "卵巢": {"囊肿": "卵巢囊肿","畸胎瘤": "卵巢畸胎瘤"},
-    "膀胱": {"结石": "膀胱结石"}, "前列腺": {"增生": "前列腺增生"},
-    "胰": {"炎": "急性胰腺炎"}, "脾": {"大": "脾大"},
-    "甲状": {"结节": "甲状腺结节","增大": "甲状腺增大","弥漫": "弥漫性甲状腺病变","囊实": "甲状腺囊实性结节"},
-    "乳腺": {"结节": "乳腺结节"},
-    "颈动": {"斑块": "颈动脉斑块","狭窄": "颈动脉狭窄","血栓": "深静脉血栓"},
-    "心": {"增大": "心脏增大","肥厚": "心肌肥厚","积液": "心包积液","瓣": "心脏瓣膜病"},
-}
-
-def _build_trie():
-    root = TrieNode()
-    for site, diseases in SITE_DISEASE.items():
-        node = root
-        for ch in site:
-            if ch not in node.children:
-                node.children[ch] = TrieNode()
-            node = node.children[ch]
-        node.diseases = diseases
-    return root
-
-_site_trie = _build_trie()
-
-def _trie_match(text):
-    """文本级宽松匹配: 只要部位词和病变词同时出现在text中即命中"""
-    result = {}
-    # 先找所有部位词
-    found_sites = []
-    for i in range(len(text)):
-        node = _site_trie
-        for j in range(i, min(i+4, len(text))):
-            ch = text[j]
-            if ch not in node.children:
-                break
-            node = node.children[ch]
-            if node.diseases:
-                found_sites.append((text[i:j+1], node.diseases))
-
-    # 再检查病变词是否在全文任意位置
-    for site, diseases in found_sites:
-        for d_keyword, d_name in diseases.items():
-            if d_keyword in text:
-                result[site] = d_name
-                break
-    return result
-
-# LRU缓存
-_new_cache = OrderedDict()
-_CACHE_CAP = 100
-
-def new_search(raw_text, exam_type="", clinical_diag=""):
-    # 缓存 key = organ+disease pattern, 而非全文本 — 因为体检报告模板高度重复
-    # 提取文本中的特征字串做hash
-    def _feature_hash(t):
-        organs = ["肝脏","胆囊","胰腺","脾脏","肾脏","前列腺","膀胱","子宫","卵巢","甲状腺","乳腺","心脏","颈动脉","椎动脉"]
-        diseases = ["囊肿","结石","肌瘤","息肉","增生","钙化","脂肪肝","血管瘤","结节","积液","占位","回声均匀","回声不均匀","未见异常"]
-        features = []
-        for o in organs:
-            if o in t: features.append(o)
-        for d in diseases:
-            if d in t: features.append(d)
-        return "|".join(sorted(features)) if features else "none"
-
-    cache_key = f"{exam_type[:15]}|{_feature_hash(raw_text)}"
-    if cache_key in _new_cache:
-        _new_cache.move_to_end(cache_key)
-        return _new_cache[cache_key], True, 0  # (result, cached, latency)
-
-    t0 = time.perf_counter()
-    score = {}
-
-    # Step 1: DISCNAME exact match (保留原逻辑)
-    for cn, idx in _names.items():
-        if len(cn) >= 3 and cn in raw_text:
-            score[idx] = max(score.get(idx, 0), 100 + len(cn) * 2)
-
-    # Step 2: Trie SITE+DISEASE 匹配 — 增加宽松回退
-    # 先做宽松匹配（不限窗口），再做原版交叉扫描做补漏
-    trie_result = _trie_match(raw_text)
-    for site, disease_name in trie_result.items():
-        for idx, t in enumerate(old_templates):
-            in_name = (site in t["name"] and disease_name in t["name"])
-            in_info = (site in t["info1"] and disease_name in t["name"])
-            if in_name:
-                score[idx] = max(score.get(idx, 0), 100)
-            elif in_info:
-                score[idx] = max(score.get(idx, 0), 87)
-
-    # Step 3: 原版 SITE+DISEASE 交叉扫描 (保留, 不做跳级)
-    # 这是旧版准确率的核心来源 — 不能跳
-    site_words = ["胆","肝","肾","子宫","卵巢","膀胱","前列腺","胰","脾","甲状","乳腺","颈动"]
-    disease_words = ["结石","囊肿","肌瘤","息肉","增生","钙化","血管瘤","脂肪肝","硬化","积水"]
-    doc_sites = [s for s in site_words if s in raw_text]
-    doc_dis = [d for d in disease_words if d in raw_text]
-    for s in doc_sites:
-        for d in doc_dis:
-            for idx, t in enumerate(old_templates):
-                in_name = (s in t["name"] and d in t["name"])
-                in_info = (s in t["info1"] and d in t["info1"])
-                in_full_disease = any(fd in t["name"] for fd in ["囊肿","结石","肌瘤","息肉","增生","钙化","血管瘤","脂肪肝","硬化","积水","腹水","畸胎瘤","狭窄","斑块","血栓","结节","积液"])
-                if in_name and in_full_disease:
-                    score[idx] = max(score.get(idx, 0), 100)
-                elif in_name:
-                    score[idx] = max(score.get(idx, 0), 95)
-                elif in_info:
-                    score[idx] = max(score.get(idx, 0), 87)
-
-    # Step 4: MANUAL + Fulltext (保留原逻辑)
-    for kw, names in MANUAL.items():
-        if kw not in raw_text: continue
-        for dn in names:
-            for idx, t in enumerate(old_templates):
-                if dn in t["name"]:
-                    score[idx] = max(score.get(idx, 0), 90)
-
-    if not score:
-        for w in set(re.findall(r"[一-鿿]{2,4}", raw_text)):
-            for idx in _fulltext.get(w, []):
-                score[idx] = score.get(idx, 0) + 1
-
-    ranked = sorted(score.items(), key=lambda x: -x[1])
-    high = [i for i, s in ranked if s >= 50]
-    result = high[0] if high else (ranked[0][0] if ranked and ranked[0][1] >= 5 else None)
-
-    latency = (time.perf_counter() - t0) * 1000
-
-    if result is not None and len(_new_cache) >= _CACHE_CAP:
-        _new_cache.popitem(last=False)
-    if result is not None:
-        _new_cache[cache_key] = result
-
-    return result, False, latency
+# ===== 100条测试用例 =====
+TEST_CASES = [
+    ("肝脏大小正常，回声均匀，未见明显异常", "腹部超声"),
+    ("胆囊壁毛糙，见1.2cm强回声团，伴声影", "腹部超声"),
+    ("甲状腺左叶见0.5×0.3cm低回声结节，边界清晰", "甲状腺超声"),
+    ("胎儿头位，双顶径8.5cm，股骨长6.7cm，羊水正常，胎心140次/分", "产科超声"),
+    ("子宫前位，肌壁间见多个低回声结节，最大约1.5×1.2cm", "腹部超声"),
+    ("右侧乳腺外上象限见1.2×0.8cm低回声肿块，边界清", "乳腺超声"),
+    ("颈动脉内膜毛糙，见斑块形成，IMT约1.2mm", "血管超声"),
+    ("双肾大小正常，集合系统未见分离", "腹部超声"),
+    ("肝脏大小正常，胆囊壁毛糙，胰腺正常，脾脏未见肿大", "腹部超声"),
+    ("前列腺稍大，大小约4.5×3.5×3.0cm", "泌尿超声"),
+    ("肝脏大小正常，回声均匀", "腹部超声"),
+    ("胆囊结石，大小约1.5cm", "腹部超声"),
+    ("甲状腺回声不均匀，实质弥漫性病变", "甲状腺超声"),
+    ("双顶径8.5cm，股骨长6.7cm", "产科超声"),
+    ("子宫肌瘤，大小约3.0×2.5cm", "腹部超声"),
+    ("乳腺增生，双侧小叶增生", "乳腺超声"),
+    ("颈动脉斑块形成", "血管超声"),
+    ("双肾囊肿，大小约2.0cm", "腹部超声"),
+    ("肝脏脂肪沉积", "腹部超声"),
+    ("甲状腺结节，TI-RADS 3类", "甲状腺超声"),
+    ("胆囊息肉，大小约0.5cm", "腹部超声"),
+    ("盆腔积液，深约1.2cm", "腹部超声"),
+    ("双侧乳腺未见明确占位性病变", "乳腺超声"),
+    ("甲状腺全切术后复查", "甲状腺超声"),
+    ("前列腺增生", "泌尿超声"),
+    ("肝囊肿单发", "腹部超声"),
+    ("胆囊壁毛糙", "腹部超声"),
+    ("颈动脉内中膜增厚", "血管超声"),
+    ("双侧颈动脉未见明显异常", "血管超声"),
+    ("双侧肾上腺区未见明显异常", "腹部超声"),
+    ("肝内钙化灶", "腹部超声"),
+    ("脾脏未见肿大", "腹部超声"),
+    ("胰腺大小形态正常", "腹部超声"),
+    ("双肾未见明显异常", "腹部超声"),
+    ("膀胱未见明显异常", "泌尿超声"),
+    ("子宫大小正常", "腹部超声"),
+    ("卵巢大小正常", "腹部超声"),
+    ("心脏各房室内径正常", "心脏超声"),
+    ("二尖瓣轻度返流", "心脏超声"),
+    ("三尖瓣轻度返流", "心脏超声"),
+    ("主动脉瓣退行性变", "心脏超声"),
+    ("心包腔未见积液", "心脏超声"),
+    ("左室收缩功能正常", "心脏超声"),
+    ("心内结构未见明显异常", "心脏超声"),
+    ("左室假腱索", "心脏超声"),
+    ("肝血管瘤，大小约1.5cm", "腹部超声"),
+    ("肾结石，大小约0.6cm", "腹部超声"),
+    ("肾积水，轻度", "腹部超声"),
+    ("输尿管未见扩张", "腹部超声"),
+    ("肝内胆管未见扩张", "腹部超声"),
+    ("肝脏大小形态正常，包膜完整", "腹部超声"),
+    ("胆囊大小正常，壁光滑", "腹部超声"),
+    ("胰腺大小形态正常，回声均匀", "腹部超声"),
+    ("脾脏大小正常", "腹部超声"),
+    ("双肾大小形态正常", "腹部超声"),
+    ("膀胱充盈好，壁光滑", "泌尿超声"),
+    ("前列腺大小正常", "泌尿超声"),
+    ("甲状腺大小正常，回声均匀", "甲状腺超声"),
+    ("双侧乳腺大小正常", "乳腺超声"),
+    ("心脏大小正常", "心脏超声"),
+    ("颈动脉内膜光滑", "血管超声"),
+    ("肝内多发囊肿", "腹部超声"),
+    ("胆囊多发结石", "腹部超声"),
+    ("胆囊息肉样病变", "腹部超声"),
+    ("胆囊胆固醇结晶", "腹部超声"),
+    ("胆囊壁增厚", "腹部超声"),
+    ("脂肪肝轻度", "腹部超声"),
+    ("脂肪肝中重度", "腹部超声"),
+    ("肝内胆管结石", "腹部超声"),
+    ("肝硬化", "腹部超声"),
+    ("肝大", "腹部超声"),
+    ("脾大", "腹部超声"),
+    ("脾囊肿", "腹部超声"),
+    ("脾内钙化灶", "腹部超声"),
+    ("副脾", "腹部超声"),
+    ("肾囊肿多发", "腹部超声"),
+    ("肾错构瘤", "腹部超声"),
+    ("肾结石多发", "腹部超声"),
+    ("双肾多发结石", "腹部超声"),
+    ("前列腺稍大", "泌尿超声"),
+    ("前列腺钙化灶", "泌尿超声"),
+    ("前列腺囊肿", "泌尿超声"),
+    ("前列腺增大", "泌尿超声"),
+    ("附睾头囊肿", "泌尿超声"),
+    ("精索静脉曲张", "泌尿超声"),
+    ("睾丸附睾未见异常", "泌尿超声"),
+    ("子宫肌瘤多发", "腹部超声"),
+    ("子宫腺肌症", "腹部超声"),
+    ("子宫内膜息肉", "腹部超声"),
+    ("卵巢囊肿", "腹部超声"),
+    ("宫颈多发囊肿", "腹部超声"),
+    ("绝经后子宫", "腹部超声"),
+    ("盆腔积液", "腹部超声"),
+    ("甲状腺单发结节", "甲状腺超声"),
+    ("甲状腺多发结节", "甲状腺超声"),
+    ("甲状腺无回声结节", "甲状腺超声"),
+    ("桥本氏甲状腺炎", "甲状腺超声"),
+    ("颈部淋巴结未见肿大", "甲状腺超声"),
+    ("双侧乳腺未见明确占位性病变，腺体结构清晰", "乳腺超声"),
+    ("心脏各瓣膜形态正常，启闭好", "心脏超声"),
+    ("颈动脉内膜光滑，IMT正常", "血管超声"),
+]
 
 
-# ============================================================
-# 测试主逻辑
-# ============================================================
-TEST_FILE = Path(__file__).resolve().parent / "test_sample_500.csv"
+def score_result(text, report):
+    """给报告质量打分 (0-100) — 只评估内容质量, 不偏袒任何引擎"""
+    score = 30  # 基础分
+    see = report.get("study_see", "") or ""
+    hints = report.get("study_hint", [])
+    rec = report.get("recommendation", "") or ""
+    see_plain = re.sub(r'<[^>]+>', '', see)
 
-def clean_text(text):
-    if not text: return ""
-    text = re.sub(r'[-]', '', text)
-    return text.strip()
+    # 内容长度（合理的报告至少有一定篇幅）
+    if len(see_plain) >= 10: score += 10
+    if len(see_plain) >= 30: score += 10
+    if len(see_plain) >= 60: score += 5
 
-def exam_type_to_category(exam_name):
-    """将HIS的RIS_XMMC映射到系统模板类别"""
-    cat = match_template(exam_name)
-    return cat
+    # 诊断提示
+    if len(hints) > 0: score += 15
+    if len(hints) >= 2: score += 5
 
-def run_benchmark():
-    if not TEST_FILE.exists():
-        print(f"ERROR: 测试文件不存在 {TEST_FILE}")
-        return
+    # 建议
+    if rec and len(rec) >= 4: score += 5
 
-    print("=" * 70)
-    print("超声报告系统 A/B 基准测试 — 500条真实HIS超声报告")
-    print("=" * 70)
+    # 数值保留—这是客观指标
+    nums = re.findall(r'\d+(?:\.\d+)?', text)
+    if nums:
+        kept = sum(1 for n in nums if n in see_plain)
+        score += int(kept / len(nums) * 15)
 
-    with open(TEST_FILE, encoding='utf-8-sig') as f:
-        samples = list(csv.DictReader(f))
+    # 关键词覆盖（客观指标，越多的原文医学术语出现在报告中越好）
+    keywords = re.findall(r'[一-鿿]{2,}', text)
+    if keywords:
+        covered = sum(1 for kw in keywords if kw in see_plain)
+        score += int(covered / len(keywords) * 20)
 
-    print(f"测试集: {len(samples)} 条")
-    print(f"{'='*70}")
-    print(f"{'指标':<35} {'旧版':>15} {'新版':>15}")
-    print(f"{'='*70}")
+    return min(score, 100)
 
-    # ===== 指标1: 模板匹配成功率 =====
-    old_match_ok = 0
-    new_match_ok = 0
-    old_fallback = 0
-    new_fallback = 0
-    old_skip = 0  # 旧版无结果跳过
-    new_skip = 0
 
-    # 时间统计
-    old_latencies = []
-    new_latencies = []
-    cache_hits = 0
+def run_volc(test_cases, count):
+    from main import app
+    from fastapi.testclient import TestClient
+    client = TestClient(app)
 
-    # 详细结果
-    old_details = []
-    new_details = []
+    results = []
+    for text, exam in test_cases[:count]:
+        t0 = time.time()
+        try:
+            r = client.post('/api/structure', json={'text': text, 'exam_type': exam})
+            dt = time.time() - t0
+            if r.status_code == 200:
+                d = r.json()
+                score = score_result(text, d['report'])
+                results.append({
+                    'text': text[:30], 'exam': exam,
+                    'method': d.get('method', '?'),
+                    'score': score, 'time': round(dt, 2),
+                    'rec': d['report'].get('recommendation', '')[:20],
+                    'hints': len(d['report'].get('study_hint', [])),
+                    'see_len': len(d['report'].get('study_see', '')),
+                })
+            else:
+                results.append({'text': text[:30], 'error': str(r.status_code)})
+        except Exception as e:
+            results.append({'text': text[:30], 'error': str(e)[:50]})
+    return results
 
-    # 数值提取覆盖
-    old_num_total = 0
-    new_num_total = 0
 
-    for i, row in enumerate(samples):
-        text = clean_text(row.get('JCSJ', ''))
-        exam_name = row.get('RIS_XMMC', '').strip()
-        if not text or len(text) < 20:
-            continue
+def run_lora(test_cases, count):
+    """用本地 LoRA 模型跑测试（走完整管线, 和火山方舟同样的流程）"""
+    from routers.structure import _USE_LOCAL_LLM, _LOCAL_LLM_AVAILABLE
+    if not _LOCAL_LLM_AVAILABLE:
+        print("LoRA 本地模型不可用, 跳过")
+        return []
 
-        # 旧版测试
-        t0 = time.perf_counter()
-        old_result = old_search(clean_text(text))
-        old_lat = (time.perf_counter() - t0) * 1000
-        old_latencies.append(old_lat)
+    from main import app
+    from fastapi.testclient import TestClient
+    client = TestClient(app)
 
-        if old_result and len(old_result) > 0:
-            matched_idx = old_result[0]
-            matched_name = old_templates[matched_idx]["name"]
-            old_match_ok += 1
-        else:
-            old_skip += 1
-            matched_name = None
+    results = []
+    for text, exam in test_cases[:count]:
+        t0 = time.time()
+        try:
+            r = client.post('/api/structure', json={'text': text, 'exam_type': exam})
+            dt = time.time() - t0
+            if r.status_code == 200:
+                d = r.json()
+                score = score_result(text, d['report'])
+                results.append({
+                    'text': text[:30], 'exam': exam,
+                    'method': d.get('method', '?'),
+                    'score': score, 'time': round(dt, 2),
+                    'rec': d['report'].get('recommendation', '')[:20],
+                    'hints': len(d['report'].get('study_hint', [])),
+                    'see_len': len(d['report'].get('study_see', '')),
+                })
+            else:
+                results.append({'text': text[:30], 'error': str(r.status_code)})
+        except Exception as e:
+            results.append({'text': text[:30], 'error': str(e)[:50]})
+    return results
 
-        # 数值提取
-        from template_filler import _extract_numbers as old_extract_nums
-        nums = old_extract_nums(clean_text(text))
-        old_num_total += len(nums)
 
-        # 新版测试
-        new_result, is_cached, new_lat = new_search(clean_text(text), exam_name, "")
-        new_latencies.append(new_lat)
-        if is_cached:
-            cache_hits += 1
 
-        if new_result is not None:
-            new_matched_name = old_templates[new_result]["name"]
-            new_match_ok += 1
-        else:
-            new_skip += 1
-            new_matched_name = None
 
-        # 降级检测
-        if old_result:
-            old_cat = exam_type_to_category(exam_name)
-            # 检查匹配到的模板是否属于正确类别
-            if not any(o in old_templates[old_result[0]]["info1"] for o in
-                      (["子宫","卵巢"] if old_cat=="obgyn" else
-                       ["肝脏","胆囊"] if old_cat=="abdomen" else
-                       ["心脏","瓣"] if old_cat=="cardiac" else
-                       ["甲状腺","乳腺"] if old_cat=="thyroid" else
-                       ["动脉","静脉"] if old_cat=="vascular" else [])):
-                old_fallback += 1  # 匹配到错误类别
+def run_deepseek(test_cases, count):
+    """用 DeepSeek 跑测试"""
+    import openai
+    client = openai.OpenAI(
+        api_key="sk-43ffc7dafcec4369a039436377694820",
+        base_url="https://api.deepseek.com/v1",
+    )
+    results = []
+    for text, exam in test_cases[:count]:
+        t0 = time.time()
+        try:
+            system = f"你是一位超声科主任医师。基于口述生成规范化超声报告。检查类型: {exam}"
+            prompt = f"ASR口述: " + text
+            resp = client.chat.completions.create(
+                model="deepseek-chat",
+                temperature=0.1, max_tokens=2048, timeout=30,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt},
+                ],
+            )
+            content = resp.choices[0].message.content
+            dt = time.time() - t0
+            report = {}
+            try:
+                report = json.loads(content)
+            except:
+                report = {"study_see": content, "study_hint": [], "recommendation": ""}
+            score = score_result(text, report)
+            results.append({
+                'text': text[:30], 'exam': exam,
+                'method': 'deepseek',
+                'score': score, 'time': round(dt, 2),
+                'rec': report.get('recommendation', '')[:20],
+                'hints': len(report.get('study_hint', [])),
+                'see_len': len(report.get('study_see', '')),
+            })
+        except Exception as e:
+            results.append({'text': text[:30], 'error': str(e)[:50]})
+    return results
 
-        if new_result is not None:
-            new_cat = exam_type_to_category(exam_name)
-            if not any(o in old_templates[new_result]["info1"] for o in
-                      (["子宫","卵巢"] if new_cat=="obgyn" else
-                       ["肝脏","胆囊"] if new_cat=="abdomen" else
-                       ["心脏","瓣"] if new_cat=="cardiac" else
-                       ["甲状腺","乳腺"] if new_cat=="thyroid" else
-                       ["动脉","静脉"] if new_cat=="vascular" else [])):
-                new_fallback += 1
 
-    total = len(samples)
 
-    # 输出
-    print(f"{'模板匹配命中率':<35} {old_match_ok/total*100:>14.1f}% {new_match_ok/total*100:>14.1f}%")
-    print(f"{'类别误匹配率':<35} {old_fallback/total*100:>14.1f}% {new_fallback/total*100:>14.1f}%")
-    print(f"{'无结果跳过率':<35} {old_skip/total*100:>14.1f}% {new_skip/total*100:>14.1f}%")
-    print(f"{'匹配耗时-P50':<35} {statistics.median(old_latencies):>13.1f}ms {statistics.median(new_latencies):>13.1f}ms")
-    print(f"{'匹配耗时-P95':<35} {sorted(old_latencies)[int(len(old_latencies)*0.95)]:>13.1f}ms {sorted(new_latencies)[int(len(new_latencies)*0.95)]:>13.1f}ms")
-    print(f"{'匹配耗时-P99':<35} {sorted(old_latencies)[int(len(old_latencies)*0.99)]:>13.1f}ms {sorted(new_latencies)[int(len(new_latencies)*0.99)]:>13.1f}ms")
-    print(f"{'匹配耗时-Mean':<35} {statistics.mean(old_latencies):>13.1f}ms {statistics.mean(new_latencies):>13.1f}ms")
-    print(f"{'LRU缓存命中率':<35} {'N/A':>15} {cache_hits/total*100:>14.1f}%")
-    print(f"{'数值提取总量':<35} {old_num_total:>15} {new_num_total:>15}")
+def run_deepseek(test_cases, count):
+    """用 DeepSeek 跑测试"""
+    import openai
+    client = openai.OpenAI(
+        api_key="sk-43ffc7dafcec4369a039436377694820",
+        base_url="https://api.deepseek.com/v1",
+    )
+    results = []
+    for text, exam in test_cases[:count]:
+        t0 = time.time()
+        try:
+            system = f"你是一位超声科主任医师。基于口述生成规范化超声报告。检查类型: {exam}"
+            resp = client.chat.completions.create(
+                model="deepseek-chat",
+                temperature=0.1, max_tokens=2048, timeout=30,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": f"ASR口述: " + text},
+                ],
+            )
+            content = resp.choices[0].message.content
+            dt = time.time() - t0
+            report = {}
+            try:
+                report = json.loads(content)
+            except:
+                report = {"study_see": content, "study_hint": [], "recommendation": ""}
+            score = score_result(text, report)
+            results.append({
+                'text': text[:30], 'exam': exam,
+                'method': 'deepseek',
+                'score': score, 'time': round(dt, 2),
+                'rec': report.get('recommendation', '')[:20],
+                'hints': len(report.get('study_hint', [])),
+                'see_len': len(report.get('study_see', '')),
+            })
+        except Exception as e:
+            results.append({'text': text[:30], 'error': str(e)[:50]})
+    return results
 
-    # ===== 检查类型维度分析 =====
-    print(f"\n{'='*70}")
-    print(f"{'按检查类型维度':^70}")
-    print(f"{'='*70}")
+def print_report(results, label):
+    scores = [r.get('score', 0) for r in results if 'score' in r]
+    times = [r.get('time', 0) for r in results if 'time' in r]
+    errors = [r for r in results if 'error' in r]
 
-    exam_types = Counter(row.get('RIS_XMMC','').strip()[:15] for row in samples)
-    for exam_type_short, cnt in exam_types.most_common(6):
-        if cnt < 5: continue
-        subset = [s for s in samples if (s.get('RIS_XMMC','').strip()[:15]) == exam_type_short]
-        sub_old_ok = 0
-        sub_new_ok = 0
-        for row in subset:
-            text = clean_text(row.get('JCSJ', ''))
-            if not text or len(text) < 20: continue
-            old_r = old_search(text)
-            if old_r and len(old_r) > 0: sub_old_ok += 1
-            new_r, _, _ = new_search(text)
-            if new_r is not None: sub_new_ok += 1
-        n = len(subset)
-        if n > 0:
-            print(f"  {exam_type_short[:12]:<12} (n={n:>3})  旧版 {sub_old_ok/n*100:5.1f}%   新版 {sub_new_ok/n*100:5.1f}%")
+    print(f"\n{'='*55}")
+    print(f"  {label}")
+    print(f"{'='*55}")
+    print(f"  总: {len(results)} | 成功: {len(scores)} | 失败: {len(errors)}")
+    if scores:
+        print(f"  平均分: {sum(scores)/len(scores):.1f}")
+        print(f"  最高: {max(scores)} | 最低: {min(scores)}")
+    if times:
+        print(f"  平均耗时: {sum(times)/len(times):.2f}s | 总耗时: {sum(times):.1f}s")
+    if errors:
+        for e in errors[:3]:
+            print(f"  ! {e['text']}: {e.get('error','')}")
 
-    # ===== 置信度分数对比 =====
-    print(f"\n{'='*70}")
-    print(f"{'模板匹配评分分布':^70}")
-    print(f"{'='*70}")
-
-    old_scores = Counter()
-    new_scores = Counter()
-
-    for row in samples:
-        text = clean_text(row.get('JCSJ', ''))
-        if not text or len(text) < 20: continue
-        # 旧版评分
-        old_score_dict = {}
-        for cn, idx in _names.items():
-            if len(cn) >= 3 and cn in text:
-                old_score_dict[idx] = max(old_score_dict.get(idx, 0), 100 + len(cn) * 2)
-        # Trie匹配
-        trie_r = _trie_match(text)
-        for site, disease_name in trie_r.items():
-            for idx, t in enumerate(old_templates):
-                if site in t["name"] and disease_name in t["name"]:
-                    old_score_dict[idx] = max(old_score_dict.get(idx, 0), 100)
-        best_old = max(old_score_dict.values()) if old_score_dict else 0
-        if best_old >= 100: old_scores["≥100"] += 1
-        elif best_old >= 50: old_scores["50-99"] += 1
-        elif best_old >= 5: old_scores["5-49"] += 1
-        else: old_scores["<5"] += 1
-
-        # 新版评分
-        new_score_dict = {}
-        for cn, idx in _names.items():
-            if len(cn) >= 3 and cn in text:
-                new_score_dict[idx] = max(new_score_dict.get(idx, 0), 100 + len(cn) * 2)
-        trie_r = _trie_match(text)
-        for site, disease_name in trie_r.items():
-            for idx, t in enumerate(old_templates):
-                if site in t["name"] and disease_name in t["name"]:
-                    new_score_dict[idx] = max(new_score_dict.get(idx, 0), 100)
-
-        # 新版评分+跳级优化: 跳过SITE+DISEASE交叉扫描
-        if not new_score_dict:  # 跳过了二次交叉扫描
-            # 新版直接用MANUAL+Fulltext
-            for kw, names in MANUAL.items():
-                if kw not in text: continue
-                for dn in names:
-                    for idx, t in enumerate(old_templates):
-                        if dn in t["name"]:
-                            new_score_dict[idx] = max(new_score_dict.get(idx, 0), 90)
-
-        best_new = max(new_score_dict.values()) if new_score_dict else 0
-        if best_new >= 100: new_scores["≥100"] += 1
-        elif best_new >= 50: new_scores["50-99"] += 1
-        elif best_new >= 5: new_scores["5-49"] += 1
-        else: new_scores["<5"] += 1
-
-    for level in ["≥100", "50-99", "5-49", "<5"]:
-        print(f"  {level:<8}  {old_scores.get(level, 0):>15}  {new_scores.get(level, 0):>15}")
-
-    # ===== 差异详情 =====
-    print(f"\n{'='*70}")
-    print(f"{'差异分析 — 新版命中但旧版未命中的案例 (TOP 10)':^70}")
-    print(f"{'='*70}")
-
-    diff_cases = []
-    for row in samples:
-        text = clean_text(row.get('JCSJ', ''))
-        if not text or len(text) < 20: continue
-        old_r = old_search(text)
-        new_r, _, _ = new_search(text)
-        if (not old_r or len(old_r) == 0) and new_r is not None:
-            diff_cases.append((text[:80], exam_name, old_templates[new_r]["name"]))
-
-    for text_preview, exam, template in diff_cases[:10]:
-        print(f"  检查: {exam[:15]:<15}")
-        print(f"  文本: {text_preview}")
-        print(f"  新匹配: {template}")
-        print()
-
-    # ===== 结论 =====
-    print(f"{'='*70}")
-    print("总结")
-    print(f"{'='*70}")
-    speedup = statistics.mean(old_latencies) / statistics.mean(new_latencies) if statistics.mean(new_latencies) > 0 else 0
-    print(f"  速度提升: {speedup:.1f}x (旧 {statistics.mean(old_latencies):.1f}ms → 新 {statistics.mean(new_latencies):.1f}ms)")
-    print(f"  缓存命中: {cache_hits}/{total} = {cache_hits/total*100:.1f}%")
-    acc_improve = (new_match_ok - old_match_ok) / total * 100
-    print(f"  准确度变化: {acc_improve:+.1f}% ({old_match_ok} → {new_match_ok} 条)")
-    misc_improve = (old_fallback - new_fallback) / total * 100
-    print(f"  误匹配改善: {misc_improve:+.1f}% ({old_fallback} → {new_fallback} 条)")
-
-    return {
-        "total": total,
-        "old_match_rate": old_match_ok / total,
-        "new_match_rate": new_match_ok / total,
-        "old_misrate": old_fallback / total,
-        "new_misrate": new_fallback / total,
-        "old_skip_rate": old_skip / total,
-        "new_skip_rate": new_skip / total,
-        "old_latency_p50": statistics.median(old_latencies),
-        "new_latency_p50": statistics.median(new_latencies),
-        "old_latency_mean": statistics.mean(old_latencies),
-        "new_latency_mean": statistics.mean(new_latencies),
-        "cache_hit_rate": cache_hits / total,
-        "speedup": speedup,
-        "acc_delta": acc_improve,
-    }
 
 
 if __name__ == "__main__":
-    results = run_benchmark()
+    count = 50
+    mode = "all"
+    for arg in sys.argv[1:]:
+        if arg.startswith('--count='): count = int(arg.split('=')[1])
+        elif arg.startswith('--mode='): mode = arg.split('=')[1]
+
+    cases = TEST_CASES[:count]
+    print(f"测试: {len(cases)}条, mode={mode}")
+
+    results = {}
+
+    if mode in ('all', 'volc'):
+        print(chr(10) + "--- 火山方舟测试中 ---")
+        results['volc'] = run_volc(cases, count)
+        print_report(results['volc'], '火山方舟 Doubao')
+
+    if mode in ('all', 'deepseek'):
+        print(chr(10) + "--- DeepSeek 测试中 ---")
+        results['deepseek'] = run_deepseek(cases, count)
+        print_report(results['deepseek'], 'DeepSeek V3')
+
+    if mode in ('all', 'lora'):
+        print(chr(10) + "--- 本地 LoRA 测试中 ---")
+        results['lora'] = run_lora(cases, count)
+        print_report(results['lora'], '本地 LoRA + Qwen2.5-3B')
+
+    if 'deepseek' in results:
+        d = results['deepseek']
+        ds = [r['score'] for r in d if 'score' in r]
+        dt_sum = sum(r['time'] for r in d if 'time' in r)
+        if ds:
+            print(f"  {'DeepSeek平均分':20s} {sum(ds)/len(ds):.1f}/100")
+        print(f"  {'DeepSeek总耗时':20s} {dt_sum:.1f}s")
+
+    if 'volc' in results and 'lora' in results:
+        v, l = results['volc'], results['lora']
+        vs = [r['score'] for r in v if 'score' in r]
+        ls = [r['score'] for r in l if 'score' in r]
+        vt = sum(r['time'] for r in v if 'time' in r)
+        lt = sum(r['time'] for r in l if 'time' in r)
+
+        print(chr(10) + "=" * 55)
+        print("  AB 对比")
+        print("=" * 55)
+        print(f"  {'指标':20s} {'火山方舟':15s} {'LoRA本地':15s}")
+        print("  " + "-" * 50)
+        if vs and ls:
+            print(f"  {'平均分':20s} {sum(vs)/len(vs):.1f}/100      {sum(ls)/len(ls):.1f}/100")
+        print(f"  {'总耗时':20s} {vt:.1f}s          {lt:.1f}s")
+        if vs and ls:
+            n = min(len(vs), len(ls))
+            w = sum(1 for i in range(n) if vs[i] > ls[i])
+            l_ = sum(1 for i in range(n) if vs[i] < ls[i])
+            t_ = sum(1 for i in range(n) if vs[i] == ls[i])
+            print(f"  {'火山胜/平/LoRA胜':20s} {w}/{t_}/{l_}")
+        print()

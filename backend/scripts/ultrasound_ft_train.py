@@ -16,18 +16,18 @@ OUTPUT_DIR = _HERE / "ultrasound-ft-model"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
 MODEL_NAME = "Qwen/Qwen2.5-3B-Instruct"
-MAX_SAMPLES = 50000      # 训练用50K条 (4070S 12GB)
+MAX_SAMPLES = 10000      # 先用10000条验证效果 (4070S 12GB, ~3.5h)
 VAL_RATIO = 0.05         # 5% 验证集
 MAX_LENGTH = 1024        # 最大序列长度
 BATCH_SIZE = 4           # 12GB可跑 batch=4
 GRAD_ACCUM = 4           # 梯度累积 → 有效batch 16
 LR = 2e-4
-EPOCHS = 2
+EPOCHS = 1
 LORA_R = 16
 LORA_ALPHA = 32
 LORA_DROPOUT = 0.05
-SAVE_STEPS = 50   # demo (2000条): 114步, 约每10min存一次; full (50000条): ~2850步
-EVAL_STEPS = 50
+SAVE_STEPS = 200   # 每200步保存一次 (~1.7h), 减少保存IO
+EVAL_STEPS = 200    # 每200步验证一次 (验证475条很慢, 不要每50步做)
 assert SAVE_STEPS % EVAL_STEPS == 0, f"SAVE_STEPS({SAVE_STEPS})不是EVAL_STEPS({EVAL_STEPS})的整数倍"
 
 # ─── Data Preparation ──────────────────────────────────────────

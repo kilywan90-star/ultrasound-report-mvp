@@ -20,11 +20,14 @@ from template_fetal import fill_fetal_template
 # ─── 本地微调模型 (替换火山方舟LLM) ───
 _USE_LOCAL_LLM = True   # True=用本地merged model(免费), False=火山方舟(付费)
 try:
-    from llm_local import generate_structured, generate as _local_gen
+    from llm_local import load_model as _local_load, generate as _local_gen, generate_structured, generate_free_report as _local_free
     _LOCAL_LLM_AVAILABLE = True
-except ImportError:
+    # 预加载模型
+    _local_load()
+except Exception as e:
     _LOCAL_LLM_AVAILABLE = False
     _USE_LOCAL_LLM = False
+    print(f"[本地LLM] 不可用: {e}")
 
 router = APIRouter(tags=["结构化"])
 
@@ -654,15 +657,30 @@ def _llm_multi_organ_fill(asr_text, exam_type):
 
     for attempt in range(2):
         try:
-            response = client.chat.completions.create(
-                model=model, temperature=0.1, max_tokens=4096, timeout=30,
-                messages=[
-                    {"role": "system", "content": system},
-                    {"role": "user", "content": f"请将以下口述转为规范化报告:\n\n{asr_text[:2000]}"},
-                ])
-            content = response.choices[0].message.content
-            if content:
-                return _parse_json(content)
+            if _USE_LOCAL_LLM and _LOCAL_LLM_AVAILABLE:
+                result = _local_gen(f"请将以下口述转为规范化报告:\n\n{asr_text[:2000]}", system_prompt=system, max_tokens=4096)
+                if result:
+                    try:
+                        import json as _js
+                        parsed = _js.loads(result)
+                        if parsed and parsed.get("study_see"):
+                            return parsed
+                    except: pass
+                    if "<div" in result:
+                        return {"study_see": result, "study_hint": [], "recommendation": ""}
+            else:
+                from llm_client import _get_client, _parse_json
+                client = _get_client(provider="volc")
+                model = "doubao-seed-1-6-flash-250615"
+                response = client.chat.completions.create(
+                    model=model, temperature=0.1, max_tokens=4096, timeout=30,
+                    messages=[
+                        {"role": "system", "content": system},
+                        {"role": "user", "content": f"请将以下口述转为规范化报告:\n\n{asr_text[:2000]}"},
+                    ])
+                content = response.choices[0].message.content
+                if content:
+                    return _parse_json(content)
         except Exception as e:
             if attempt < 1:
                 import time as _sleep
@@ -888,12 +906,14 @@ async def structure(req: StructureRequest):
         if _llm_suggestion:
             report["recommendation"] = _llm_suggestion
 
-    # 多器官兜底
-    _all_organs = ["乳腺", "甲状腺", "胆囊", "肝脏", "胰腺", "脾脏", "双肾", "子宫", "卵巢", "附件", "前列腺", "膀胱", "心脏", "颈动脉"]
+    # 多器官兜底（排除"双肾"这种一个器官的变体）
+    _all_organs = ["乳腺", "甲状腺", "胆囊", "肝脏", "胰腺", "脾脏", "子宫", "卵巢", "附件", "前列腺", "膀胱", "心脏", "颈动脉"]
     _all_organs_short = {"乳": "乳腺", "甲": "甲状腺", "肝": "肝脏", "胆": "胆囊", "脾": "脾脏", "肾": "肾脏", "宫": "子宫", "卵": "卵巢", "膀": "膀胱"}
     _organ_count = sum(1 for o in _all_organs if o in A)
     _organ_count += sum(1 for s, full in _all_organs_short.items() if s in A and full not in A)
-    if _organ_count >= 2 and method in ("converted_fill", "template_fill", "llm_free") and not _route_result["is_multi"]:
+    # "双肾"算一个器官，不触发多器官
+    if "肾" in A: _organ_count = max(_organ_count, 1)
+    if _organ_count >= 3 and method in ("converted_fill", "template_fill", "llm_free") and not _route_result["is_multi"]:
         logging.info(f"多器官兜底触发: organ_count={_organ_count} method={method}")
         report_llm = await asyncio.to_thread(_llm_multi_organ_fill, A, req.exam_type)
         if report_llm and report_llm.get("study_see"):

@@ -338,6 +338,14 @@ _TPL = {
         'opt_reset': {},
         'option_keys': ["_norm_未见"],
     },
+    '甲状腺全切术后': {
+        'html': '<div class="rpt-html"><div class="rpt-sec">受检者自述甲状腺已切除。双侧颈部未见明显肿大淋巴结。</div></div>',
+        'fields': {},
+        'measurements': [],
+        'options': [],
+        'opt_reset': {},
+        'option_keys': [],
+    },
 }
 
 register_templates(_TPL, category='甲状腺')

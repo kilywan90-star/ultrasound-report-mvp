@@ -18,104 +18,10 @@ DASHSCOPE_API_KEY = os.environ.get("DASHSCOPE_API_KEY", "") or "sk-6e6dfb5313964
 
 
 @router.post("/ali-asr")
-async def ali_asr(file: UploadFile = File(...), doctor: str = Form("")):
-    if not file.filename: raise HTTPException(400, "文件名为空")
-    content = await file.read()
-    if len(content) == 0: raise HTTPException(400, "文件为空")
-
-    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    uid = uuid.uuid4().hex[:8]
-    safe_name = f"{ts}_{uid}.webm"
-    filepath = AUDIO_DIR / safe_name
-    file_size = len(content)
-
-    with open(filepath, 'wb') as f: f.write(content)
-
-    conn = get_db()
-    cur = conn.execute("""INSERT INTO audio_recordings(filename,filepath,file_size,doctor,status)
-                          VALUES(?,?,?,?,'processed')""",
-                       (safe_name, str(filepath), file_size, doctor))
-    audio_id = cur.lastrowid
-    conn.commit()
-
-    text = ""
-    source = "whisper"
-    asr_elapsed = 0
-    raw_text = ""
-    corrected_text = ""
-    quality_score = 0.5
-
-    if DASHSCOPE_API_KEY:
-        try:
-            start = datetime.now()
-            text = await _call_dashscope_asr(str(filepath))
-            asr_elapsed = (datetime.now() - start).total_seconds()
-            if text: source = "dashscope"
-        except Exception as e:
-            logging.warning(f"DashScope ASR失败, 降级到Whisper: {e}")
-            text = ""
-
-    if not text:
-        import time as _t
-        result = asr.transcribe(content, language='zh')
-        raw_text = result['text']
-        quality_score = result.get('quality_score', 0.5)
-        asr_elapsed = result.get('duration', 0)
-
-        from knowledge_engine import knowledge
-        if raw_text:
-            corrected_text = knowledge.correct_asr_text(raw_text)
-        else:
-            corrected_text = raw_text
-
-        if corrected_text:
-            from pipeline import pipeline as pl
-            if pl:
-                pipe_result = pl.process_and_save(corrected_text, doctor)
-                text = pipe_result['report']['description']
-
-                conn.execute("""INSERT INTO asr_logs(audio_file,raw_text,corrected_text,source,quality_score,
-                                elapsed_seconds,doctor,report_id)
-                                VALUES(?,?,?,?,?,?,?,?)""",
-                             (safe_name, raw_text, corrected_text, source, quality_score,
-                              asr_elapsed, doctor, pipe_result.get('report_id', '')))
-                intent = pipe_result.get('intent', {})
-                conn.execute("""INSERT INTO intent_logs(text,sites,findings,is_normal,keywords,elapsed_ms,report_id)
-                                VALUES(?,?,?,?,?,?,?)""",
-                             (corrected_text,
-                              json.dumps(intent.get('sites', []), ensure_ascii=False),
-                              json.dumps(intent.get('findings', []), ensure_ascii=False),
-                              1 if intent.get('is_normal') else 0,
-                              json.dumps(intent.get('keywords', []), ensure_ascii=False),
-                              pipe_result.get('elapsed_ms', 0),
-                              pipe_result.get('report_id', '')))
-                matches = pipe_result.get('matches', [])
-                top3 = []
-                for m in matches[:3]:
-                    top3.append({'name': m.get('template_name',''), 'score': m.get('score',0)})
-                conn.execute("""INSERT INTO match_log(voice_text,corrected_text,best_template_id,best_template_name,
-                                best_score,matched_sites,result_count,top3_candidates,doctor,report_id)
-                                VALUES(?,?,?,?,?,?,?,?,?,?)""",
-                             (raw_text, corrected_text,
-                              pipe_result['report'].get('template_id',''),
-                              pipe_result['report'].get('template_name',''),
-                              pipe_result['report'].get('match_score',0),
-                              pipe_result['report'].get('matched_sites',''),
-                              len(matches),
-                              json.dumps(top3, ensure_ascii=False),
-                              doctor, pipe_result.get('report_id', '')))
-                conn.commit()
-            else:
-                text = corrected_text
-        else:
-            text = corrected_text
-
-    conn.close()
-    return {
-        "text": text, "source": source, "audio_file": safe_name, "audio_path": str(filepath),
-        "raw_text": raw_text, "corrected_text": corrected_text,
-        "quality_score": quality_score, "elapsed_seconds": round(asr_elapsed, 2),
-    }
+async def ali_asr(file: UploadFile = File(...), doctor: str = Form(""), exam_type: str = Form("腹部超声")):
+    """兼容旧接口：统一转发到 /api/asr/transcribe 的实现，避免新旧ASR逻辑不一致。"""
+    from routers.asr import transcribe_unified
+    return await transcribe_unified(file=file, doctor=doctor, exam_type=exam_type, run_structure=False)
 
 
 @router.post("/save-local")

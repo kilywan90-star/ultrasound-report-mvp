@@ -120,8 +120,11 @@ def classify(text: str, exam_type: str = "") -> dict:
                 best = r
                 best["_kw_hits"] = kw_hits
 
-    # 3. 多器官检测
-    organ_count = sum(1 for o in ORGAN_KEYWORDS if o in text)
+    # 3. 多器官检测（排除"双肾"这种单一器官的变体）
+    organ_count = sum(1 for o in ORGAN_KEYWORDS if o in text and o != "双肾")
+    # "双肾"单独计数（算一个器官）
+    if "双肾" in text or "肾脏" in text or "肾" in text:
+        organ_count = max(organ_count, 1)
     is_multi = organ_count >= 3 or (len(text) > 100 and organ_count >= 2)
 
     return {

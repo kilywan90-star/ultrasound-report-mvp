@@ -6,7 +6,7 @@ import os, re, uuid, logging
 from datetime import datetime
 from pathlib import Path
 from fastapi import APIRouter, File, HTTPException, UploadFile
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 import db
 
@@ -14,6 +14,10 @@ router = APIRouter(tags=["音频"])
 
 AUDIO_DIR = Path(__file__).resolve().parent.parent / "audio_backups"
 AUDIO_DIR.mkdir(exist_ok=True)
+
+# 录音文件也监听recordings目录
+RECORDINGS_DIR = Path(__file__).resolve().parent.parent / "recordings"
+RECORDINGS_DIR.mkdir(exist_ok=True)
 
 
 @router.post("/api/audio/upload")
@@ -41,7 +45,10 @@ async def audio_playback(audio_id: str):
     """回放原始录音"""
     if not re.fullmatch(r'[A-Za-z0-9_]+', audio_id):
         raise HTTPException(400, "audio_id格式无效")
-    matches = list(AUDIO_DIR.glob(f"{audio_id}.*"))
+    # 先查recordings目录
+    matches = list(RECORDINGS_DIR.glob(f"{audio_id}.*"))
+    if not matches:
+        matches = list(AUDIO_DIR.glob(f"{audio_id}.*"))
     if not matches:
         raise HTTPException(404, "音频文件不存在")
     return FileResponse(matches[0])
@@ -52,7 +59,9 @@ async def audio_download(audio_id: str):
     """下载原始录音到本机"""
     if not re.fullmatch(r'[A-Za-z0-9_]+', audio_id):
         raise HTTPException(400, "audio_id格式无效")
-    matches = list(AUDIO_DIR.glob(f"{audio_id}.*"))
+    matches = list(RECORDINGS_DIR.glob(f"{audio_id}.*"))
+    if not matches:
+        matches = list(AUDIO_DIR.glob(f"{audio_id}.*"))
     if not matches:
         raise HTTPException(404, "音频文件不存在")
     fpath = matches[0]
