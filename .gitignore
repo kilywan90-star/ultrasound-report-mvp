@@ -14,11 +14,24 @@ venv/
 *.db
 *.db-shm
 *.db-wal
+*.db.bak
+*.db.corrupted
 audio_backups/
+backend/ultrasound-ft-model/
+
+# Credentials
+*.pem
 
 # Test outputs
 test_results*.json
+test_*_results.csv
+test_*_results.json
+test_sample_*.csv
+batch_*_results.json
 *_debug*.txt
+
+# Backup files
+*.bak
 
 # OS
 .DS_Store
