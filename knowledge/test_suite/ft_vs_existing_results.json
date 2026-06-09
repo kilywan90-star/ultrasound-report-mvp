@@ -1,0 +1,202 @@
+[
+  {
+    "text": "甲状腺右叶见0.5×0.3cm低回声结节，边界清",
+    "expected": "甲状腺结节",
+    "old_success": true,
+    "old_time": 0.02,
+    "old_method": "converted_fill",
+    "ft_time": 11.81,
+    "ft_result_preview": "assistant\n【超声所见】\n甲状腺双侧叶切面形态规则，大小正常，表面光滑，包膜完整，实质回声分布均匀，未见明显结节及占位回声。\n\n【超声提示】\n甲状腺疾病: 甲状腺无回声结节（高倍下可见）\n\n【",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">甲状腺双侧叶形态规则，大小正常，表面光滑，包膜完整,内部回声均匀，侧叶内可见回声结节，大小<i class=\"un"
+  },
+  {
+    "text": "肝脏大小正常，右叶见0.8cm强回声，后方伴声影",
+    "expected": "肝脏钙化灶/肝内胆管结石",
+    "old_success": true,
+    "old_time": 1.05,
+    "old_method": "converted_fill",
+    "ft_time": 7.4,
+    "ft_result_preview": "assistant\n【超声所见】\n肝脏大小正常，右叶见0.8cm强回声，后方伴声影。\n\n【超声提示】\n肝脏: 肝内钙化灶\n\n【参考模板】\n肝脏大小形态正常，实质回声分布欠均匀，肝内可见多个强回声斑，后",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">肝脏形态欠规则,体积正常/缩小,肝包膜表面欠光滑/呈锯齿状,实质回声增粗,分布不均匀,管系结构显示不清晰/走形欠/"
+  },
+  {
+    "text": "胆囊大小正常，壁不厚，腔内见1.2cm强回声，随体位移动",
+    "expected": "胆囊结石",
+    "old_success": true,
+    "old_time": 0.03,
+    "old_method": "converted_fill",
+    "ft_time": 9.79,
+    "ft_result_preview": "assistant\n【超声所见】\n胆囊大小正常，壁不厚，腔内见1.2cm强回声，随体位移动。\n\n【超声提示】\n肝脏: 肝脏脂肪沉积(xy)\n胆道: 胆总管扩张(未见明显结石)\n\n【参考模板】\n胆囊大小",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">胆囊大小形态正常，壁欠光滑，内见多个强回声团，后伴声影，改变体位可移动,较大<i class=\"unfill\">_"
+  },
+  {
+    "text": "子宫前位，肌层见1.5×1.2cm低回声，边界清",
+    "expected": "子宫肌瘤",
+    "old_success": true,
+    "old_time": 0.01,
+    "old_method": "converted_fill",
+    "ft_time": 12.11,
+    "ft_result_preview": "assistant\n【超声所见】\n子宫前位，肌层见1.5×1.2cm低回声，边界清。双侧附件未见明显包块回声。\n\n【超声提示】\n子宫: 妊娠（宫内） 未见明显胚胎组织及原始心管搏动\n\n【参考模板】\n子",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">子宫前壁/后壁可见低回声结节，大小<i class=\"unfill\">__</i>mm，形态规则，边界清晰，内部回"
+  },
+  {
+    "text": "双肾大小正常，右肾下极见0.6cm强回声，后方伴声影",
+    "expected": "肾结石",
+    "old_success": true,
+    "old_time": 1.73,
+    "old_method": "llm_multi",
+    "ft_time": 15.0,
+    "ft_result_preview": "assistant\n【超声所见】\n双肾大小正常，右肾下极见0.6cm强回声，后方伴声影。\n\n【超声提示】\n肾脏: 肾多发囊肿（单侧）\n\n【参考模板】\n双肾大小正常，左肾上极/下极/右肾上极/右肾下极近",
+    "old_result_preview": "双肾: 大小正常，右肾下极可见大小约0.6cm强回声，后方伴声影。"
+  },
+  {
+    "text": "右乳外上象限0.8×0.5cm低回声结节，边界清，无血流，二类",
+    "expected": "乳腺结节BI-RADS 2类",
+    "old_success": true,
+    "old_time": 0.02,
+    "old_method": "converted_fill",
+    "ft_time": 13.07,
+    "ft_result_preview": "assistant\n【超声所见】\n右乳外上象限0.8×0.5cm低回声结节，边界清，无血流，二类。左乳腺未见明显结节及肿大淋巴结回声。\n\n【超声提示】\n乳腺疾病: 乳腺小叶增生\n\n【参考模板】\n右乳/",
+    "old_result_preview": "<div class='rpt-html'>左乳/右乳点距乳头mm处/乳头旁/乳头后方可探及一低回声结节，大小约xmm，形态规则，边界清晰，内部回声欠均匀。,</div><br><b class='v"
+  },
+  {
+    "text": "胰腺大小正常，实质回声均匀，主胰管不扩张",
+    "expected": "胰腺正常",
+    "old_success": true,
+    "old_time": 0.03,
+    "old_method": "converted_fill",
+    "ft_time": 9.63,
+    "ft_result_preview": "assistant\n【超声所见】\n胰腺大小正常，实质回声均匀，主胰管不扩张。胆囊充盈可，壁薄光滑，内未见明显结石回声。\n\n【超声提示】\n胰腺: 胰腺实质性疾病 USS\n胆系: 胆囊炎（无名） USS\n",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">肝脏形态规则，大小正常，表面光滑，实质回声分布均匀，肝内管系尚清。</div></div>"
+  },
+  {
+    "text": "脾脏大小正常，实质回声均匀",
+    "expected": "脾脏正常",
+    "old_success": true,
+    "old_time": 0.02,
+    "old_method": "converted_fill",
+    "ft_time": 4.48,
+    "ft_result_preview": "assistant\n【超声所见】\n脾脏大小正常，实质回声均匀。\n\n【超声提示】\n肝脏: 肝脏脂肪沉积(xy)\n\n【参考模板】\n脾脏大小正常，实质回声均匀。,肝脏脂肪沉积。",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">肝脏形态规则，大小正常，表面光滑，实质回声分布均匀，肝内管系尚清。</div></div>"
+  },
+  {
+    "text": "左乳内上象限可见大小约1.2×0.8cm低回声结节，边界清，内可见点状强回声，CDFI:结节内可见血",
+    "expected": "乳腺结节BI-RADS 4A类",
+    "old_success": true,
+    "old_time": 0.03,
+    "old_method": "converted_fill",
+    "ft_time": 17.77,
+    "ft_result_preview": "assistant\n【超声所见】\n左乳内上象限可见大小约1.2×0.8cm低回声结节，边界清，内可见点状强回声，CDFI:结节内可见血流信号。左腋下可探及一淋巴结，大小约3x2mm。\n\n【超声提示】\n",
+    "old_result_preview": "<div class='rpt-html'>双侧乳腺切面形态轮廓正常，层次清楚，边界光滑完整，内部回声分布均匀，左乳/右乳可探及多个低回声结节，其一大小约xmm（位于点），形态规则，边界清晰，内部回声"
+  },
+  {
+    "text": "前列腺大小约4.8×3.8×3.5cm，形态饱满，内回声欠均匀",
+    "expected": "前列腺增生",
+    "old_success": true,
+    "old_time": 3.16,
+    "old_method": "template_fill",
+    "ft_time": 14.01,
+    "ft_result_preview": "assistant\n【超声所见】\n前列腺大小约4.8×3.8×3.5cm，形态饱满，内回声欠均匀。,前列腺实质性回声未见明显结节。\n\n【超声提示】\n前列腺: 前列腺稍大-ch\n\n【参考模板】\n前列腺大",
+    "old_result_preview": "<div class='rpt-html'>前列腺大小约4.8×3.8×3.5cm，形态饱满，内回声欠均匀</div>"
+  },
+  {
+    "text": "子宫大小正常，形态规则，肌壁回声均匀，内膜线居中",
+    "expected": "子宫正常",
+    "old_success": true,
+    "old_time": 0.03,
+    "old_method": "converted_fill",
+    "ft_time": 8.72,
+    "ft_result_preview": "assistant\n【超声所见】\n子宫大小正常，形态规则，肌壁回声均匀，内膜线居中。双侧附件区未见明显包块回声。\n\n【超声提示】\n子宫: 妊娠期子宫（学生）\n\n【参考模板】\n子宫大小正常，形态规则，肌",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">子宫前壁/后壁可见低回声结节，大小<i class=\"unfill\">__</i>mm，形态规则，边界清晰，内部回"
+  },
+  {
+    "text": "甲状腺大小正常，峡部不厚，双侧叶未见明显结节",
+    "expected": "甲状腺正常",
+    "old_success": true,
+    "old_time": 0.02,
+    "old_method": "converted_fill",
+    "ft_time": 10.03,
+    "ft_result_preview": "assistant\n【超声所见】\n甲状腺大小正常，峡部不厚，双侧叶未见明显结节。状腺大小正常，峡部不厚，双侧叶未见明显结节。\n\n【超声提示】\n甲状腺疾病: 甲状腺回声不均匀\n\n【参考模板】\n甲状腺形态",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">甲状腺双侧叶形态规则，大小正常，表面光滑，包膜完整,内部回声均匀，侧叶内可见回声结节，大小<i class=\"un"
+  },
+  {
+    "text": "肝脏大小正常，表面光滑，实质回声均匀，肝内管系显示清晰",
+    "expected": "肝脏正常",
+    "old_success": true,
+    "old_time": 0.03,
+    "old_method": "converted_fill",
+    "ft_time": 7.56,
+    "ft_result_preview": "assistant\n【超声所见】\n肝脏大小正常，表面光滑，实质回声均匀，肝内管系显示清晰。脏大小正常，表面光滑，实质回声均匀，肝内管系显示清晰。\n\n【超声提示】\n肝脏: 肝脏脂肪沉积(xy)\n\n【参考",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">肝脏形态规则，大小正常，表面光滑，实质回声分布均匀，肝内管系尚清。</div></div>"
+  },
+  {
+    "text": "胆囊大小正常，壁不光滑，囊壁增厚约5mm",
+    "expected": "胆囊炎",
+    "old_success": true,
+    "old_time": 0.82,
+    "old_method": "converted_fill",
+    "ft_time": 9.78,
+    "ft_result_preview": "assistant\n【超声所见】\n胆囊大小正常，壁不光滑，囊壁增厚约5mm。,肝脏形态大小正常，表面光滑，实质回声分布欠均匀，肝内管系显示欠清。\n\n【超声提示】\n肝脏: 肝脏脂肪沉积(xy)\n\n【参考",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">肝脏形态规则，大小正常，表面光滑，实质回声分布均匀，肝内管系尚清。</div></div><br><b class"
+  },
+  {
+    "text": "颈动脉内膜中层厚度约1.2mm，管壁可见斑块形成",
+    "expected": "颈动脉斑块",
+    "old_success": true,
+    "old_time": 0.01,
+    "old_method": "converted_fill",
+    "ft_time": 20.2,
+    "ft_result_preview": "assistant\n【超声所见】\n颈动脉彩超： 颈动脉（颈总、颈内、颈外动脉）内膜面毛糙，内中膜不增厚。,颈动脉（颈总、颈内、颈外动脉）内膜面毛糙，内中膜不增厚。,颈动脉（颈总、颈内、颈外动脉）内膜面",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">双侧颈动脉（颈总、颈内、颈外动脉）走行正常，内膜面毛糙，内中膜不厚，左侧/右侧颈总动脉分叉处可见大小<i clas"
+  },
+  {
+    "text": "膀胱充盈可，壁不厚，内未见明显异常回声",
+    "expected": "膀胱正常",
+    "old_success": true,
+    "old_time": 1.46,
+    "old_method": "template_fill",
+    "ft_time": 10.11,
+    "ft_result_preview": "assistant\n【超声所见】\n膀胱充盈可，壁不厚，内未见明显异常回声。胱充盈可，壁不厚，内未见明显异常回声。\n\n【超声提示】\n前列腺: 前列腺稍大-ch\n\n【参考模板】\n膀胱充盈可，壁不厚，内未见",
+    "old_result_preview": "<p>膀胱充盈可，壁不厚，内未见明显异常回声</p>"
+  },
+  {
+    "text": "双侧卵巢大小正常，未见明显异常回声",
+    "expected": "卵巢正常",
+    "old_success": true,
+    "old_time": 0.02,
+    "old_method": "converted_fill",
+    "ft_time": 7.34,
+    "ft_result_preview": "assistant\n【超声所见】\n双侧卵巢大小正常，未见明显异常回声。\n\n【超声提示】\n卵巢: 卵巢滤泡期\n\n【参考模板】\n双侧卵巢大小正常，形态规则，表面光滑，内部回声分布均匀，未见明显包块及液性包",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">膀胱充盈可，壁光滑，内未见明显包块回声。</div></div>"
+  },
+  {
+    "text": "右肾大小正常，肾盂分离约2.0cm",
+    "expected": "肾积水",
+    "old_success": true,
+    "old_time": 0.03,
+    "old_method": "converted_fill",
+    "ft_time": 6.27,
+    "ft_result_preview": "assistant\n【超声所见】\n右肾大小正常，肾盂分离约2.0cm，左肾未见明显异常声像。\n\n【超声提示】\n肾脏: 肾盂输尿管扩张（左侧）\n\n【参考模板】\n右肾大小正常，肾盂轻度扩张。,左肾未见明显",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">双肾形态规则，左肾大小<i class=\"unfill\">__</i>mm，右肾大小<b class=\"voice"
+  },
+  {
+    "text": "肝脏大小正常，实质回声增粗增强，分布欠均匀，肝内管系显示欠清晰",
+    "expected": "脂肪肝/肝损害",
+    "old_success": true,
+    "old_time": 0.02,
+    "old_method": "converted_fill",
+    "ft_time": 8.53,
+    "ft_result_preview": "assistant\n【超声所见】\n肝脏大小正常，实质回声增粗增强，分布欠均匀，肝内管系显示欠清晰。脏大小正常，实质回声增粗增强，分布欠均匀，肝内管系显示欠清晰。\n\n【超声提示】\n肝脏: 脂肪肝（中-重",
+    "old_result_preview": "<div class=\"rpt-html\"><div class=\"rpt-sec\">肝脏形态大小正常，表面光滑, 实质回声分布欠均匀,近场回声增强，远场回声衰减，肝内管系显示欠清。</div></d"
+  },
+  {
+    "text": "胃大部分切除术后，肝胆胰脾未见明显异常",
+    "expected": "腹部超声术后",
+    "old_success": true,
+    "old_time": 3.5,
+    "old_method": "llm_multi",
+    "ft_time": 19.47,
+    "ft_result_preview": "assistant\n【超声所见】\n胃大部分切除术后，肝胆胰脾未见明显异常。\n\n【超声提示】\n胃 胃大部分切除术后\n\n【参考模板】\n胃大部分切除术后，肝胆胰脾未见明显异常。,胃部切口处可见部分肠管回声，",
+    "old_result_preview": "肝脏: 大小形态正常。\n胰腺: 正常。\n脾脏: 未见肿大。\n胆囊: 大小正常。"
+  }
+]
