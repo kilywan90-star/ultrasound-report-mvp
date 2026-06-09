@@ -892,10 +892,32 @@ async def structure(req: StructureRequest):
     elif best_score >= 50 and template_info1 and len(template_info1) >= 20:
         report = await asyncio.to_thread(_llm_fill_template, A, req.exam_type, best_name, template_info1)
         method = "template_fill"
+    elif best_score >= 30 and template_info1 and len(template_info1) >= 20:
+        report = await asyncio.to_thread(_llm_fill_template, A, req.exam_type, best_name, template_info1)
+        method = "template_fill_low"
     else:
-        report = await asyncio.to_thread(_llm_free_generate, A, req.exam_type)
-        method = "llm_free"
-        best_name = "自由生成(无匹配模板)"
+        # 40万真实报告兜底: 当常规匹配都失败时, 用40W数据匹配
+        _40w_candidates = None
+        try:
+            from matcher_40w import match_40w
+            _40w_candidates = match_40w(A, req.exam_type, top_n=3)
+        except Exception:
+            pass
+
+        if _40w_candidates:
+            _40w_top = _40w_candidates[0]
+            report = {
+                "study_see": f"<div class='rpt-html'>{_40w_top['see'][:2000]}</div>",
+                "study_hint": [{"rank": 1, "diagnosis": _40w_top['hint'][:200], "icd10": ""}],
+                "recommendation": "",
+            }
+            method = "40w_match"
+            best_name = _40w_top['hint'][:50] or "40万报告匹配"
+            logging.info(f"40W fallback used: exam_type={req.exam_type} hint={_40w_top['hint'][:40]}")
+        else:
+            report = await asyncio.to_thread(_llm_free_generate, A, req.exam_type)
+            method = "llm_free"
+            best_name = "自由生成(无匹配模板)"
 
     report = _wrap_hints_with_toggle(report)
     report, warnings = _preserve_numbers(A, report, warnings)
