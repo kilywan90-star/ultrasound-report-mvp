@@ -404,6 +404,9 @@ _ABNORMAL_RULES = [
     (lambda see, name, text, exam: "胎儿" in text and "产" in exam, "建议定期产检"),
 ]
 
+# 建议检测：ASR 原文中包含"建议"开头的句子 → 直接提取
+_ASR_SUGGESTION_PATTERN = re.compile(r'(?:建议|注意|避免|可以|需要)[^。]*[。]?', re.UNICODE)
+
 # 正常规则（仅当无异常模式命中时触发）
 _NORMAL_RULES = [
     (lambda see, name, text, exam: "未见明显异常" in see, "建议定期体检"),
@@ -414,6 +417,16 @@ _NORMAL_RULES = [
 
 def _quick_recommendation(asr_text: str, template_name: str, report: dict, exam_type: str) -> str | None:
     """规则快速判断（0ms，无LLM）。返回建议或None"""
+    # Phase 0: ASR原文直接提取建议句（优先级最高）
+    if asr_text:
+        matches = _ASR_SUGGESTION_PATTERN.findall(asr_text)
+        if matches:
+            extracted = matches[0].strip()
+            # 只要ASR原文有"建议"开头的句子，直接用它覆盖规则建议
+            # 排除"建议定期产检/体检/复查"这类固定模板建议
+            # 注意：rule pattern 可能先于extraction执行，所以这里必须返回
+            return extracted
+
     if not report or not report.get("study_see"):
         return None
     _study_see_plain = re.sub(r'<[^>]+>', '', report.get("study_see", ""))[:500]
@@ -734,6 +747,10 @@ async def structure(req: StructureRequest):
     if _route_result["is_fetal"] and (req.patient_gender or "").strip() not in ("男", "M", "male"):
         report = fill_fetal_template(A)
         report = _wrap_hints_with_toggle(report)
+        # 建议：从ASR原文提取或规则生成
+        _llm_suggestion = await _generate_recommendation(A, "胎儿超声标准模板", report, req.exam_type)
+        if _llm_suggestion:
+            report["recommendation"] = _llm_suggestion
         if req.patient_id and req.patient_id.strip():
             try:
                 pid = int(req.patient_id)
@@ -751,6 +768,10 @@ async def structure(req: StructureRequest):
         report = await asyncio.to_thread(_llm_multi_organ_fill, A, req.exam_type)
         report = _wrap_hints_with_toggle(report)
         report, warnings = _preserve_numbers(A, report, warnings)
+        # 建议：从ASR原文提取或规则生成
+        _llm_suggestion = await _generate_recommendation(A, "多器官综合报告", report, req.exam_type)
+        if _llm_suggestion:
+            report["recommendation"] = _llm_suggestion
         pid = None
         if req.patient_id and req.patient_id.strip():
             try:
