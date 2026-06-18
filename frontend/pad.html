@@ -5,15 +5,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>超声平板 - 主任极简 / 实时听写</title>
 <style>
-:root{--bg1:#07111f;--bg2:#0f172a;--bg3:#102a43;--card:rgba(15,23,42,.72);--card2:rgba(30,41,59,.78);--glass:rgba(255,255,255,.08);--line:rgba(148,163,184,.22);--text:#e5f0ff;--muted:#9fb3cc;--blue:#38bdf8;--blue2:#1d4ed8;--green:#34d399;--red:#fb7185;--orange:#fbbf24;--shadow:0 22px 60px rgba(0,0,0,.32);--radius:28px;--radius-inner:18px;--font:'PingFang SC','Microsoft YaHei',-apple-system,BlinkMacSystemFont,sans-serif}
-*{box-sizing:border-box;margin:0;padding:0}body{height:100vh;overflow:hidden;font-family:var(--font);color:var(--text);background:radial-gradient(circle at 15% 5%,rgba(56,189,248,.28),transparent 32%),radial-gradient(circle at 92% 8%,rgba(29,78,216,.26),transparent 36%),linear-gradient(135deg,var(--bg1),var(--bg2) 55%,var(--bg3))}
-body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:44px 44px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.8),rgba(0,0,0,.1));pointer-events:none}.app{position:relative;z-index:1;height:100vh;padding:20px;display:flex;flex-direction:column;gap:12px}
-.top{height:68px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.brand{display:flex;align-items:center;gap:14px}.logo{width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#38bdf8,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:24px;box-shadow:0 0 32px rgba(56,189,248,.3)}.brand h1{font-size:24px;letter-spacing:.3px}.brand p{font-size:13px;color:var(--muted);margin-top:1px}.mode-switch{display:flex;gap:6px;background:rgba(255,255,255,.08);border-radius:18px;padding:4px;border:1px solid var(--line)}.mode-btn{border:none;border-radius:14px;padding:10px 20px;font-size:15px;font-weight:700;cursor:pointer;background:transparent;color:var(--muted);transition:.15s;font-family:var(--font)}.mode-btn.on{background:var(--blue);color:#062033;box-shadow:0 0 20px rgba(56,189,248,.35)}.mode-btn:hover:not(.on){color:var(--text)}
-.clock{text-align:right;color:var(--muted);font-size:13px}.clock strong{display:block;color:var(--text);font-size:22px}
+:root {
+  /* ── 深色科技风（默认）── */
+  --bg1:#0b1628;
+  --bg2:#0f1a2e;
+  --card:rgba(20,30,48,.85);
+  --card2:rgba(28,40,60,.78);
+  --glass:rgba(255,255,255,.06);
+  --line:rgba(120,140,170,.25);
+  --text:#e8f0fe;
+  --muted:#8899b4;
+  --blue:#38bdf8;
+  --green:#34d399;
+  --red:#f87171;
+  --orange:#fbbf24;
+  --shadow:0 20px 50px rgba(0,0,0,.4);
+  --radius:24px;
+  --radius-sm:14px;
+  --font:'Inter','PingFang SC','Microsoft YaHei',-apple-system,sans-serif
+}
+/* ── 浅色医疗风 ── */
+.light{--bg1:#f0f4fa;--bg2:#e8edf5;--card:rgba(255,255,255,.98);--card2:#fff;
+  --glass:rgba(255,255,255,.7);--line:#cdd7e6;--text:#0f172a;--muted:#475569;
+  --blue:#2563eb;--green:#0d9488;--red:#dc2626;--orange:#d97706;
+  --radius:22px;--radius-sm:13px}
+.light .logo{background:linear-gradient(135deg,#2563eb,#1d4ed8)}
+.light body{background:var(--bg1)}.light body::before{display:none}
+.light .mode-btn.on{background:var(--blue);color:#fff}
+.light .btn-blue{background:var(--blue);color:#fff}
+.light .btn-ghost{color:var(--text)}.light .btn-ghost-light{color:var(--text)}
+.light .patient-card{background:var(--card);border-color:#d0dae8;box-shadow:0 1px 4px rgba(15,23,42,.04)}
+.light .patient-card::after{background:rgba(37,99,235,.04)}
+.light .p-name{color:#0f172a}
+.light .p-meta{color:#334155}
+.light .p-label{color:#64748b}
+.light .p-tag{color:var(--green);background:rgba(13,148,136,.1)}
+.light .p-id-badge{background:rgba(37,99,235,.1);color:var(--blue)}
+.light .stat label{color:#475569;font-weight:600}
+.light .stat div{color:#0f172a;font-weight:800}
+.light .panel-hd{color:#0f172a;font-weight:700}
+.light .panel-hd,.light .review-head,.light .review-foot{border-color:var(--line)}
+.light .clock strong{color:#0f172a}
+.light .clock span{color:#475569}
+.light .brand h1{color:#0f172a}.light .brand p{color:#475569}
+.light .stat{background:var(--card);border-color:var(--line);box-shadow:0 1px 3px rgba(15,23,42,.04)}
+.light .tpl-card{background:var(--card)}.light .live-text{background:var(--card);color:var(--text);border-color:var(--line)}
+.light .final-box{background:var(--card);color:var(--text);border-color:var(--line)}
+.light .recognized .interim{color:var(--muted)}
+.light .seg-done{background:rgba(37,99,235,.1);color:var(--blue)}
+.light .seg-live{background:rgba(217,119,6,.1);color:var(--orange)}
+.light .review{background:rgba(240,244,250,.96)}
+.light .review-box{background:var(--card2);border-color:#d0dae8;box-shadow:0 8px 32px rgba(15,23,42,.1)}
+.light .review-text{background:#f8faff;border-color:var(--line);color:var(--text)}
+.light .review-text .voice-template{color:#475569}
+.light .doc-chip{background:var(--card);border-color:var(--line);color:var(--text)}
+.light .doc-chip:hover{border-color:var(--blue);color:#0f172a}
+.light .doc-chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.light .candidates-body{background:rgba(240,244,250,.6)}
+.light .cand-card{background:var(--card);border-color:#d0dae8}
+.light .cand-card:hover{border-color:var(--blue);background:rgba(37,99,235,.04)}
+.light .cand-card-name{color:#0f172a}
+.light .cand-card-preview{color:#334155}
+.light .cand-card-tag{background:rgba(37,99,235,.08);color:var(--blue)}
+.light .cand-voice-bubble{background:var(--card);border-color:#d0dae8;color:#334155}
+.light .candidates-header{border-color:var(--line)}
+.light .ch-patient{color:#0f172a}
+.light .ch-meta{color:#475569}
+.light .patient-panel,.light .record-panel{background:var(--card);border-color:var(--line)}
+.light .top{background:rgba(255,255,255,.8);border-bottom:1px solid var(--line)}
+.light .mode-switch{background:rgba(255,255,255,.6);border-color:var(--line)}
+.light .mode-btn{color:#64748b}
+.light .mode-btn.on{background:var(--blue);color:#fff}
+.light .mode-btn:hover:not(.on){color:#0f172a}
+.light .cand-row{background:#f8faff}
+.light .toast{background:rgba(255,255,255,.95);color:var(--text);border-color:#d0dae8;box-shadow:0 4px 16px rgba(15,23,42,.08)}
+.light .panel{background:var(--card);border-color:var(--line)}
+.light .panel-tabs{background:rgba(255,255,255,.5);border-color:var(--line)}
+.light .ptab{color:#64748b}
+.light .ptab-on{background:var(--blue);color:#fff}
+.light .candidates-footer{border-color:var(--line)}
+.light .cf-cancel,.light .cf-edit{background:rgba(255,255,255,.6);border-color:var(--line);color:var(--text)}
+.light .cf-confirm{color:#fff}
+.light .live-panel .card{background:var(--card);border-color:var(--line)}
+.light .card-hd{color:#0f172a;border-color:var(--line)}
+.light .tcand-chip{background:rgba(37,99,235,.08);border-color:rgba(37,99,235,.2);color:var(--blue)}
+.light .tcand-chip:hover{background:rgba(37,99,235,.16)}
+.light .tcand-chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}
+.light .current-name{color:#0f172a}
+.light .current-meta{color:#334155}
+.light .current-tag{color:var(--green)}
+.light .record-panel .record-center{color:var(--text)}
+.light #listStatus{color:#334155}
+.light .process p{color:#475569}
+.light .card-bd{color:var(--text)}
+.light .card-hd span{color:var(--text)}
+.light .live-report h3{color:var(--blue)}
+.light .review-item h3{color:var(--blue)}
+.light .review-head h2{color:#0f172a}
+.light *,.light .review-box,.light .review-text,.light .cand-card,.light .patient-card,
+.light .panel,.light .stat,.light .candidates-layout{box-shadow:none}
+*{box-sizing:border-box;margin:0;padding:0}
+body{height:100vh;overflow:hidden;font-family:var(--font);color:var(--text);
+  background:radial-gradient(ellipse at 20% 0%,rgba(56,189,248,.12),transparent 45%),
+             linear-gradient(165deg,var(--bg1),var(--bg2) 60%)}
+.app{position:relative;z-index:1;height:100vh;padding:18px;display:flex;flex-direction:column;gap:10px}
+/* ── 顶部栏 ── */
+.top{height:60px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding:0 4px}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}.brand h1{font-size:20px;font-weight:700;letter-spacing:-.2px}.brand p{font-size:12px;color:var(--muted);margin-top:0}.mode-switch{display:flex;gap:4px;background:rgba(255,255,255,.07);border-radius:14px;padding:3px;border:1px solid var(--line)}.mode-btn{border:none;border-radius:11px;padding:8px 16px;font-size:13px;font-weight:600;cursor:pointer;background:transparent;color:var(--muted);transition:.15s;font-family:var(--font)}.mode-btn.on{background:var(--blue);color:#f0f9ff;box-shadow:0 0 14px rgba(56,189,248,.25)}.mode-btn:hover:not(.on){color:var(--text)}.clock{text-align:right;color:var(--muted);font-size:12px;line-height:1.3}.clock strong{display:block;color:var(--text);font-size:18px;font-weight:700}
+/* ── 布局 ── */
 .view{flex:1;min-height:0}.screen{display:none;height:100%}.screen.on{display:block}
-.queue-layout{display:grid;grid-template-columns:1fr 360px;gap:16px;height:100%}
-.panel{background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.045));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(18px);overflow:hidden}.panel-hd{height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;border-bottom:1px solid var(--line);font-size:18px;font-weight:800}.panel-bd{padding:16px;height:calc(100% - 60px);overflow:auto}
+.queue-layout{display:grid;grid-template-columns:1fr 280px;gap:12px;height:100%}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(12px);overflow:hidden}
+.panel-hd{height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-bottom:1px solid var(--line);font-size:14px;font-weight:700}
+.panel-bd{padding:12px;height:calc(100% - 48px);overflow:auto}
 .patient-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px}
 .patient-card{cursor:pointer;background:linear-gradient(180deg,rgba(15,23,42,.74),rgba(30,41,59,.68));border:1px solid rgba(148,163,184,.22);border-radius:22px;padding:18px;min-height:140px;transition:.18s;position:relative;overflow:hidden}.patient-card:hover{transform:translateY(-2px);border-color:var(--blue);box-shadow:0 0 28px rgba(56,189,248,.25)}.patient-card::after{content:'';position:absolute;right:-36px;top:-36px;width:100px;height:100px;border-radius:50%;background:rgba(56,189,248,.07)}
 .p-name{font-size:28px;font-weight:900;margin-bottom:6px}.p-meta{font-size:15px;color:var(--muted);line-height:1.6}.p-tag{display:inline-block;margin-top:8px;padding:4px 10px;border-radius:999px;background:rgba(52,211,153,.12);color:var(--green);font-size:12px}
@@ -29,11 +133,36 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
 .live-panel{display:grid;grid-template-columns:1fr 1fr;gap:14px;height:100%}
 .live-panel .card{background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.045));border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);backdrop-filter:blur(18px);display:flex;flex-direction:column;overflow:hidden}.card-hd{padding:12px 18px;border-bottom:1px solid var(--line);font-size:16px;font-weight:800;display:flex;justify-content:space-between;align-items:center}.card-bd{padding:14px 16px;flex:1;overflow:auto}
 .recognized{font-size:26px;line-height:1.6;letter-spacing:.3px;word-wrap:break-word}.recognized .interim{color:var(--muted)}.final-box{margin-top:10px;background:rgba(15,23,42,.5);border:1px dashed rgba(148,163,184,.25);border-radius:14px;padding:12px;font-size:16px;line-height:1.6;max-height:140px;overflow:auto;white-space:pre-wrap;color:var(--muted)}
-.tpl-hero{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}.tpl-card{background:rgba(15,23,42,.5);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}.tpl-card label{display:block;font-size:12px;color:var(--muted)}.tpl-card div{font-size:18px;font-weight:700;margin-top:4px}.live-report{margin-top:10px}.live-report h3{font-size:14px;color:var(--blue);margin-bottom:5px}.live-text{background:rgba(15,23,42,.5);border:1px solid rgba(148,163,184,.15);border-radius:12px;padding:10px;font-size:16px;line-height:1.6;min-height:48px;white-space:pre-wrap;color:#c8d6e5}.seg-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-right:4px;vertical-align:middle}.seg-done{background:rgba(56,189,248,.12);color:var(--blue)}.seg-live{background:rgba(251,191,36,.15);color:var(--orange);animation:segPulse 1.2s infinite}@keyframes segPulse{0%,100%{opacity:1}50%{opacity:.5}}
+.tpl-hero{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:10px}.tpl-card{background:rgba(15,23,42,.5);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}.tpl-card label{display:block;font-size:12px;color:var(--muted)}.tpl-card div{font-size:18px;font-weight:700;margin-top:4px}.live-report{margin-top:10px}.live-report h3{font-size:14px;color:var(--blue);margin-bottom:5px}.live-text{background:rgba(15,23,42,.5);border:1px solid rgba(148,163,184,.15);border-radius:12px;padding:10px;font-size:16px;line-height:1.6;min-height:48px;white-space:pre-wrap;color:#c8d6e5}
+.live-text .voice-matched{color:#f97316;font-weight:700}.live-text .voice-unfilled{color:#fbbf24;font-weight:700}.live-text .voice-template{color:#c8d6e5}.seg-badge{display:inline-block;padding:1px 6px;border-radius:8px;font-size:10px;font-weight:700;margin-right:4px;vertical-align:middle}.seg-done{background:rgba(56,189,248,.12);color:var(--blue)}.seg-live{background:rgba(251,191,36,.15);color:var(--orange);animation:segPulse 1.2s infinite}@keyframes segPulse{0%,100%{opacity:1}50%{opacity:.5}}
 .actions{display:flex;gap:10px;flex-wrap:wrap}.btn{border:none;border-radius:16px;padding:14px 22px;font-size:17px;font-weight:800;cursor:pointer;font-family:var(--font)}.btn-soft{background:rgba(255,255,255,.08);border:1px solid var(--line);color:var(--text)}.btn-blue{background:var(--blue);color:#062033}.btn-danger{background:var(--red);color:#fff}.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:rgba(15,23,42,.94);border:1px solid var(--line);border-radius:16px;padding:12px 22px;color:var(--text);font-size:17px;box-shadow:var(--shadow);display:none;z-index:99}.toast.on{display:block}
 .https-warn{display:none;background:rgba(251,191,36,.14);border:1px solid rgba(251,191,36,.45);color:#fde68a;border-radius:14px;padding:10px 14px;font-size:13px;margin-top:8px}.error{color:var(--red)}
+/* ── 面板标签切换 ── */
+.panel-tabs{display:flex;gap:0;background:rgba(255,255,255,.05);border-radius:10px;padding:2px;border:1px solid var(--line)}.ptab{border:none;background:transparent;color:var(--muted);padding:6px 14px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);transition:.15s}.ptab-on{background:var(--blue);color:#f0f9ff;box-shadow:0 0 14px rgba(56,189,248,.2)}.ptab:hover:not(.ptab-on){color:var(--text)}
+/* ── 医生网格 ── */
+.doctor-panel{max-width:360px;overflow:hidden}.doctor-grid{display:flex;flex-wrap:wrap;gap:4px;max-height:72px;overflow-y:auto}.doc-chip{border:none;border-radius:8px;padding:3px 7px;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font);background:rgba(255,255,255,.06);border:1px solid rgba(148,163,184,.15);color:var(--muted);transition:.12s;white-space:nowrap;text-align:center;line-height:1.3}.doc-chip:hover{border-color:var(--blue);color:var(--text);background:rgba(56,189,248,.08)}.doc-chip.on{background:var(--blue);color:#f0f9ff;border-color:var(--blue);box-shadow:0 0 10px rgba(56,189,248,.2)}
+/* ── 实时听写候选模板条 ── */
+.tcand-bar{display:flex;gap:6px;padding:8px 0;overflow-x:auto;flex-wrap:nowrap}.tcand-chip{border:none;border-radius:10px;padding:5px 10px;font-size:12px;font-weight:600;cursor:pointer;font-family:var(--font);background:rgba(56,189,248,.08);border:1px solid rgba(56,189,248,.2);color:var(--blue);white-space:nowrap;transition:.12s;flex-shrink:0}.tcand-chip:hover{background:rgba(56,189,248,.18)}.tcand-chip.on{background:var(--blue);color:#fff;border-color:var(--blue)}.tcand-chip .chip-pct{font-size:10px;opacity:.7;margin-left:3px}
+/* ── 患者卡片增强 ── */
+.p-card-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}.p-id-badge{font-size:11px;font-weight:700;color:var(--blue);background:rgba(56,189,248,.12);padding:1px 8px;border-radius:999px;font-family:ui-monospace,Menlo,monospace}.p-label{font-size:11px;color:var(--muted);display:inline}@media(max-width:768px){.patient-card{min-height:100px}.p-name{font-size:22px}}
+/* ── 候选模板选择 ── */
+.candidates-layout{height:100%;display:flex;flex-direction:column;gap:0}.candidates-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;flex-shrink:0;border-bottom:1px solid var(--line)}.ch-left{display:flex;flex-direction:column;gap:2px}.ch-patient{font-size:26px;font-weight:900;line-height:1.2}.ch-meta{font-size:14px;color:var(--muted)}.ch-right{text-align:right}.ch-badge{font-size:32px;font-weight:900;font-family:ui-monospace,Menlo,monospace;letter-spacing:-.5px}
+.candidates-body{flex:1;overflow:auto;padding:20px 24px;display:flex;flex-direction:column;gap:20px}.cand-voice-bubble{display:flex;align-items:flex-start;gap:10px;padding:14px 18px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:16px;font-size:15px;line-height:1.6;color:var(--muted);flex-shrink:0}.cand-voice-bubble svg{flex-shrink:0;margin-top:2px;color:var(--blue)}.cand-grid-title{display:flex;align-items:center;justify-content:space-between;font-size:15px;font-weight:700;color:var(--text);flex-shrink:0}.cand-grid-hint{font-size:12px;font-weight:400;color:var(--muted)}.cand-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;flex:1;align-content:start}
+.cand-card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:18px;cursor:pointer;transition:.15s;position:relative;overflow:hidden;display:flex;flex-direction:column;gap:8px;min-height:120px}.cand-card:hover{border-color:var(--blue);background:rgba(56,189,248,.06);transform:translateY(-1px);box-shadow:0 4px 20px rgba(0,0,0,.12)}.cand-card.selected{border-color:var(--green);background:rgba(52,211,153,.08);box-shadow:0 0 0 1px rgba(52,211,153,.3),0 4px 20px rgba(0,0,0,.12)}.cand-card.selected .cand-card-check{opacity:1;transform:scale(1)}.cand-card-check{position:absolute;top:10px;right:10px;width:22px;height:22px;border-radius:50%;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;opacity:0;transform:scale(.5);transition:.2s}.cand-card-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.cand-card-name{font-size:16px;font-weight:800;color:var(--text);line-height:1.3;flex:1}.cand-card-score{font-size:20px;font-weight:900;font-family:ui-monospace,Menlo,monospace;flex-shrink:0}.cand-card-score.high{color:var(--green)}.cand-card-score.mid{color:var(--orange)}.cand-card-score.low{color:var(--red)}.cand-card-tags{display:flex;gap:4px;flex-wrap:wrap}.cand-card-tag{font-size:10px;padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.06);color:var(--muted)}.cand-card-preview{font-size:12px;line-height:1.5;color:var(--muted);display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;word-break:break-all}.cand-card-pref{font-size:11px;color:var(--blue);font-weight:600;margin-top:auto;padding-top:4px}
+.candidates-footer{display:flex;align-items:center;justify-content:flex-end;gap:10px;padding:16px 24px;border-top:1px solid var(--line);flex-shrink:0}.cf-btn{border:none;border-radius:14px;padding:12px 22px;font-size:16px;font-weight:700;cursor:pointer;font-family:var(--font);transition:.15s}.cf-cancel{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)}.cf-cancel:hover{background:rgba(239,68,68,.12);color:var(--red);border-color:rgba(239,68,68,.3)}.cf-edit{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)}.cf-edit:hover{background:rgba(255,255,255,.1);color:var(--text)}.cf-confirm{background:var(--green);color:#062033;min-width:140px}.cf-confirm:hover{filter:brightness(1.08)}.cf-confirm:disabled{opacity:.4;cursor:default}
+/* ── 候选模板选择 END ── */
 /* review modal */
-.review{z-index:100;position:fixed;inset:0;background:rgba(7,17,31,.96);display:flex;align-items:center;justify-content:center;padding:24px}.review-box{width:70vw;max-width:900px;max-height:86vh;background:rgba(20,30,50,.94);border:1px solid var(--line);border-radius:30px;box-shadow:0 40px 100px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column;animation:fadeIn .22s}@keyframes fadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}.review-head{padding:20px 26px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.review-head h2{font-size:26px;font-weight:900}.review-head small{font-size:14px;color:var(--muted)}.review-body{padding:20px 26px;overflow:auto;flex:1}.review-item{margin-bottom:16px}.review-item h3{font-size:14px;color:var(--blue);margin-bottom:6px}.review-text{padding:14px 16px;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.15);border-radius:14px;font-size:22px;line-height:1.7;min-height:50px;color:#e5f0ff}.recognized-value{color:#10b981;font-weight:600;background:rgba(16,185,129,.06);padding:0 1px;border-radius:2px}.missing-var{color:#fbbf24;border-bottom:2px dashed #fbbf24;padding:0 4px;font-weight:700;background:rgba(251,191,36,.08);border-radius:2px}.cand-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.cand-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:rgba(15,23,42,.5);border:1px solid rgba(148,163,184,.2);cursor:pointer;transition:.15s;min-width:120px}.cand-row:hover,.cand-row.on{border-color:var(--blue);background:rgba(56,189,248,.12)}.cand-score{font-weight:900;font-size:15px;min-width:36px}.cand-score.high{color:var(--green)}.cand-score.mid{color:var(--orange)}.cand-score.low{color:var(--red)}.cand-name{font-size:14px;color:var(--text)}.review-foot{padding:18px 26px;border-top:1px solid var(--line);display:flex;gap:12px;justify-content:flex-end}.review-foot .btn{padding:14px 24px;font-size:18px}
+.review{z-index:100;position:fixed;inset:0;background:rgba(7,17,31,.96);display:flex;align-items:center;justify-content:center;padding:24px}.review-box{width:70vw;max-width:900px;max-height:86vh;background:rgba(20,30,50,.94);border:1px solid var(--line);border-radius:30px;box-shadow:0 40px 100px rgba(0,0,0,.5);overflow:hidden;display:flex;flex-direction:column;animation:fadeIn .22s}@keyframes fadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}.review-head{padding:20px 26px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}.review-head h2{font-size:26px;font-weight:900}.review-head small{font-size:14px;color:var(--muted)}.review-body{padding:20px 26px;overflow:auto;flex:1}.review-item{margin-bottom:16px}.review-item h3{font-size:14px;color:var(--blue);margin-bottom:6px}.review-text{padding:14px 16px;background:rgba(15,23,42,.6);border:1px solid rgba(148,163,184,.15);border-radius:14px;font-size:20px;line-height:1.8;min-height:50px;color:var(--text)}
+.voice-matched{color:#f97316;font-weight:700;background:rgba(249,115,22,.08);padding:0 3px;border-radius:3px}
+.voice-unfilled{color:#fbbf24;font-weight:700;border-bottom:2px dashed #fbbf24;padding:0 4px;background:rgba(251,191,36,.08);border-radius:3px}
+.voice-template{color:#c8d6e5;font-weight:400}
+.voice-value{color:#10b981;font-weight:700;background:rgba(16,185,129,.06);padding:0 2px;border-radius:3px}
+.voice{color:#f97316;font-weight:700;background:rgba(249,115,22,.08);padding:0 2px;border-radius:3px}
+.unfill{color:#fbbf24;border-bottom:2px dashed #fbbf24;padding:0 4px;font-weight:700;background:rgba(251,191,36,.08);border-radius:3px}
+.supplement{color:#06b6d4;font-weight:700;display:block;margin-top:4px;padding-top:4px;border-top:1px dashed rgba(6,182,212,.3)}
+.review-text .voice-matched{font-size:22px}.review-text .voice-unfilled{font-size:22px}
+/* ── 报告文本三色标记 ── */
+.voice-matched{color:#f97316;font-weight:700;background:rgba(249,115,22,.08);padding:0 2px;border-radius:3px}.voice-unfilled{color:#fbbf24;font-weight:700;border-bottom:2px dashed #fbbf24;padding:0 4px;background:rgba(251,191,36,.08);border-radius:3px}.voice-template{color:#e8f0fe;font-weight:400}.voice-value{color:#10b981;font-weight:700;background:rgba(16,185,129,.06);padding:0 2px;border-radius:3px}.recognized-value{color:#10b981;font-weight:600;background:rgba(16,185,129,.06);padding:0 1px;border-radius:2px}.missing-var{color:#fbbf24;border-bottom:2px dashed #fbbf24;padding:0 4px;font-weight:700;background:rgba(251,191,36,.08);border-radius:2px}.cand-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}.cand-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:rgba(15,23,42,.5);border:1px solid rgba(148,163,184,.2);cursor:pointer;transition:.15s;min-width:120px}.cand-row:hover,.cand-row.on{border-color:var(--blue);background:rgba(56,189,248,.12)}.cand-score{font-weight:900;font-size:15px;min-width:36px}.cand-score.high{color:var(--green)}.cand-score.mid{color:var(--orange)}.cand-score.low{color:var(--red)}.cand-name{font-size:14px;color:var(--text)}.review-foot{padding:18px 26px;border-top:1px solid var(--line);display:flex;gap:12px;justify-content:flex-end}.review-foot .btn{padding:14px 24px;font-size:18px}
 @media(max-width:1000px){.queue-layout,.big-state,.live-panel{grid-template-columns:1fr}.app{overflow:auto;height:auto}.screen{height:auto}.rec-button{width:200px;height:200px}.current-name{font-size:38px}}
 </style>
 </head>
@@ -42,6 +171,10 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
   <header class="top">
     <div class="brand"><div class="logo">🩺</div><div><h1 id="mainTitle">超声平板</h1><p id="modeHint">主任极简 · 选病人 录语音 自动生成</p><div id="httpsWarn" class="https-warn">录音需要 HTTPS，请使用 https://47.109.151.238/pad.html</div></div></div>
     <div style="display:flex;align-items:center;gap:12px">
+      <div id="doctorPanel" class="doctor-panel">
+        <div class="doctor-grid" id="doctorGrid"></div>
+      </div>
+      <button id="themeToggle" style="background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:14px;padding:10px 14px;color:var(--muted);font-size:15px;font-family:var(--font);cursor:pointer">🌓</button>
       <div class="mode-switch"><button id="modeDirector" class="mode-btn on">主任极简</button><button id="modeTablet" class="mode-btn">实时听写</button></div>
       <div class="clock"><strong id="clockTime">--:--</strong><span id="clockDate">----</span></div>
     </div>
@@ -50,7 +183,21 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <!-- 患者列表 -->
     <section id="screenList" class="screen on">
       <div class="queue-layout">
-        <div class="panel"><div class="panel-hd"><span>待检患者</span><div class="actions"><button class="btn btn-ghost" id="mockBtn">模拟患者</button><button class="btn btn-blue" id="refreshBtn">刷新</button></div></div><div class="panel-bd"><div id="patientGrid" class="patient-grid">加载中...</div></div></div>
+        <div class="panel"><div class="panel-hd">
+          <div class="panel-tabs">
+            <button class="ptab ptab-on" id="tabPending">待检患者</button>
+            <button class="ptab" id="tabCompleted">已检查</button>
+          </div>
+          <div class="actions">
+          <select id="daysFilter" style="background:rgba(255,255,255,.08);border:1px solid var(--line);border-radius:10px;padding:6px 10px;color:var(--text);font-size:14px;font-family:var(--font);cursor:pointer;outline:none;max-width:110px;-webkit-appearance:none;appearance:none;text-align-last:center">
+            <option value="0">全部</option>
+            <option value="1">今天</option>
+            <option value="3" selected>3天内</option>
+            <option value="7">7天内</option>
+          </select>
+          <button class="btn btn-ghost" id="mockBtn">模拟患者</button>
+          <button class="btn btn-blue" id="refreshBtn">刷新</button>
+        </div></div><div class="panel-bd"><div id="patientGrid" class="patient-grid">加载中...</div></div></div>
         <aside class="panel"><div class="panel-hd">概览</div><div class="panel-bd"><div class="side-stat"><div class="stat"><label>待检人数</label><div id="statWaiting">--</div></div><div class="stat"><label id="modeSteps">操作步骤</label><div id="stepGuide" style="font-size:20px;line-height:1.8">1 选患者<br>2 开始录音<br>3 停止生成</div></div><div class="stat"><label>状态</label><div id="listStatus" style="font-size:22px">等待选择</div></div></div></div></aside>
       </div>
     </section>
@@ -66,7 +213,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
     <!-- 实时听写模式 -->
     <section id="screenTablet" class="screen">
       <div class="live-panel">
-        <div class="card"><div class="card-hd"><span>实时识别</span><span style="font-size:13px;color:var(--muted)" id="liPatient">未选择患者</span></div><div class="card-bd" style="overflow:hidden;display:flex;flex-direction:column">
+        <div class="card"><div class="card-hd"><span>实时识别</span><span style="font-size:13px;color:var(--muted)" id="liPatient">未选择患者</span><button id="tabletBackBtn" class="btn btn-ghost" style="font-size:12px;padding:4px 10px">← 返回</button></div><div class="card-bd" style="overflow:hidden;display:flex;flex-direction:column">
           <div style="overflow:auto;flex:1">
             <div id="recognizedText" class="recognized">等待语音输入...</div>
             <div class="final-box"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">已确认文本</div><div id="finalOnly">(等待语音输入)</div></div>
@@ -79,6 +226,7 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
         </div></div>
         <div class="card"><div class="card-hd">实时理解 / 报告草稿</div><div class="card-bd">
           <div class="tpl-hero"><div class="tpl-card"><label>模板</label><div id="tplName">-</div></div><div class="tpl-card"><label>置信度</label><div id="tplConf">--</div></div><div class="tpl-card"><label>部位</label><div id="tplSite">-</div></div></div>
+          <div id="tabletCandidates" class="tcand-bar" style="display:none"></div>
           <div class="live-report"><h3>📖 超声所见</h3><div id="previewSee" class="live-text">-</div></div>
           <div class="live-report"><h3>💊 超声提示</h3><div id="previewHint" class="live-text">-</div></div>
           <div class="live-report"><h3>🎤 ASR原文</h3><div id="previewSource" class="live-text" style="font-size:13px;color:var(--muted)">-</div></div>
@@ -86,6 +234,37 @@ body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(
       </div>
     </section>
     <section id="screenReview" class="screen"><div class="process"><div class="done-icon">✅</div><h2>报告已生成</h2><p id="doneText">请查看确认弹窗</p></div></section>
+    <!-- 候选模板选择 -->
+    <section id="screenCandidates" class="screen">
+      <div class="candidates-layout">
+        <div class="candidates-header">
+          <div class="ch-left">
+            <div class="ch-patient" id="candPatientName">患者</div>
+            <div class="ch-meta" id="candPatientMeta">腹部超声 · 已识别语音</div>
+          </div>
+          <div class="ch-right">
+            <div class="ch-badge" id="candConfBadge">--%</div>
+          </div>
+        </div>
+        <div class="candidates-body">
+          <div class="cand-voice-bubble">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            <span id="candVoiceText">等待语音文本...</span>
+          </div>
+          <div class="cand-grid-title">
+            <span>请选择匹配的模板</span>
+            <span class="cand-grid-hint" id="candGridHint">系统将自动填充语音内容</span>
+          </div>
+          <div class="cand-grid" id="candGrid">
+            <!-- 候选卡片由 JS 动态渲染 -->
+          </div>
+        </div>
+        <div class="candidates-footer">
+          <button class="cf-btn cf-cancel" id="candSkipBtn">重新录音</button>
+          <button class="cf-btn cf-edit" id="candEditBtn">手动输入</button>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
 <div id="toast" class="toast"></div>

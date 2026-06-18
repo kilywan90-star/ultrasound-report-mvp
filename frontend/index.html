@@ -21,7 +21,7 @@
 <body>
 <div class="app">
   <aside class="sidebar">
-    <div class="logo"><span class="icon">🔬</span><span>超声报告</span><span class="badge">v4.3</span></div>
+    <div class="logo"><span class="icon">🔬</span><span>超声报告</span><span class="badge">v4.0</span></div>
     <nav class="nav">
       <div class="nav-item on" data-page="workstation">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16M4 16h16"/><path d="M3 3h18v18H3z"/><circle cx="12" cy="12" r="2"/></svg>
@@ -35,7 +35,7 @@
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
         <span>语音报告</span>
       </div>
-      <div class="nav-item" data-page="audio">
+      <div class="nav-item" data-page="audio" onclick="window.location.href='/pad.html'" style="cursor:pointer">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><circle cx="12" cy="16" r="5"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
         <span>语音档案</span>
       </div>
@@ -58,6 +58,10 @@
       <div class="nav-item" data-page="settings">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         <span>系统配置</span>
+      </div>
+      <div class="nav-item" data-page="accesslog">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/><line x1="9" y1="15" x2="12" y2="12"/></svg>
+        <span>访问日志</span>
       </div>
     </nav>
     <div class="sidebar-footer">
@@ -184,6 +188,19 @@
       <section class="page" id="page-templates"><div class="card"><div class="card-hd">模板库</div><div class="card-bd table-wrap-scroll" id="templateList"><span style="color:var(--text-muted)">加载中...</span></div></div></section>
       <section class="page" id="page-knowledge"><div class="grid-2"><div class="card"><div class="card-hd">知识库加载状态</div><div class="card-bd"><pre id="kbStatus" style="font-size:11px">加载中...</pre></div></div><div class="card"><div class="card-hd">数据库状态</div><div class="card-bd"><pre id="dbStatus" style="font-size:11px">加载中...</pre></div></div></div></section>
       <section class="page" id="page-settings"><div class="card"><div class="card-hd">系统配置</div><div class="card-bd"><div class="grid-2"><div><label>默认检查类型</label><select class="input"><option>腹部超声</option><option>甲状腺超声</option></select></div><div><label>API地址</label><input class="input" value="同域 /api" readonly></div></div><p style="margin-top:12px;font-size:12px;color:var(--text-muted)">系统采用专业医疗蓝白主题，适配医生日常录入、报告预览和PACS对接流程。</p></div></div></section>
+
+      <!-- ── 访问日志 ── -->
+      <section class="page" id="page-accesslog">
+        <!-- 概览 -->
+        <div class="stat-row" id="accessLogStats"><div class="stat-card-modern"><div class="lbl">加载中...</div><div class="val">--</div></div></div>
+        <!-- 地区 + 方法分布 -->
+        <div class="grid-2" style="margin-bottom:12px">
+          <div class="card" style="min-height:100px"><div class="card-hd">🌍 地区分布</div><div class="card-bd" id="accessLogRegion"><span style="color:var(--text-muted);font-size:12px">加载中...</span></div></div>
+          <div class="card" style="min-height:100px"><div class="card-hd">📊 方法分布</div><div class="card-bd" id="accessLogMethod"><span style="color:var(--text-muted);font-size:12px">加载中...</span></div></div>
+        </div>
+        <!-- 筛选 + 表格 -->
+        <div class="card"><div class="card-hd"><span>访问记录</span><span><select id="alFilterMethod" onchange="loadAccessLogs()" style="margin-right:8px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;background:var(--card);color:var(--text)"><option value="">全部方法</option><option value="converted_fill">converted_fill</option><option value="template_fill">template_fill</option><option value="llm_free">llm_free</option><option value="llm_multi">llm_multi</option></select><input id="alFilterSearch" placeholder="搜索IP/地区/路径" style="margin-right:8px;padding:4px 8px;border:1px solid var(--border);border-radius:6px;font-size:12px;width:160px;background:var(--card);color:var(--text)" onkeydown="if(event.key==='Enter')loadAccessLogs()"><button class="btn-ghost-light" onclick="loadAccessLogs()">刷新</button></span></div><div class="card-bd table-wrap-scroll" id="accessLogTable"><span style="color:var(--text-muted);font-size:13px">加载中...</span></div></div>
+      </section>
     </section>
   </main>
 </div>

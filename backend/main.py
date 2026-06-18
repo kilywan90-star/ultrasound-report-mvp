@@ -14,11 +14,15 @@ import re
 import hmac
 import json
 import logging
+import time as _time
 from datetime import datetime
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
+
+from routers.access_log import write_log
+from geoip import geoip_lookup
 
 try:
     from asr_client import transcribe_audio
@@ -40,6 +44,8 @@ from api_exam_parts import router as exam_parts_router
 from routers.fixed_template import router as fixed_template_router
 from routers.audio import router as audio_router
 from routers.structure import router as structure_router
+from routers.preference import router as preference_router
+from routers.pad_api import router as pad_api_router
 
 # main_v3 兼容路由需要 database.py 的表，确保初始化
 from database import init_db as mvp_init_db
@@ -71,9 +77,10 @@ from routers.asr import router as unified_asr_router
 from routers.audio_records import router as audio_records_router
 from routers.workstation import router as workstation_router
 from routers.asr_stream import router as asr_stream_router
+from routers.access_log import router as access_log_router
 
-BUILD = "20260607-2103"
-VERSION = f"v3.3.{BUILD}"
+BUILD = "20260610-0308"
+VERSION = f"v4.0.{BUILD}"
 
 app = FastAPI(title="超声报告语音结构化", version=VERSION)
 
@@ -88,6 +95,8 @@ app.include_router(exam_parts_router)
 app.include_router(fixed_template_router)
 app.include_router(audio_router)
 app.include_router(structure_router)
+app.include_router(preference_router)
+app.include_router(pad_api_router)
 
 # === v3 兼容路由（合并版）===
 app.include_router(doctors_router)
@@ -100,6 +109,7 @@ app.include_router(unified_asr_router)
 app.include_router(asr_stream_router)
 app.include_router(audio_records_router)
 app.include_router(workstation_router)
+app.include_router(access_log_router)
 
 # CORS: 允许常见来源但不回显任意Origin（避免creds问题）
 app.add_middleware(
@@ -119,6 +129,53 @@ async def security_headers(request: Request, call_next):
     response.headers["X-XSS-Protection"] = "1; mode=block"
     response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
     response.headers["Permissions-Policy"] = "microphone=(self)"
+    return response
+
+# 访问日志中间件（捕获所有请求的 IP、地区、耗时等信息）
+@app.middleware("http")
+async def access_log_middleware(request: Request, call_next):
+    path = request.url.path
+    # 跳过静态资源和健康检查
+    if path in ("/", "/health", "/docs", "/openapi.json") or path.startswith("/static") or path == "/api/health":
+        return await call_next(request)
+
+    start = _time.time()
+    try:
+        response = await call_next(request)
+    except Exception:
+        response = JSONResponse({"detail": "Internal Server Error"}, status_code=500)
+    elapsed = int((_time.time() - start) * 1000)
+
+    # 获取 IP
+    ip_raw = (request.headers.get("X-Forwarded-For", "")
+              or request.headers.get("X-Real-IP", "")
+              or (request.client.host if request.client else ""))
+    ip = ip_raw.rsplit(",", 1)[0].strip() if "," in ip_raw else ip_raw
+
+    # 脱敏: 192.168.1.1 → 192.168.1.xxx
+    ip_masked = ip
+    if ip and "." in ip:
+        parts = ip.rsplit(".", 1)
+        if len(parts) == 2:
+            ip_masked = parts[0] + ".xxx"
+
+    # GeoIP 地区查询
+    geo = geoip_lookup(ip) if ip else None
+
+    try:
+        write_log(
+            ip_masked=ip_masked,
+            ip_raw=ip_raw,
+            province=geo.get("province", "") if geo else "",
+            city=geo.get("city", "") if geo else "",
+            path=path,
+            method=request.method,
+            status_code=response.status_code,
+            elapsed_ms=elapsed,
+        )
+    except Exception as e:
+        logging.getLogger(__name__).warning(f"访问日志写入失败: {e}")
+
     return response
 
 # API认证中间件 (基于Token)
@@ -193,7 +250,9 @@ async def asr_upload(body: dict):
 
     # 阿里云ASR识别
     try:
-        dashscope.api_key = os.getenv("DASHSCOPE_API_KEY") or "sk-6e6dfb5313964b2eb79bc72edf72b7db"
+        dashscope.api_key = os.getenv("DASHSCOPE_API_KEY")
+        if not dashscope.api_key:
+            raise HTTPException(500, "DASHSCOPE_API_KEY 未配置")
         import dashscope.audio.asr as asr_module
 
         # 上传文件
@@ -274,13 +333,23 @@ frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 # 禁止路径遍历的文件名白名单
 _ALLOWED_STATIC = {
     "index.html", "debug.html", "admin.html", "dashboard.html", "developer.html",
-    "plans.html", "smart.html", "trace_logs.html", "error_report.html", "tablet.html", "director.html", "pad.html",
-    "style.css", "api.js", "ui.js", "app.js", "tablet.js", "director.js", "pad.js",
+    "plans.html", "smart.html", "trace_logs.html", "error_report.html", "tablet.html", "director.html", "pad.html", "m.html",
+    "style.css", "api.js", "ui.js", "app.js", "tablet.js", "director.js", "pad.js", "m.js",
+    "favicon.ico", "keywords.html",
 }
 
 if frontend_dir.exists():
+    # 移动端/桌面端 User-Agent 检测关键词
+    _MOBILE_UA = re.compile(
+        r"Mobile|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|iOS|webOS|Tablet|Silk",
+        re.I,
+    )
+
     @app.get("/")
-    async def index():
+    async def index(request: Request):
+        ua = request.headers.get("User-Agent", "")
+        if _MOBILE_UA.search(ua):
+            return FileResponse(frontend_dir / "m.html")
         return FileResponse(frontend_dir / "index.html")
 
     @app.get("/{filename}")
@@ -290,7 +359,11 @@ if frontend_dir.exists():
             raise HTTPException(404)
         fpath = frontend_dir / path
         if fpath.exists() and fpath.is_file():
-            return FileResponse(fpath)
+            return FileResponse(fpath, headers={
+                "Cache-Control": "no-cache, no-store, must-revalidate",
+                "Pragma": "no-cache",
+                "Expires": "0",
+            })
         raise HTTPException(404)
 
 if __name__ == "__main__":

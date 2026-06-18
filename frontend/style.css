@@ -343,6 +343,10 @@ table tr:hover td { background: var(--card-hover); }
   gap: 8px;
 }
 
+/* === 候选模板卡片 (主页面弹窗) === */
+.cand-card { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.cand-card:hover { border-color: #3b82f6 !important; box-shadow: 0 2px 12px rgba(59,130,246,.12); }
+
 /* === Toast === */
 .toast {
   position: fixed;
@@ -442,6 +446,34 @@ table tr:hover td { background: var(--card-hover); }
 .rpt-sec { margin-bottom: 8px; padding: 6px 0; }
 .rpt-sec strong { color: var(--text); font-weight: 600; }
 .rpt-sec .unfill { color: var(--text-muted); border-bottom: 1px dashed var(--border); }
+
+/* 三色标记 — 与后端结构输出的 class 保持一致 */
+.rpt-html .voice-matched,
+.rpt-sec .voice-matched,
+.voice-matched { color: #f97316; font-weight: 700; background: rgba(249,115,22,.08); padding: 0 3px; border-radius: 3px; }
+
+.rpt-html .voice-unfilled,
+.rpt-sec .voice-unfilled,
+.voice-unfilled { color: #fbbf24; font-weight: 700; border-bottom: 2px dashed #fbbf24; padding: 0 4px; background: rgba(251,191,36,.08); border-radius: 3px; }
+
+.rpt-html .voice-value,
+.rpt-sec .voice-value,
+.voice-value { color: #10b981; font-weight: 700; background: rgba(16,185,129,.06); padding: 0 2px; border-radius: 3px; }
+
+.rpt-html .voice,
+.rpt-sec .voice,
+.voice { color: #f97316; font-weight: 700; background: rgba(249,115,22,.08); padding: 0 2px; border-radius: 3px; }
+
+.rpt-html .unfill,
+.rpt-sec .unfill { color: #fbbf24; border-bottom: 2px dashed #fbbf24; padding: 0 4px; font-weight: 700; background: rgba(251,191,36,.08); border-radius: 3px; }
+
+/* 补充标记 */
+.rpt-html .supplement,
+.rpt-sec .supplement { color: #06b6d4; font-weight: 700; display: block; margin-top: 4px; padding-top: 4px; border-top: 1px dashed rgba(6,182,212,.3); }
+
+/* 数值待确认 */
+.rpt-html .confirm,
+.rpt-sec .confirm { color: #ef4444; font-weight: 700; border-bottom: 2px dashed #ef4444; padding: 0 3px; }
 
 /* === Tabs === */
 .tabs { display: flex; gap: 2px; margin-bottom: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--border); }

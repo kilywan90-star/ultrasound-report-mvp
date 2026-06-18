@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="format-detection" content="telephone=no">
+<meta name="theme-color" content="#0b1628">
+<meta name="color-scheme" content="dark light">
+<title>超声医生 - 手机版</title>
+<style>
+:root {
+  --bg: #0b1628;
+  --card: rgba(20,30,48,.88);
+  --text: #e8f0fe;
+  --muted: #8899b4;
+  --blue: #38bdf8;
+  --green: #34d399;
+  --red: #f87171;
+  --orange: #fbbf24;
+  --line: rgba(120,140,170,.2);
+  --radius: 20px;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --font: -apple-system, 'PingFang SC', 'Helvetica Neue', 'SF Pro Display', system-ui, sans-serif;
+  --btn-min: 48px;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+html,body{height:100%;overflow:hidden;font-family:var(--font);color:var(--text);background:var(--bg);-webkit-text-size-adjust:100%}
+
+body{background:radial-gradient(ellipse at 30% 0%,rgba(56,189,248,.08),transparent 50%),var(--bg);padding:var(--safe-t) var(--safe-r) var(--safe-b) var(--safe-l)}
+
+/* ─── App Shell ─── */
+.app{height:100dvh;display:flex;flex-direction:column;gap:8px;padding:8px}
+
+/* ─── Top Bar ─── */
+.topbar{height:52px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;padding:0 4px}
+.brand{display:flex;align-items:center;gap:8px}
+.logo{width:32px;height:32px;border-radius:10px;background:linear-gradient(135deg,#38bdf8,#1d4ed8);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.brand h1{font-size:17px;font-weight:700;letter-spacing:-.3px}
+.state-badge{font-size:11px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.08);color:var(--muted);white-space:nowrap}
+.state-badge.active{background:rgba(52,211,153,.15);color:var(--green)}
+
+/* ─── Screens ─── */
+.view{flex:1;min-height:0;position:relative}
+.screen{display:none;height:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.screen.on{display:block}
+
+/* ─── Patient List ─── */
+.patient-area{min-height:0;flex:1;display:flex;flex-direction:column}
+.section-label{font-size:12px;font-weight:600;color:var(--muted);padding:8px 0 6px;display:flex;justify-content:space-between;align-items:center}
+.patient-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.patient-card{background:linear-gradient(180deg,rgba(20,30,48,.7),rgba(15,23,42,.6));border:1px solid var(--line);border-radius:18px;padding:14px;cursor:pointer;transition:.12s;position:relative;overflow:hidden;min-height:96px}
+.patient-card:active{transform:scale(.97);border-color:var(--blue)}
+.patient-card .name{font-size:19px;font-weight:800;line-height:1.2;margin-bottom:2px}
+.patient-card .meta{font-size:12px;color:var(--muted);line-height:1.5}
+.patient-card .tag{display:inline-block;margin-top:5px;padding:2px 8px;border-radius:999px;background:rgba(52,211,153,.1);color:var(--green);font-size:10px}
+
+/* ─── Record Screen ─── */
+.record-layout{height:100%;display:flex;flex-direction:column;gap:10px}
+.patient-info{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;flex-shrink:0}
+.patient-info .name{font-size:28px;font-weight:900}
+.patient-info .meta{font-size:13px;color:var(--muted);margin-top:2px;line-height:1.6}
+.patient-info .tag{display:inline-block;margin-top:4px;padding:3px 10px;border-radius:999px;background:rgba(52,211,153,.1);color:var(--green);font-size:11px}
+
+.record-zone{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.record-btn{width:180px;height:180px;border-radius:50%;border:none;cursor:pointer;background:radial-gradient(circle at 35% 30%,#67e8f9,#0ea5e9 45%,#1d4ed8);color:#fff;box-shadow:0 0 36px rgba(56,189,248,.35);font-size:22px;font-weight:900;transition:.15s;font-family:var(--font);-webkit-tap-highlight-color:transparent}
+.record-btn:active{transform:scale(.95)}
+.record-btn.recording{background:radial-gradient(circle at 35% 30%,#fda4af,#fb7185 45%,#be123c);box-shadow:0 0 50px rgba(251,113,133,.4);animation:pulse 1.1s infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.04)}}
+.timer{font-size:44px;font-weight:900;font-family:ui-monospace,'SF Mono',monospace;letter-spacing:-1px}
+.wave{display:flex;gap:4px;height:40px;align-items:center}
+.wave span{display:block;width:6px;border-radius:6px;background:var(--blue);height:12px;animation:wave 1s infinite ease-in-out}
+.wave span:nth-child(2){animation-delay:.1s}.wave span:nth-child(3){animation-delay:.2s}
+.wave span:nth-child(4){animation-delay:.3s}.wave span:nth-child(5){animation-delay:.4s}.wave span:nth-child(6){animation-delay:.5s}
+@keyframes wave{0%,100%{height:10px;opacity:.4}50%{height:38px;opacity:1}}
+.record-hint{font-size:14px;color:var(--muted);text-align:center}
+
+/* ─── Process Screen ─── */
+.process-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;text-align:center;gap:12px}
+.spinner{width:56px;height:56px;border-radius:50%;border:5px solid rgba(255,255,255,.1);border-top-color:var(--blue);animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.process-screen h2{font-size:26px;font-weight:800}
+.process-screen p{font-size:15px;color:var(--muted);line-height:1.6;max-width:280px}
+
+/* ─── Candidate Selection ─── */
+.cand-screen{display:flex;flex-direction:column;gap:10px;height:100%}
+.cand-voice{padding:12px 14px;background:var(--card);border:1px solid var(--line);border-radius:14px;font-size:13px;line-height:1.5;color:var(--muted);flex-shrink:0}
+.cand-title{font-size:14px;font-weight:700;flex-shrink:0}
+.cand-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:1;overflow-y:auto;align-content:start;padding-bottom:8px}
+.cand-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;cursor:pointer;transition:.12s;min-height:90px;display:flex;flex-direction:column;gap:4px}
+.cand-card:active{transform:scale(.97);border-color:var(--blue)}
+.cand-card.selected{border-color:var(--green);background:rgba(52,211,153,.08)}
+.cand-card .top{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.cand-card .name{font-size:13px;font-weight:700;flex:1;line-height:1.3}
+.cand-card .score{font-size:16px;font-weight:900;font-family:ui-monospace,monospace;flex-shrink:0}
+.cand-card .score.high{color:var(--green)}.cand-card .score.mid{color:var(--orange)}.cand-card .score.low{color:var(--red)}
+.cand-card .preview{font-size:10px;color:var(--muted);line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cand-actions{display:flex;gap:8px;flex-shrink:0;padding-top:4px}
+.cand-actions button{flex:1;height:var(--btn-min);border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);-webkit-tap-highlight-color:transparent}
+.cand-actions .skip{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)}
+.cand-actions .confirm{background:var(--green);color:#062033}
+
+/* ─── Report Review ─── */
+.review-screen{display:flex;flex-direction:column;gap:10px;height:100%}
+.review-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.review-section{margin-bottom:12px}
+.review-section h3{font-size:13px;color:var(--blue);margin-bottom:4px}
+.review-text{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word}
+.review-text .voice-matched{color:var(--orange);font-weight:700}
+.review-text .voice-unfilled{color:var(--orange);border-bottom:2px dashed var(--orange);font-weight:700}
+.review-text .voice-template{color:#c8d6e5}
+.review-text .voice-value{color:#10b981;font-weight:700}
+.review-text .voice{color:#fbbf24;font-weight:700}
+.review-text .unfill{color:var(--orange);border-bottom:1px dashed var(--orange);font-weight:700}
+.review-text .voice-matched{color:#f97316;font-weight:700;background:rgba(249,115,22,.08);padding:0 2px;border-radius:3px}
+.review-text .voice-unfilled{color:#fbbf24;font-weight:700;border-bottom:2px dashed #fbbf24;padding:0 4px;background:rgba(251,191,36,.08);border-radius:3px}
+.review-text .voice-template{color:#c8d6e5;font-weight:400}
+.review-text .voice-value{color:#10b981;font-weight:700;background:rgba(16,185,129,.06);padding:0 2px;border-radius:3px}
+.review-text .unfill{color:#fbbf24;border-bottom:2px dashed #fbbf24;padding:0 4px;font-weight:700;background:rgba(251,191,36,.08);border-radius:3px}
+.review-text .voice{color:#f97316;font-weight:700;background:rgba(249,115,22,.08);padding:0 2px;border-radius:3px}
+.review-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex-shrink:0;padding-top:4px}
+.review-actions button{height:var(--btn-min);border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--font);-webkit-tap-highlight-color:transparent}
+.review-actions .save{background:var(--green);color:#062033}
+.review-actions .cancel{background:rgba(255,255,255,.06);color:var(--muted);border:1px solid var(--line)}
+
+/* ─── Buttons ─── */
+.btn{height:var(--btn-min);padding:0 16px;border:none;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);-webkit-tap-highlight-color:transparent;transition:.1s}
+.btn:active{transform:scale(.96)}
+.btn-soft{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text)}
+.btn-blue{background:var(--blue);color:#062033}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.btn-sm{height:36px;font-size:12px;padding:0 12px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+
+/* ─── Toast ─── */
+.toast{position:fixed;left:16px;right:16px;bottom:calc(24px + var(--safe-b));background:rgba(15,23,42,.95);border:1px solid var(--line);border-radius:14px;padding:12px 18px;color:var(--text);font-size:15px;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.4);display:none;z-index:999;animation:toastIn .2s}
+.toast.on{display:block}
+@keyframes toastIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+/* ─── HTTPS Warn ─── */
+.https-warn{display:none;background:rgba(251,191,36,.12);border:1px solid rgba(251,191,36,.35);color:#fde68a;border-radius:12px;padding:10px 14px;font-size:12px;margin-top:6px}
+
+/* ─── Empty State ─── */
+.empty{padding:30px 0;text-align:center;color:var(--muted);font-size:14px}
+
+/* ─── iPad / Large Screen ─── */
+@media(min-width:768px){
+  .patient-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+  .cand-grid{grid-template-columns:1fr 1fr}
+  .record-btn{width:200px;height:200px}
+}
+
+/* ─── Landscape on Phone ─── */
+@media(max-height:500px){
+  .record-btn{width:120px;height:120px;font-size:16px}
+  .timer{font-size:28px}
+  .patient-info .name{font-size:22px}
+  .topbar{height:40px}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🩺</div>
+      <h1>超声医生</h1>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <span id="stateBadge" class="state-badge">就绪</span>
+      <button id="themeBtn" style="background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--muted);font-size:14px;cursor:pointer;font-family:var(--font)">🌓</button>
+    </div>
+  </header>
+
+  <main class="view">
+
+    <!-- ===== Screen: Patient List ===== -->
+    <section id="scList" class="screen on">
+      <div class="patient-area" style="display:flex;flex-direction:column;height:100%">
+        <div class="section-label">
+          <span id="listTitle">待检患者</span>
+          <div class="actions">
+            <button class="btn btn-sm btn-ghost" id="mockBtn">模拟</button>
+            <button class="btn btn-sm btn-blue" id="refreshBtn">刷新</button>
+          </div>
+        </div>
+        <div id="patientGrid" class="patient-grid" style="flex:1;overflow-y:auto;align-content:start">加载中...</div>
+      </div>
+    </section>
+
+    <!-- ===== Screen: Record ===== -->
+    <section id="scRecord" class="screen">
+      <div class="record-layout">
+        <div class="patient-info">
+          <div class="name" id="patName">-</div>
+          <div class="meta" id="patMeta">-</div>
+          <div class="tag" id="patTag">-</div>
+        </div>
+        <div style="display:flex;flex-shrink:0;gap:8px">
+          <button class="btn btn-sm btn-ghost" id="backBtn">← 返回列表</button>
+        </div>
+        <div class="record-zone">
+          <button id="recordBtn" class="record-btn">🎤<br>开始</button>
+          <div id="timerDisplay" class="timer">00</div>
+          <div id="wave" class="wave" style="display:none"><span></span><span></span><span></span><span></span><span></span><span></span></div>
+          <div id="recordHint" class="record-hint">点击按钮开始录音</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Screen: Processing ===== -->
+    <section id="scProcess" class="screen">
+      <div class="process-screen">
+        <div class="spinner"></div>
+        <h2 id="procTitle">识别中</h2>
+        <p id="procDesc">正在识别语音...</p>
+      </div>
+    </section>
+
+    <!-- ===== Screen: Candidates ===== -->
+    <section id="scCand" class="screen">
+      <div class="cand-screen">
+        <div class="cand-voice" id="candVoice">等待语音文本...</div>
+        <div class="cand-title">请选择匹配的模板</div>
+        <div class="cand-grid" id="candGrid"></div>
+        <div class="cand-actions">
+          <button class="skip" id="candSkip">跳过 → 直接生成</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== Screen: Report Review ===== -->
+    <section id="scReview" class="screen">
+      <div class="review-screen">
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-shrink:0">
+          <span style="font-size:16px;font-weight:700">报告预览</span>
+          <span id="reviewMethod" style="font-size:11px;color:var(--muted)"></span>
+        </div>
+        <div class="review-scroll">
+          <div class="review-section"><h3>📖 超声所见</h3><div id="rSee" class="review-text">-</div></div>
+          <div class="review-section"><h3>💊 超声提示</h3><div id="rHint" class="review-text">-</div></div>
+          <div class="review-section"><h3>📋 建议</h3><div id="rRec" class="review-text">-</div></div>
+        </div>
+        <div class="review-actions">
+          <button class="cancel" id="reviewCancel">取消</button>
+          <button class="save" id="reviewSave">✓ 确认报告</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast" class="toast"></div>
+<script src="/m.js"></script>
+</body>
+</html>

@@ -126,6 +126,12 @@ function switchPage(page) {
   const title = document.querySelector(`.nav-item[data-page="${page}"] span:last-child`)?.textContent || '工作台';
   const titleEl = document.getElementById('pageTitle');
   if (titleEl) titleEl.textContent = title;
+
+  // 切换到时自动加载日志数据
+  if (page === 'accesslog') {
+    loadAccessLogs();
+    loadAccessLogStats();
+  }
 }
 
 function renderDashboard() {
@@ -355,10 +361,22 @@ function formatDuration(sec) {
   return m ? `${m}分${s}秒` : `${s}秒`;
 }
 
+function _checkMicPermission() {
+  if (!navigator.mediaDevices?.getUserMedia) {
+    UI.toast('当前浏览器不支持麦克风 API，请使用 Chrome/Edge 最新版', 'error');
+    return false;
+  }
+  if (!window.isSecureContext && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') {
+    UI.toast('🔒 录音需要 HTTPS 安全连接。请使用 https://47.109.151.238/ 访问', 'error');
+    return false;
+  }
+  return true;
+}
+
 async function toggleWsRecording() {
   if (!Store.state.currentSession) return UI.toast('请先选择患者', 'error');
   if (Store.state.wsRecording) return stopWsRecording();
-  if (!navigator.mediaDevices?.getUserMedia) return UI.toast('浏览器不支持录音', 'error');
+  if (!_checkMicPermission()) return;
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true, channelCount: 1, sampleRate: 16000 } });
     Store.state.wsAudioChunks = [];
@@ -432,17 +450,22 @@ async function runStructure() {
   const text = document.getElementById('voiceText').value.trim();
   const examType = document.getElementById('examType').value;
   if (!text) return UI.toast('请输入语音文本', 'error');
-  setStatus('处理中...');
-  try {
-    const result = await API.post('/api/structure', { text, exam_type: examType });
-    Store.state.currentResult = result;
-    UI.renderResult(result);
-    document.getElementById('rawJson').textContent = JSON.stringify(result, null, 2);
-    setStatus('完成');
-    UI.toast('结构化完成', 'success');
-  } catch (err) {
-    setStatus('失败');
-    UI.toast(err.message, 'error');
+  // 先取候选模板
+  const ok = await _fetchAndShowCandidates(text, examType);
+  if (!ok) {
+    // 候选失败或无 → 直接结构化
+    setStatus('处理中...');
+    try {
+      const result = await API.post('/api/structure', { text, exam_type: examType });
+      Store.state.currentResult = result;
+      UI.renderResult(result);
+      document.getElementById('rawJson').textContent = JSON.stringify(result, null, 2);
+      setStatus('完成');
+      UI.toast('结构化完成', 'success');
+    } catch (err) {
+      setStatus('失败');
+      UI.toast(err.message, 'error');
+    }
   }
 }
 
@@ -491,7 +514,7 @@ function clearReport() {
 
 async function toggleRecording() {
   if (Store.state.recording) return stopRecording();
-  if (!navigator.mediaDevices?.getUserMedia) return UI.toast('浏览器不支持录音', 'error');
+  if (!_checkMicPermission()) return;
   try {
     const stream = await navigator.mediaDevices.getUserMedia({
       audio: {
@@ -554,7 +577,8 @@ async function handleAudioBlob(blob, format) {
       const quality = typeof data.quality_score === 'number' ? `，质量${Math.round(data.quality_score * 100)}%` : '';
       const source = data.source ? `（${data.source}${data.fallback_used ? '兜底' : ''}）` : '';
       UI.toast(`识别完成${source}${quality}`, 'success');
-      await runFullPipeline();
+      // 候选模板选择（异步弹出）
+      await _fetchAndShowCandidates(text, document.getElementById('examType')?.value || '腹部超声');
     } else {
       const warning = (data.warnings || []).join('；');
       UI.toast('未识别到文字' + (warning ? '：' + warning : '，可手动输入'), 'error');
@@ -569,4 +593,189 @@ async function handleAudioBlob(blob, format) {
 async function refreshAll() {
   await loadInitialData();
   UI.toast('数据已刷新', 'success');
+}
+
+/* ─── 访问日志 ─── */
+
+async function loadAccessLogs() {
+  const el = document.getElementById('accessLogTable');
+  if (!el) return;
+  const methodFilter = document.getElementById('alFilterMethod')?.value || '';
+  const q = document.getElementById('alFilterSearch')?.value || '';
+  try {
+    let url = '/api/access-log?limit=500';
+    if (q) url += '&q=' + encodeURIComponent(q);
+    if (methodFilter) url += '&method_filter=' + encodeURIComponent(methodFilter);
+    const data = await API.get(url);
+    renderAccessLogs(data);
+  } catch (err) {
+    UI.toast('加载访问日志失败：' + err.message, 'error');
+  }
+}
+
+function renderAccessLogs(data) {
+  const el = document.getElementById('accessLogTable');
+  if (!el) return;
+  const logs = data.logs || [];
+  const rows = logs.map(log => {
+    const m = log.route_method || log.method || 'GET';
+    const methCls = m === 'converted_fill' ? 'tag-green' : m === 'template_fill' ? 'tag-orange' : m === 'llm_free' ? 'tag-red' : 'tag-blue';
+    return `<tr>
+      <td style="white-space:nowrap;font-family:var(--mono);font-size:11px">${(log.created_at || '').slice(0,19)}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text-secondary)">${log.ip || '-'}</td>
+      <td style="font-size:11px;color:var(--text-muted)">${log.province || ''}${log.city ? ' ' + log.city : ''}</td>
+      <td style="font-size:11px;color:var(--text-secondary);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(log.path || '')}</td>
+      <td><span class="tag ${methCls}" style="font-size:10px">${escapeHtml(m)}</span></td>
+      <td style="font-size:11px;color:var(--text-secondary);max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(log.template_used || '-')}</td>
+      <td style="font-family:var(--mono);font-size:11px">${log.elapsed_ms || '-'}</td>
+      <td style="font-family:var(--mono);font-size:11px">${log.confidence ? Math.round(log.confidence*100)+'%' : '-'}</td>
+      <td><span class="tag ${(log.status_code||200)>=400?'tag-red':(log.status_code||200)>=300?'tag-orange':'tag-blue'}">${log.status_code || 200}</span></td>
+    </tr>`;
+  }).join('');
+  el.innerHTML = `<div style="padding:2px 0 6px;font-size:12px;color:var(--text-muted)">共 ${data.total || logs.length} 条记录（显示 ${logs.length} 条）</div>
+    <table><thead><tr><th>时间</th><th>IP</th><th>地区</th><th>路径</th><th>方法</th><th>模板</th><th>耗时ms</th><th>置信度</th><th>状态</th></tr></thead>
+    <tbody>${rows || '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:30px">暂无日志</td></tr>'}</tbody></table>`;
+}
+
+async function loadAccessLogStats() {
+  try {
+    const data = await API.get('/api/access-log/stats');
+    renderAccessLogStats(data);
+  } catch (err) {
+    console.warn('加载访问日志统计失败:', err);
+  }
+}
+
+function renderAccessLogStats(data) {
+  const el = document.getElementById('accessLogStats');
+  if (!el) return;
+  el.innerHTML = `
+    <div class="stat-card-modern"><div class="icon">👁</div><div class="val">${data.today || 0}</div><div class="lbl">今日访问</div></div>
+    <div class="stat-card-modern"><div class="icon">📈</div><div class="val">${data.total || 0}</div><div class="lbl">总记录</div></div>
+    <div class="stat-card-modern"><div class="icon">⚠</div><div class="val" style="color:${(data.errors_today||0)>0?'#ef4444':'#16a34a'}">${data.errors_today || 0}</div><div class="lbl">今日异常</div></div>
+  `;
+
+  // 地区分布
+  const regionEl = document.getElementById('accessLogRegion');
+  if (regionEl && data.region_distribution) {
+    const maxCnt = Math.max(...data.region_distribution.map(r => r.count), 1);
+    regionEl.innerHTML = data.region_distribution.length
+      ? data.region_distribution.map(r => {
+          const pct = (r.count / maxCnt * 100).toFixed(0);
+          const label = [r.province, r.city].filter(Boolean).join(' ');
+          return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:12px"><span style="width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(label)}</span><div style="flex:1;height:14px;background:#e2e8f0;border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#3b82f6,#1d4ed8);border-radius:4px;transition:width .3s"></div></div><span style="width:36px;text-align:right;color:var(--text-muted);font-family:var(--mono);font-size:11px">${r.count}</span></div>`;
+        }).join('')
+      : '<span style="color:var(--text-muted);font-size:12px">暂无地区数据（需配置 GeoIP 数据库）</span>';
+  }
+
+  // 方法分布
+  const methodEl = document.getElementById('accessLogMethod');
+  if (methodEl && data.method_distribution) {
+    const all = data.method_distribution.reduce((s, m) => s + m.count, 0) || 1;
+    methodEl.innerHTML = data.method_distribution.length
+      ? data.method_distribution.map(m => {
+          const pct = (m.count / all * 100).toFixed(0);
+          const colors = {converted_fill:'#16a34a', template_fill:'#d97706', llm_free:'#ef4444', llm_multi:'#8b5cf6'};
+          const color = colors[m.method] || '#64748b';
+          return `<div style="display:flex;align-items:center;gap:8px;margin:3px 0;font-size:12px"><span style="width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(m.method)}</span><div style="flex:1;height:14px;background:#e2e8f0;border-radius:4px;overflow:hidden"><div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width .3s"></div></div><span style="width:48px;text-align:right;color:var(--text-muted);font-family:var(--mono);font-size:11px">${m.count} (${pct}%)</span></div>`;
+        }).join('')
+      : '<span style="color:var(--text-muted);font-size:12px">暂无方法数据</span>';
+  }
+}
+
+/* ─── 候选模板选择（主页面模态框） ─── */
+
+function escapeHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function _fetchAndShowCandidates(text, examType) {
+  let cands;
+  try {
+    const resp = await API.post('/api/pad/candidates', {
+      text: text,
+      exam_type: examType,
+      doctor_name: Store.state.doctor || '',
+      site: examType,
+    });
+    cands = resp.candidates || [];
+  } catch (e) {
+    console.warn('候选获取失败，直接走原流程:', e);
+    return false;
+  }
+
+  if (!cands || cands.length <= 1) return false; // 无候选或仅1个 → 不弹窗，直接自动填充
+
+  // 有多个候选 → 弹窗让医生选
+  _showCandidatesModal(text, examType, cands);
+  return true;
+}
+
+function _showCandidatesModal(text, examType, candidates) {
+  const html = `
+    <div style="margin-bottom:14px;font-size:12px;color:#64748b;word-break:break-all">
+      🎤 <span style="color:#0f172a">${escapeHtml(text.slice(0, 180))}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr;gap:8px;" id="candModalGrid">
+      ${candidates.map((c, i) => _candCardHtml(c, i)).join('')}
+    </div>`;
+
+  const modal = UI.modal('🎯 选择匹配模板', html, `
+    <button class="btn btn-outline btn-sm" onclick="this.closest('.modal-overlay').remove(); _fallbackStructure()">跳过 → 直接生成</button>
+  `);
+
+  modal.querySelectorAll('.cand-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const idx = parseInt(card.dataset.idx);
+      const cand = candidates[idx];
+      if (!cand) return;
+      modal.querySelector('.modal-overlay, .modal')?.closest('.modal-overlay')?.remove();
+      _fillWithCandidate(text, examType, cand);
+    });
+  });
+}
+
+function _candCardHtml(c, i) {
+  const pct = Math.round((c.score || 0) * 100);
+  const scoreCls = pct >= 80 ? 'cand-green' : pct >= 60 ? 'cand-yellow' : 'cand-red';
+  const preview = (c.description || '').replace(/<[^>]+>/g, '').slice(0, 80);
+  return `<div class="cand-card" data-idx="${i}" style="background:#f8fafc;border:1.5px solid #e2e8f0;border-radius:10px;padding:12px 14px;cursor:pointer;transition:.12s">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-weight:600;font-size:13px;color:#0f172a">${escapeHtml(c.template_name || '未知模板')}</div>
+      <div style="font-size:15px;font-weight:700;color:${pct>=80?'#16a34a':pct>=60?'#d97706':'#ef4444'}">${pct}%</div>
+    </div>
+    ${preview ? `<div style="font-size:11px;color:#475569;margin-top:4px">${escapeHtml(preview)}</div>` : ''}
+    ${c.preference_boost > 0 ? `<div style="font-size:11px;color:#f59e0b;margin-top:4px">📌 常用 +${Math.round(c.preference_boost * 100)}%</div>` : ''}
+  </div>`;
+}
+
+let _pendingFallbackText = '';
+let _pendingFallbackExam = '';
+
+async function _fillWithCandidate(text, examType, cand) {
+  setStatus('填充中...');
+  try {
+    const result = await API.post('/api/pad/fill', {
+      text: text,
+      exam_type: examType,
+      doctor_name: Store.state.doctor || '',
+      template_name: cand.template_name || cand.name || '',
+    });
+    Store.state.currentResult = result;
+    UI.renderResult(result);
+    document.getElementById('rawJson').textContent = JSON.stringify(result, null, 2);
+    setStatus('完成');
+    UI.toast(`已用模板「${cand.template_name || cand.name || ''}」填充`, 'success');
+  } catch (err) {
+    setStatus('失败');
+    UI.toast('填充失败：' + err.message + '，已降级直接结构化', 'error');
+    _fallbackStructure();
+  }
+}
+
+function _fallbackStructure() {
+  const text = document.getElementById('voiceText').value.trim();
+  const examType = document.getElementById('examType').value;
+  if (text) runStructure();
 }

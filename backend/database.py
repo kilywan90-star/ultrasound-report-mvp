@@ -43,6 +43,7 @@ def init_db():
             id_card TEXT DEFAULT '',
             bed_no TEXT DEFAULT '',
             exam_no TEXT DEFAULT '',
+            referring_doctor TEXT DEFAULT '',
             created_at TEXT DEFAULT (datetime('now','localtime')),
             updated_at TEXT DEFAULT (datetime('now','localtime'))
         );
@@ -303,6 +304,25 @@ def init_db():
             created_at TEXT NOT NULL, error_msg TEXT,
             template_name TEXT, template_id TEXT
         );
+
+        -- ===== 访问日志表 =====
+        CREATE TABLE IF NOT EXISTS access_log (
+            id           INTEGER PRIMARY KEY AUTOINCREMENT,
+            ip           TEXT DEFAULT '',
+            ip_raw       TEXT DEFAULT '',
+            province     TEXT DEFAULT '',
+            city         TEXT DEFAULT '',
+            path         TEXT NOT NULL DEFAULT '',
+            method       TEXT DEFAULT 'GET',
+            route_method TEXT DEFAULT '',
+            template_used TEXT DEFAULT '',
+            confidence   REAL DEFAULT 0,
+            elapsed_ms   INTEGER DEFAULT 0,
+            status_code  INTEGER DEFAULT 0,
+            created_at   TEXT NOT NULL DEFAULT (datetime('now','localtime'))
+        );
+        CREATE INDEX IF NOT EXISTS idx_access_log_created ON access_log(created_at);
+        CREATE INDEX IF NOT EXISTS idx_access_log_path ON access_log(path);
     """)
     # 兼容旧库：CREATE TABLE IF NOT EXISTS 不会补列，这里统一补齐新旧 schema 需要的列
     def _ensure_column(table: str, column: str, definition: str) -> None:

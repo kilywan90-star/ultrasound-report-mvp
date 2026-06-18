@@ -186,6 +186,28 @@
 
     const doneBtn = document.getElementById('reviewDoneBtn');
     doneBtn.addEventListener('click', async () => {
+      // 保存确认反馈
+      const tpl = document.getElementById('reviewTemplate')?.textContent || '';
+      const see = document.getElementById('reviewSee')?.textContent || '';
+      const hint = document.getElementById('reviewHint')?.textContent || '';
+      const rec = document.getElementById('reviewRec')?.textContent || '';
+      try {
+        await fetch('/api/feedback/confirm', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            doctor: S.patient?.doctor || null,
+            patient_id: S.patient?.id?.toString() || null,
+            exam_type: S.patient?.exam_type || null,
+            asr_text: S.lastRawText || '',
+            template_used: tpl || null,
+            study_see_final: see || null,
+            study_hint_final: hint || null,
+            recommendation_final: rec || null,
+            confirmed: true,
+          }),
+        });
+      } catch (_) {}
       overlay.style.display = 'none';
       resetRecordUI();
       await loadQueue();

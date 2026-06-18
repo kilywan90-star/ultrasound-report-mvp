@@ -33,6 +33,16 @@
     bindEvents();
     loadQueue();
     checkHTTPS();
+    // 时钟
+    tickTabletClock();
+    setInterval(tickTabletClock, 1000);
+  }
+
+  function tickTabletClock() {
+    const el = document.getElementById('tabletClock');
+    if (!el) return;
+    const now = new Date();
+    el.textContent = now.toLocaleTimeString('zh-CN', {hour:'2-digit',minute:'2-digit'});
   }
 
   function checkHTTPS() {
